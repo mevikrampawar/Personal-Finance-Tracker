@@ -15,16 +15,16 @@
 
 .dark {
   color-scheme: dark;
-  --bg: #101418;
-  --surface: rgba(18, 25, 33, 0.92);
-  --surface-strong: rgba(26, 34, 46, 0.98);
-  --text: #e6edf8;
-  --muted: #94a3b8;
-  --border: rgba(148, 163, 184, 0.18);
-  --primary: #7c8cff;
-  --primary-strong: #5c6aff;
-  --accent: #4fd1c5;
-  --danger: #fb7185;
+  --bg: #0a0e12;
+  --surface: rgba(20, 26, 34, 0.95);
+  --surface-strong: rgba(28, 36, 48, 0.98);
+  --text: #f5f7fa;
+  --muted: #a8b5c1;
+  --border: rgba(255, 255, 255, 0.08);
+  --primary: #8b9eff;
+  --primary-strong: #6d82ff;
+  --accent: #5dd9ce;
+  --danger: #ff6b7a;
   --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
 
@@ -41,8 +41,8 @@ body {
 
 body {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top left, rgba(91, 108, 234, 0.12), transparent 30%),
-              radial-gradient(circle at bottom right, rgba(42, 168, 167, 0.12), transparent 25%),
+  background: linear-gradient(135deg, rgba(91, 108, 234, 0.08) 0%, transparent 50%),
+              linear-gradient(45deg, rgba(42, 168, 167, 0.06) 0%, transparent 50%),
               var(--bg);
   color: var(--text);
   transition: background 0.3s ease, color 0.3s ease;
@@ -81,11 +81,11 @@ a:hover {
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 24px;
-  box-shadow: var(--shadow);
-  padding: 28px;
-  margin-bottom: 24px;
-  backdrop-filter: blur(14px);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  margin-bottom: 28px;
+  backdrop-filter: blur(12px);
 }
 
 h1,
@@ -114,18 +114,18 @@ input {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid var(--border);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.72);
+  border-radius: 12px;
+  background: var(--surface-strong);
   color: var(--text);
-  transition: border-color 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 input:focus,
 .select-focus:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(92, 106, 255, 0.12);
-  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(91, 108, 234, 0.1);
+  transform: none;
 }
 
 button {
@@ -134,16 +134,17 @@ button {
   background: var(--primary);
   color: white;
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: all 0.25s ease;
 }
 
 button:hover {
   background: var(--primary-strong);
-  transform: translateY(-1px);
+  transform: scale(1.01);
+  box-shadow: 0 8px 24px rgba(91, 108, 234, 0.3);
 }
 
 .navbar {
@@ -193,49 +194,64 @@ button:hover {
 
 .logout-btn,
 .theme-btn {
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--surface-strong);
   color: var(--text);
   border: 1px solid var(--border);
-  padding: 10px 16px;
-  border-radius: 999px;
+  padding: 10px 18px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 0.95rem;
-  transition: transform 0.2s ease, background 0.3s ease, color 0.3s ease;
-  min-width: 80px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  min-width: auto;
 }
 
 .logout-btn:hover,
 .theme-btn:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(91, 108, 234, 0.15);
+  border-color: var(--primary);
 }
 
 .totals {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin-bottom: 24px;
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
 .total-card {
   background: linear-gradient(135deg, rgba(91, 108, 234, 0.95), rgba(58, 83, 240, 0.95));
   color: white;
-  border-radius: 24px;
-  padding: 24px;
+  border-radius: 20px;
+  padding: 28px 24px;
   text-align: center;
-  min-height: 130px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(91, 108, 234, 0.2);
+  transition: all 0.3s ease;
+}
+
+.total-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(91, 108, 234, 0.3);
 }
 
 .total-card-label {
-  font-size: 0.9rem;
-  opacity: 0.85;
+  font-size: 0.85rem;
+  opacity: 0.9;
   margin-bottom: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .total-card-amount {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  margin-top: 6px;
+  margin-top: 4px;
+  letter-spacing: -1px;
 }
 
 .form-row {
@@ -247,27 +263,30 @@ button:hover {
 
 .radio-row {
   display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  margin-top: 8px;
+  gap: 16px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: nowrap;
 }
 
 .radio-option {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 18px;
-  border-radius: 999px;
+  padding: 10px 16px;
+  border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--surface-strong);
   color: var(--text);
   cursor: pointer;
-  transition: background 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .radio-option:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(91, 108, 234, 0.1);
+  border-color: var(--primary);
 }
 
 .radio-option input {
