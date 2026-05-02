@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simple Finance Tracker</title>
+  <title>Finance Tracker with Login</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -37,6 +37,7 @@
       border-radius: 8px;
       font-size: 1rem;
       box-sizing: border-box;
+      margin-bottom: 8px;
     }
     button {
       margin-top: 16px;
@@ -47,9 +48,35 @@
       color: white;
       font-size: 1rem;
       cursor: pointer;
+      width: 100%;
     }
     button:hover {
       background: #1f3a61;
+    }
+    .logout-btn {
+      background: #dc3545;
+      width: auto;
+      padding: 10px 16px;
+      margin-top: 0;
+    }
+    .logout-btn:hover {
+      background: #c82333;
+    }
+    .login-container, .tracker-container {
+      display: none;
+    }
+    .login-container.active, .tracker-container.active {
+      display: block;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .user-info {
+      font-size: 0.95rem;
+      color: #666;
     }
     table {
       width: 100%;
@@ -84,68 +111,280 @@
       margin-top: 10px;
       font-size: 1.4rem;
     }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e4e8ef;
+    }
+    .tab-btn {
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      border-bottom: 3px solid transparent;
+      margin: 0;
+      width: auto;
+    }
+    .tab-btn.active {
+      color: #2a4d7f;
+      border-bottom-color: #2a4d7f;
+    }
   </style>
 </head>
 <body>
-  <h1>Simple Finance Tracker</h1>
+  <!-- Login Container -->
+  <div id="login-container" class="login-container active">
+    <div class="card" style="max-width: 400px; margin: 60px auto;">
+      <h1 style="margin: 0 0 24px;">Finance Tracker</h1>
+      
+      <div class="tabs" style="border: none; margin: 0 0 20px;">
+        <button type="button" class="tab-btn active" onclick="switchTab('login')">Login</button>
+        <button type="button" class="tab-btn" onclick="switchTab('register')">Register</button>
+      </div>
 
-  <div class="card">
-    <form id="transaction-form">
-      <label for="description">Description</label>
-      <input type="text" id="description" placeholder="e.g. Grocery, Salary" required />
+      <!-- Login Form -->
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" placeholder="Enter username" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Enter password" required />
+        </div>
+        <button type="submit">Login</button>
+      </form>
 
-      <label for="type">Type</label>
-      <select id="type">
-        <option value="expense">Expense</option>
-        <option value="income">Income</option>
-      </select>
+      <!-- Register Form -->
+      <form id="register-form" style="display: none;">
+        <div class="form-group">
+          <label for="register-username">Username</label>
+          <input type="text" id="register-username" placeholder="Choose username" required />
+        </div>
+        <div class="form-group">
+          <label for="register-password">Password</label>
+          <input type="password" id="register-password" placeholder="Choose password" required />
+        </div>
+        <div class="form-group">
+          <label for="register-confirm">Confirm Password</label>
+          <input type="password" id="register-confirm" placeholder="Confirm password" required />
+        </div>
+        <button type="submit">Register</button>
+      </form>
 
-      <label for="amount">Amount</label>
-      <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required />
-
-      <button type="submit">Add Transaction</button>
-    </form>
+      <div id="auth-message" style="margin-top: 16px; color: #dc3545; text-align: center; display: none;"></div>
+    </div>
   </div>
 
-  <div class="card totals">
-    <div class="total-card">
-      <div>Total Income</div>
-      <strong id="income-total">$0.00</strong>
+  <!-- Tracker Container -->
+  <div id="tracker-container" class="tracker-container">
+    <div class="header card" style="margin-bottom: 12px;">
+      <div>
+        <h1 style="margin: 0;">Finance Tracker</h1>
+        <div class="user-info">Logged in as: <strong id="username-display"></strong></div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
-    <div class="total-card">
-      <div>Total Expense</div>
-      <strong id="expense-total">$0.00</strong>
-    </div>
-    <div class="total-card">
-      <div>Balance</div>
-      <strong id="balance-total">$0.00</strong>
-    </div>
-  </div>
 
-  <div class="card">
-    <h2>Transaction History</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Type</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-      <tbody id="transaction-table">
-      </tbody>
-    </table>
+    <div class="card">
+      <form id="transaction-form">
+        <div class="form-group">
+          <label for="description">Description</label>
+          <input type="text" id="description" placeholder="e.g. Grocery, Salary" required />
+        </div>
+        <div class="form-group">
+          <label for="type">Type</label>
+          <select id="type">
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="amount">Amount</label>
+          <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required />
+        </div>
+        <button type="submit">Add Transaction</button>
+      </form>
+    </div>
+
+    <div class="card totals">
+      <div class="total-card">
+        <div>Total Income</div>
+        <strong id="income-total">$0.00</strong>
+      </div>
+      <div class="total-card">
+        <div>Total Expense</div>
+        <strong id="expense-total">$0.00</strong>
+      </div>
+      <div class="total-card">
+        <div>Balance</div>
+        <strong id="balance-total">$0.00</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Transaction History</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="transaction-table">
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
-    const form = document.getElementById('transaction-form');
-    const tableBody = document.getElementById('transaction-table');
-    const incomeTotalEl = document.getElementById('income-total');
-    const expenseTotalEl = document.getElementById('expense-total');
-    const balanceTotalEl = document.getElementById('balance-total');
-
+    // State management
+    let currentUser = null;
     let transactions = [];
 
+    // Initialize app
+    function initApp() {
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser) {
+        currentUser = savedUser;
+        loadTransactions();
+        showTracker();
+      } else {
+        showLogin();
+      }
+    }
+
+    // Tab switching
+    function switchTab(tab) {
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      const tabs = document.querySelectorAll('.tab-btn');
+
+      tabs.forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (tab === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+      }
+    }
+
+    // Show/Hide containers
+    function showLogin() {
+      document.getElementById('login-container').classList.add('active');
+      document.getElementById('tracker-container').classList.remove('active');
+    }
+
+    function showTracker() {
+      document.getElementById('login-container').classList.remove('active');
+      document.getElementById('tracker-container').classList.add('active');
+      document.getElementById('username-display').textContent = currentUser;
+    }
+
+    // Authentication
+    function getUsers() {
+      const users = localStorage.getItem('users');
+      return users ? JSON.parse(users) : {};
+    }
+
+    function saveUsers(users) {
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    // Login handler
+    document.getElementById('login-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+      const users = getUsers();
+
+      if (users[username] && users[username] === password) {
+        currentUser = username;
+        localStorage.setItem('currentUser', username);
+        loadTransactions();
+        showTracker();
+        document.getElementById('login-form').reset();
+      } else {
+        showMessage('Invalid username or password');
+      }
+    });
+
+    // Register handler
+    document.getElementById('register-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = document.getElementById('register-username').value;
+      const password = document.getElementById('register-password').value;
+      const confirm = document.getElementById('register-confirm').value;
+      const users = getUsers();
+
+      if (users[username]) {
+        showMessage('Username already exists');
+        return;
+      }
+
+      if (password !== confirm) {
+        showMessage('Passwords do not match');
+        return;
+      }
+
+      if (password.length < 4) {
+        showMessage('Password must be at least 4 characters');
+        return;
+      }
+
+      users[username] = password;
+      saveUsers(users);
+      currentUser = username;
+      localStorage.setItem('currentUser', username);
+      showTracker();
+      document.getElementById('register-form').reset();
+      showMessage('');
+    });
+
+    function showMessage(msg) {
+      const msgEl = document.getElementById('auth-message');
+      msgEl.textContent = msg;
+      msgEl.style.display = msg ? 'block' : 'none';
+    }
+
+    // Logout
+    function logout() {
+      localStorage.removeItem('currentUser');
+      currentUser = null;
+      transactions = [];
+      showLogin();
+      document.getElementById('login-form').reset();
+      document.getElementById('register-form').reset();
+    }
+
+    // Transaction storage
+    function getStorageKey() {
+      return `transactions_${currentUser}`;
+    }
+
+    function saveTransactions() {
+      localStorage.setItem(getStorageKey(), JSON.stringify(transactions));
+    }
+
+    function loadTransactions() {
+      const saved = localStorage.getItem(getStorageKey());
+      transactions = saved ? JSON.parse(saved) : [];
+      renderTransactions();
+      updateTotals();
+    }
+
+    // Formatting
     function formatCurrency(value) {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -153,6 +392,7 @@
       }).format(value);
     }
 
+    // UI Updates
     function updateTotals() {
       const incomeTotal = transactions
         .filter(t => t.type === 'income')
@@ -162,12 +402,13 @@
         .reduce((sum, t) => sum + t.amount, 0);
       const balance = incomeTotal - expenseTotal;
 
-      incomeTotalEl.textContent = formatCurrency(incomeTotal);
-      expenseTotalEl.textContent = formatCurrency(expenseTotal);
-      balanceTotalEl.textContent = formatCurrency(balance);
+      document.getElementById('income-total').textContent = formatCurrency(incomeTotal);
+      document.getElementById('expense-total').textContent = formatCurrency(expenseTotal);
+      document.getElementById('balance-total').textContent = formatCurrency(balance);
     }
 
     function renderTransactions() {
+      const tableBody = document.getElementById('transaction-table');
       tableBody.innerHTML = '';
       transactions.forEach(transaction => {
         const row = document.createElement('tr');
@@ -180,8 +421,9 @@
       });
     }
 
-    form.addEventListener('submit', event => {
-      event.preventDefault();
+    // Add transaction
+    document.getElementById('transaction-form').addEventListener('submit', (e) => {
+      e.preventDefault();
 
       const description = document.getElementById('description').value.trim();
       const type = document.getElementById('type').value;
@@ -192,11 +434,14 @@
       }
 
       transactions.push({ description, type, amount });
+      saveTransactions();
       renderTransactions();
       updateTotals();
-
-      form.reset();
+      document.getElementById('transaction-form').reset();
     });
+
+    // Start app
+    initApp();
   </script>
 </body>
 </html>
