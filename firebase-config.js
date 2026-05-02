@@ -3,17 +3,19 @@ import { getAuth, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_AUTH_DOMAIN',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-  appId: 'YOUR_APP_ID'
+  apiKey: "AIzaSyCS8otGc8nh1YJMU_UnvgJwLdD_uF50gww",
+  authDomain: "personal-finance-tracker-babac.firebaseapp.com",
+  projectId: "personal-finance-tracker-babac",
+  storageBucket: "personal-finance-tracker-babac.firebasestorage.app",
+  messagingSenderId: "1018198853683",
+  appId: "1:1018198853683:web:9e1bbcd3418c79b219fb46",
+  measurementId: "G-2X15Q8EWG9"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
+const analytics = getAnalytics(app);
 
-export { auth, provider, db };
+export { auth, provider, db, analytics };
