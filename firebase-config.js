@@ -4,7 +4,7 @@ import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase
 import { getAnalytics } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js';
 
 const firebaseConfig = {
-  apiKey: ${{secrets.firebase_api}},
+  apiKey: "${{secrets.firebase_api}}",
   authDomain: "personal-finance-tracker-babac.firebaseapp.com",
   projectId: "personal-finance-tracker-babac",
   storageBucket: "personal-finance-tracker-babac.firebasestorage.app",
