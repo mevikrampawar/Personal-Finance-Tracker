@@ -188,7 +188,7 @@
       <h1>💰 Finance Tracker</h1>
       <div class="navbar-user">
         <span>Welcome, <strong id="username-display"></strong></span>
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <button id="logout-button" class="logout-btn">Logout</button>
       </div>
     </div>
   </div>
@@ -387,11 +387,15 @@
       const confirmLogout = confirm('Are you sure you want to logout?');
       if (!confirmLogout) return;
 
-      await signOut(auth);
-      window.location.href = 'login.html';
+      try {
+        await signOut(auth);
+        window.location.href = 'login.html';
+      } catch (error) {
+        alert('Logout failed: ' + error.message);
+      }
     }
 
-    window.logout = logout;
+    document.getElementById('logout-button').addEventListener('click', logout);
     initApp();
   </script>
 </body>
