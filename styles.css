@@ -630,4 +630,18 @@ tr:hover {
   .form-row-single {
     grid-template-columns: 1fr;
   }
+
+  .summary-header,
+  .calendar-header {
+    gap: 16px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .summary-controls,
+  .calendar-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
+
