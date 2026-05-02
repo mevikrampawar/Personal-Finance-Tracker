@@ -40,15 +40,15 @@
     <div class="totals">
       <div class="total-card">
         <div class="total-card-label">Total Income</div>
-        <div class="total-card-amount" id="income-total">$0.00</div>
+        <div class="total-card-amount" id="income-total">₹0.00</div>
       </div>
       <div class="total-card">
         <div class="total-card-label">Total Expenses</div>
-        <div class="total-card-amount" id="expense-total">$0.00</div>
+        <div class="total-card-amount" id="expense-total">₹0.00</div>
       </div>
       <div class="total-card">
         <div class="total-card-label">Balance</div>
-        <div class="total-card-amount" id="balance-total">$0.00</div>
+        <div class="total-card-amount" id="balance-total">₹0.00</div>
       </div>
     </div>
 
@@ -181,7 +181,7 @@
       const yyyy = today.getFullYear();
       const mm = String(today.getMonth() + 1).padStart(2, '0');
       const dd = String(today.getDate()).padStart(2, '0');
-      document.getElementById('transaction-date').value = `${yyyy}-${mm}-${dd}`;
+      document.getElementById('transaction-date').value = `₹{yyyy}-₹{mm}-₹{dd}`;
     }
 
     // Get transactions for a specific date
@@ -208,7 +208,7 @@
       // Update month-year display
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
-      document.getElementById('calendar-month-year').textContent = `${monthNames[month]} ${year}`;
+      document.getElementById('calendar-month-year').textContent = `₹{monthNames[month]} ₹{year}`;
 
       // Get first day of month and number of days
       const firstDay = new Date(year, month, 1).getDay();
@@ -300,9 +300,9 @@
 
       tableBody.innerHTML = dateTransactions.map(transaction => `
         <tr>
-          <td>${transaction.description}</td>
-          <td>${transaction.type === 'income' ? '📈 Income' : '📉 Expense'}</td>
-          <td>${formatCurrency(transaction.amount)}</td>
+          <td>₹{transaction.description}</td>
+          <td>₹{transaction.type === 'income' ? '📈 Income' : '📉 Expense'}</td>
+          <td>₹{formatCurrency(transaction.amount)}</td>
         </tr>
       `).join('');
     }
@@ -324,7 +324,7 @@
         'July', 'August', 'September', 'October', 'November', 'December'];
       const year = summaryMonth.getFullYear();
       const month = summaryMonth.getMonth();
-      document.getElementById('summary-month-year').textContent = `${monthNames[month]} ${year}`;
+      document.getElementById('summary-month-year').textContent = `₹{monthNames[month]} ₹{year}`;
     }
 
     // Initialize app
