@@ -430,7 +430,8 @@ tr:hover {
   margin-bottom: 18px;
 }
 
-/* Calendar styles */
+/* Summary and calendar styles */
+.summary-header,
 .calendar-header {
   display: flex;
   justify-content: space-between;
@@ -438,12 +439,32 @@ tr:hover {
   margin-bottom: 28px;
 }
 
+.summary-controls,
 .calendar-controls {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
+.summary-month-picker {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  color: var(--text);
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  min-width: 160px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.summary-month-picker:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(91, 108, 234, 0.1);
+}
+
+.summary-nav,
 .calendar-nav {
   background: var(--primary);
   color: white;

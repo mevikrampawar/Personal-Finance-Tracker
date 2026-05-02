@@ -160,6 +160,11 @@
     let displayMonth = new Date();
     let summaryMonth = new Date();
 
+    function parseYearMonth(value) {
+      const [year, month] = value.split('-').map(Number);
+      return new Date(year, month - 1, 1);
+    }
+
     function setTheme(theme) {
       document.body.classList.toggle('dark', theme === 'dark');
       const button = document.getElementById('theme-toggle');
@@ -445,28 +450,38 @@
 
     // Calendar navigation
     document.getElementById('prev-month').addEventListener('click', () => {
-      displayMonth.setMonth(displayMonth.getMonth() - 1);
+      displayMonth = new Date(displayMonth.getFullYear(), displayMonth.getMonth() - 1, 1);
       renderCalendar();
     });
 
     document.getElementById('next-month').addEventListener('click', () => {
-      displayMonth.setMonth(displayMonth.getMonth() + 1);
+      displayMonth = new Date(displayMonth.getFullYear(), displayMonth.getMonth() + 1, 1);
       renderCalendar();
     });
 
     // Summary month navigation
     document.getElementById('summary-prev-month').addEventListener('click', () => {
-      summaryMonth.setMonth(summaryMonth.getMonth() - 1);
+      summaryMonth = new Date(summaryMonth.getFullYear(), summaryMonth.getMonth() - 1, 1);
       updateTotals();
     });
 
     document.getElementById('summary-next-month').addEventListener('click', () => {
-      summaryMonth.setMonth(summaryMonth.getMonth() + 1);
+      summaryMonth = new Date(summaryMonth.getFullYear(), summaryMonth.getMonth() + 1, 1);
       updateTotals();
     });
 
+    const summaryPicker = document.getElementById('summary-month-picker');
+    if (summaryPicker) {
+      summaryPicker.addEventListener('change', (e) => {
+        summaryMonth = parseYearMonth(e.target.value);
+        updateTotals();
+      });
+    }
+
     document.getElementById('logout-button').addEventListener('click', logout);
     setDefaultDate();
+    setSummaryMonthPickerValue();
+    updateSummaryMonthDisplay();
     initApp();
   </script>
 </body>
