@@ -26,6 +26,16 @@
   </div>
 
   <div class="container">
+    <!-- Summary Month Selector -->
+    <div class="summary-header">
+      <h2>Monthly Summary</h2>
+      <div class="summary-controls">
+        <button type="button" id="summary-prev-month" class="summary-nav">←</button>
+        <span id="summary-month-year" class="summary-month-display"></span>
+        <button type="button" id="summary-next-month" class="summary-nav">→</button>
+      </div>
+    </div>
+
     <!-- Summary Cards -->
     <div class="totals">
       <div class="total-card">
@@ -147,6 +157,7 @@
     let unsubscribe = null;
     let selectedDate = new Date();
     let displayMonth = new Date();
+    let summaryMonth = new Date();
 
     function setTheme(theme) {
       document.body.classList.toggle('dark', theme === 'dark');
@@ -296,6 +307,26 @@
       `).join('');
     }
 
+    // Get transactions for a specific month
+    function getTransactionsForMonth(month) {
+      const year = month.getFullYear();
+      const monthIndex = month.getMonth();
+      return transactions.filter(t => {
+        if (!t.createdAt) return false;
+        const tDate = t.createdAt.toDate ? t.createdAt.toDate() : new Date(t.createdAt);
+        return tDate.getFullYear() === year && tDate.getMonth() === monthIndex;
+      });
+    }
+
+    // Update summary month display
+    function updateSummaryMonthDisplay() {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      const year = summaryMonth.getFullYear();
+      const month = summaryMonth.getMonth();
+      document.getElementById('summary-month-year').textContent = `${monthNames[month]} ${year}`;
+    }
+
     // Initialize app
     function initApp() {
       initTheme();
@@ -340,10 +371,12 @@
 
     // Update summary totals
     function updateTotals() {
-      const incomeTotal = transactions
+      const monthTransactions = getTransactionsForMonth(summaryMonth);
+      
+      const incomeTotal = monthTransactions
         .filter(t => t.type === 'income')
         .reduce((sum, t) => sum + t.amount, 0);
-      const expenseTotal = transactions
+      const expenseTotal = monthTransactions
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + t.amount, 0);
       const balance = incomeTotal - expenseTotal;
@@ -351,6 +384,7 @@
       document.getElementById('income-total').textContent = formatCurrency(incomeTotal);
       document.getElementById('expense-total').textContent = formatCurrency(expenseTotal);
       document.getElementById('balance-total').textContent = formatCurrency(balance);
+      updateSummaryMonthDisplay();
     }
 
     // Handle form submission
