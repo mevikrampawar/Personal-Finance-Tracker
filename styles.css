@@ -470,9 +470,8 @@ tr:hover {
   margin-bottom: 18px;
 }
 
-/* Summary and calendar styles */
-.summary-header,
-.calendar-header {
+/* Summary styles */
+.summary-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -480,8 +479,7 @@ tr:hover {
   gap: 16px;
 }
 
-.summary-controls,
-.calendar-controls {
+.summary-controls {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -505,8 +503,7 @@ tr:hover {
   box-shadow: 0 0 0 3px rgba(91, 108, 234, 0.1);
 }
 
-.summary-nav,
-.calendar-nav {
+.summary-nav {
   background: var(--primary);
   color: white;
   border: none;
@@ -522,13 +519,12 @@ tr:hover {
   padding: 0;
 }
 
-.calendar-nav:hover {
+.summary-nav:hover {
   background: var(--primary-strong);
   transform: scale(1.05);
 }
 
-.summary-month-display,
-.calendar-month-display {
+.summary-month-display {
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--text);
@@ -677,34 +673,17 @@ tr:hover {
 }
 
 @media (max-width: 840px) {
-  .calendar-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-
-  .calendar-controls {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .calendar-month-display {
-    min-width: auto;
-  }
-
   .form-row-single {
     grid-template-columns: 1fr;
   }
 
-  .summary-header,
-  .calendar-header {
+  .summary-header {
     gap: 16px;
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .summary-controls,
-  .calendar-controls {
+  .summary-controls {
     width: 100%;
     justify-content: flex-start;
   }
@@ -838,21 +817,18 @@ tr:hover {
     font-size: 0.9rem;
   }
 
-  .summary-header,
-  .calendar-header {
+  .summary-header {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
 
-  .summary-controls,
-  .calendar-controls {
+  .summary-controls {
     width: 100%;
     justify-content: space-between;
   }
 
-  .summary-month-display,
-  .calendar-month-display {
+  .summary-month-display {
     min-width: auto;
     font-size: 0.95rem;
   }
@@ -863,8 +839,7 @@ tr:hover {
     padding: 8px 12px;
   }
 
-  .summary-nav,
-  .calendar-nav {
+  .summary-nav {
     width: 36px;
     height: 36px;
     font-size: 1rem;
