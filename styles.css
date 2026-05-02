@@ -41,20 +41,21 @@ body {
 
 body {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, rgba(91, 108, 234, 0.08) 0%, transparent 50%),
-              linear-gradient(45deg, rgba(42, 168, 167, 0.06) 0%, transparent 50%),
+  background: radial-gradient(circle at top left, rgba(240, 245, 255, 0.8), transparent 28%),
+              radial-gradient(circle at bottom right, rgba(214, 224, 255, 0.6), transparent 30%),
               var(--bg);
   color: var(--text);
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background 0.35s ease, color 0.35s ease;
 }
 
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at top left, rgba(91, 108, 234, 0.1), transparent 20%),
-              radial-gradient(circle at bottom right, rgba(42, 168, 167, 0.1), transparent 20%);
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.22), transparent 20%),
+              radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.12), transparent 25%);
   pointer-events: none;
+  opacity: 0.75;
 }
 
 button,
@@ -81,11 +82,11 @@ a:hover {
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  padding: 32px;
-  margin-bottom: 28px;
-  backdrop-filter: blur(12px);
+  border-radius: 28px;
+  box-shadow: 0 24px 60px rgba(32, 45, 95, 0.08);
+  padding: 34px;
+  margin-bottom: 30px;
+  backdrop-filter: blur(20px);
 }
 
 h1,
@@ -143,23 +144,24 @@ button {
 
 button:hover {
   background: var(--primary-strong);
-  transform: scale(1.01);
-  box-shadow: 0 8px 24px rgba(91, 108, 234, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 32px rgba(79, 113, 255, 0.22);
 }
 
 .navbar {
   background: transparent;
   color: var(--text);
-  padding: 24px 20px 0;
+  padding: 26px 20px 0;
 }
 
 .navbar-content {
-  max-width: 920px;
+  max-width: 980px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
+  padding: 10px 0 14px;
 }
 
 .navbar-left {
@@ -177,6 +179,7 @@ button:hover {
 .meta {
   color: var(--muted);
   font-size: 0.95rem;
+  letter-spacing: 0.01em;
 }
 
 .navbar-user {
@@ -194,22 +197,24 @@ button:hover {
 
 .logout-btn,
 .theme-btn {
-  background: var(--surface-strong);
+  background: rgba(255, 255, 255, 0.88);
   color: var(--text);
-  border: 1px solid var(--border);
-  padding: 10px 18px;
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  padding: 12px 20px;
+  border-radius: 999px;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: transform 0.22s ease, background 0.22s ease, border-color 0.22s ease;
   min-width: auto;
+  backdrop-filter: blur(12px);
 }
 
 .logout-btn:hover,
 .theme-btn:hover {
-  background: rgba(91, 108, 234, 0.15);
-  border-color: var(--primary);
+  background: rgba(255, 255, 255, 1);
+  border-color: rgba(91, 108, 234, 0.35);
+  transform: translateY(-1px);
 }
 
 .totals {
@@ -220,23 +225,23 @@ button:hover {
 }
 
 .total-card {
-  background: linear-gradient(135deg, rgba(91, 108, 234, 0.95), rgba(58, 83, 240, 0.95));
+  background: linear-gradient(135deg, rgba(79, 113, 255, 0.95), rgba(57, 83, 242, 0.95));
   color: white;
-  border-radius: 20px;
-  padding: 28px 24px;
+  border-radius: 28px;
+  padding: 30px 26px;
   text-align: center;
-  min-height: 140px;
+  min-height: 150px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 8px 32px rgba(91, 108, 234, 0.2);
-  transition: all 0.3s ease;
+  box-shadow: 0 24px 70px rgba(57, 83, 242, 0.18);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .total-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(91, 108, 234, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 30px 80px rgba(57, 83, 242, 0.2);
 }
 
 .total-card-label {
@@ -256,9 +261,15 @@ button:hover {
 
 .form-row {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: 1.3fr 0.9fr 0.8fr;
   gap: 18px;
   align-items: flex-end;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .radio-row {
@@ -273,20 +284,21 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 16px;
-  border-radius: 12px;
+  padding: 12px 18px;
+  border-radius: 16px;
   border: 1px solid var(--border);
   background: var(--surface-strong);
   color: var(--text);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s ease;
   flex-shrink: 0;
-  white-space: nowrap;
+  min-width: 140px;
+  justify-content: center;
 }
 
 .radio-option:hover {
-  background: rgba(91, 108, 234, 0.1);
-  border-color: var(--primary);
+  background: rgba(91, 108, 234, 0.12);
+  border-color: rgba(91, 108, 234, 0.45);
 }
 
 .radio-option input {
@@ -326,17 +338,45 @@ th {
   padding: 16px 14px;
   text-align: left;
   font-weight: 700;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: transparent;
 }
 
 td {
   padding: 16px 14px;
   color: var(--text);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 tr:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+.transaction-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.transaction-date {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.transaction-description {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.amount-income {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.amount-expense {
+  color: #ef4b5b;
+  font-weight: 700;
 }
 
 .empty-state {
@@ -437,13 +477,14 @@ tr:hover {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 28px;
+  gap: 16px;
 }
 
 .summary-controls,
 .calendar-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .summary-month-picker {
@@ -486,9 +527,10 @@ tr:hover {
   transform: scale(1.05);
 }
 
+.summary-month-display,
 .calendar-month-display {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--text);
   min-width: 180px;
   text-align: center;
@@ -496,10 +538,11 @@ tr:hover {
 
 .calendar-container {
   margin-bottom: 32px;
-  padding: 20px;
-  background: rgba(91, 108, 234, 0.05);
-  border-radius: 16px;
-  border: 1px solid var(--border);
+  padding: 22px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.06);
 }
 
 .calendar-weekdays {
@@ -595,15 +638,16 @@ tr:hover {
 /* Date details section */
 .date-details-section {
   margin-top: 32px;
-  padding-top: 28px;
-  border-top: 1px solid var(--border);
+  padding-top: 32px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .date-details-section h3 {
   color: var(--text);
-  margin-bottom: 20px;
-  font-size: 1.1rem;
-  font-weight: 600;
+  margin-bottom: 22px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .date-transactions-table {
@@ -663,6 +707,218 @@ tr:hover {
   .calendar-controls {
     width: 100%;
     justify-content: flex-start;
+  }
+}
+
+/* Enhanced responsive design for desktop/mobile */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 100%;
+    padding: 0 12px;
+  }
+
+  .card {
+    padding: 24px;
+    border-radius: 20px;
+  }
+
+  .totals {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .total-card {
+    min-height: 130px;
+    padding: 24px;
+  }
+
+  .total-card-amount {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .navbar-user {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .button-group {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .logout-btn,
+  .theme-btn {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+    flex: 1;
+  }
+
+  .navbar h1 {
+    font-size: 1.2rem;
+  }
+
+  .meta {
+    font-size: 0.85rem;
+  }
+
+  .container {
+    margin: 16px auto 32px;
+  }
+
+  .card {
+    padding: 20px;
+    border-radius: 16px;
+    margin-bottom: 20px;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+
+  .totals {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .total-card {
+    min-height: 120px;
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .total-card-label {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+  }
+
+  .total-card-amount {
+    font-size: 1.6rem;
+    margin-top: 2px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-row-single {
+    margin-bottom: 12px;
+  }
+
+  input,
+  button {
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+  }
+
+  label {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+  }
+
+  .radio-row {
+    gap: 12px;
+    margin-top: 8px;
+  }
+
+  .radio-option {
+    min-width: 120px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .summary-header,
+  .calendar-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .summary-controls,
+  .calendar-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .summary-month-display,
+  .calendar-month-display {
+    min-width: auto;
+    font-size: 0.95rem;
+  }
+
+  .summary-month-picker {
+    min-width: 100%;
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .summary-nav,
+  .calendar-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .calendar-container {
+    margin-bottom: 24px;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .calendar-weekdays,
+  .calendar-days {
+    gap: 6px;
+  }
+
+  .calendar-day {
+    border-radius: 10px;
+    font-size: 0.85rem;
+  }
+
+  .transaction-indicator {
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
+  }
+
+  .date-details-section {
+    margin-top: 24px;
+    padding-top: 24px;
+  }
+
+  .date-details-section h3 {
+    font-size: 1rem;
+    margin-bottom: 16px;
+  }
+
+  table {
+    margin-top: 8px;
+  }
+
+  th,
+  td {
+    padding: 12px 10px;
+    font-size: 0.9rem;
+  }
+
+  .empty-state {
+    padding: 24px;
+  }
+
+  .empty-state-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
   }
 }
 

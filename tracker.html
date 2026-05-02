@@ -324,7 +324,7 @@
       });
     }
 
-    // Update summary month display
+    // Update summary month display and sync calendar
     function updateSummaryMonthDisplay() {
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
@@ -332,6 +332,13 @@
       const month = summaryMonth.getMonth();
       document.getElementById('summary-month-year').textContent = `${monthNames[month]} ${year}`;
       setSummaryMonthPickerValue();
+      
+      // Sync calendar to show same month
+      displayMonth = new Date(summaryMonth);
+      renderCalendar();
+      
+      // Update transaction view to show month's transactions
+      updateMonthTransactionsList();
     }
 
     function formatYearMonth(date) {
@@ -342,6 +349,59 @@
       const summaryPicker = document.getElementById('summary-month-picker');
       if (!summaryPicker) return;
       summaryPicker.value = formatYearMonth(summaryMonth);
+    }
+
+    // Update month transactions list
+    function updateMonthTransactionsList() {
+      const monthTransactions = getTransactionsForMonth(summaryMonth);
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      const monthYear = `${monthNames[summaryMonth.getMonth()]} ${summaryMonth.getFullYear()}`;
+      
+      document.getElementById('selected-date-display').textContent = monthYear;
+      
+      const tableBody = document.getElementById('date-transaction-table');
+      if (monthTransactions.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="3">
+              <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <div>No transactions in this month</div>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // Sort by date descending
+      const sorted = monthTransactions.sort((a, b) => {
+        const dateA = a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+        const dateB = b.createdAt.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+        return dateB - dateA;
+      });
+
+      tableBody.innerHTML = sorted.map(transaction => {
+        const date = transaction.createdAt.toDate ? transaction.createdAt.toDate() : new Date(transaction.createdAt);
+        const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const isIncome = transaction.type === 'income';
+        const amountClass = isIncome ? 'amount-income' : 'amount-expense';
+        const icon = isIncome ? '📈' : '📉';
+        
+        return `
+          <tr>
+            <td>
+              <div class="transaction-row">
+                <div class="transaction-date">${dateStr}</div>
+                <div class="transaction-description">${transaction.description}</div>
+              </div>
+            </td>
+            <td>${icon} ${isIncome ? 'Income' : 'Expense'}</td>
+            <td class="${amountClass}">${formatCurrency(transaction.amount)}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     // Initialize app
@@ -379,7 +439,7 @@
       unsubscribe = onSnapshot(q, (snapshot) => {
         transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderCalendar();
-        updateDateDetailsView();
+        updateMonthTransactionsList();
         updateTotals();
       }, (error) => {
         alert('Unable to load transactions: ' + error.message);
@@ -462,19 +522,19 @@
     // Summary month navigation
     document.getElementById('summary-prev-month').addEventListener('click', () => {
       summaryMonth = new Date(summaryMonth.getFullYear(), summaryMonth.getMonth() - 1, 1);
-      updateTotals();
+      updateSummaryMonthDisplay();
     });
 
     document.getElementById('summary-next-month').addEventListener('click', () => {
       summaryMonth = new Date(summaryMonth.getFullYear(), summaryMonth.getMonth() + 1, 1);
-      updateTotals();
+      updateSummaryMonthDisplay();
     });
 
     const summaryPicker = document.getElementById('summary-month-picker');
     if (summaryPicker) {
       summaryPicker.addEventListener('change', (e) => {
         summaryMonth = parseYearMonth(e.target.value);
-        updateTotals();
+        updateSummaryMonthDisplay();
       });
     }
 
