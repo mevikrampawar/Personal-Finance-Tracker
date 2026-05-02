@@ -108,69 +108,38 @@
 <body>
   <div class="container">
     <h1>Finance Tracker</h1>
-    <div class="subtitle">Login to your account</div>
+    <div class="subtitle">Sign in with Google to continue</div>
 
-    <form id="login-form">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="Enter your username" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="Enter your password" required />
-      </div>
-      <button type="submit">Login</button>
-    </form>
-
+    <button id="google-button">Sign in with Google</button>
     <div id="message" class="message"></div>
-
-    <div class="link">
-      Don't have an account? <a href="register.html">Register here</a>
-    </div>
   </div>
 
-  <script>
-    // Get stored users
-    function getUsers() {
-      const users = localStorage.getItem('users');
-      return users ? JSON.parse(users) : {};
-    }
+  <script type="module">
+    import { auth, provider } from './firebase-config.js';
+    import { signInWithPopup, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
 
-    // Show message
+    const messageEl = document.getElementById('message');
+    const button = document.getElementById('google-button');
+
     function showMessage(text, type) {
-      const msgEl = document.getElementById('message');
-      msgEl.textContent = text;
-      msgEl.className = `message ${type}`;
-      msgEl.style.display = 'block';
+      messageEl.textContent = text;
+      messageEl.className = `message ${type}`;
+      messageEl.style.display = 'block';
     }
 
-    // Handle login
-    document.getElementById('login-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const users = getUsers();
-
-      if (!username || !password) {
-        showMessage('Please fill in all fields', 'error');
-        return;
+    button.addEventListener('click', async () => {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        showMessage(error.message, 'error');
       }
-
-      if (!users[username] || users[username] !== password) {
-        showMessage('Invalid username or password', 'error');
-        return;
-      }
-
-      // Successful login
-      localStorage.setItem('currentUser', username);
-      window.location.href = 'tracker.html';
     });
 
-    // Check if already logged in
-    if (localStorage.getItem('currentUser')) {
-      window.location.href = 'tracker.html';
-    }
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'tracker.html';
+      }
+    });
   </script>
 </body>
 </html>

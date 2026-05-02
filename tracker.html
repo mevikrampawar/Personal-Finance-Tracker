@@ -260,22 +260,34 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { auth, db } from './firebase-config.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+    import {
+      collection,
+      query,
+      orderBy,
+      addDoc,
+      serverTimestamp,
+      onSnapshot
+    } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
     let currentUser = null;
     let transactions = [];
+    let unsubscribe = null;
 
     // Initialize app
     function initApp() {
-      const savedUser = localStorage.getItem('currentUser');
-      
-      if (!savedUser) {
-        window.location.href = 'login.html';
-        return;
-      }
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          window.location.href = 'login.html';
+          return;
+        }
 
-      currentUser = savedUser;
-      document.getElementById('username-display').textContent = currentUser;
-      loadTransactions();
+        currentUser = user;
+        document.getElementById('username-display').textContent = user.displayName || user.email;
+        loadTransactions();
+      });
     }
 
     // Format currency
@@ -286,19 +298,22 @@
       }).format(value);
     }
 
-    // Load transactions from localStorage (FIXED: Each user has separate data)
+    // Load transactions from Firestore
     function loadTransactions() {
-      const storageKey = `transactions_${currentUser}`;
-      const saved = localStorage.getItem(storageKey);
-      transactions = saved ? JSON.parse(saved) : [];
-      renderTransactions();
-      updateTotals();
-    }
+      const transactionsRef = collection(db, 'users', currentUser.uid, 'transactions');
+      const q = query(transactionsRef, orderBy('createdAt', 'desc'));
 
-    // Save transactions to localStorage
-    function saveTransactions() {
-      const storageKey = `transactions_${currentUser}`;
-      localStorage.setItem(storageKey, JSON.stringify(transactions));
+      if (unsubscribe) {
+        unsubscribe();
+      }
+
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderTransactions();
+        updateTotals();
+      }, (error) => {
+        alert('Unable to load transactions: ' + error.message);
+      });
     }
 
     // Update summary totals
@@ -319,7 +334,7 @@
     // Render transaction table
     function renderTransactions() {
       const tableBody = document.getElementById('transaction-table');
-      
+
       if (transactions.length === 0) {
         tableBody.innerHTML = `
           <tr>
@@ -344,7 +359,7 @@
     }
 
     // Handle form submission
-    document.getElementById('transaction-form').addEventListener('submit', (e) => {
+    document.getElementById('transaction-form').addEventListener('submit', async (e) => {
       e.preventDefault();
 
       const description = document.getElementById('description').value.trim();
@@ -356,22 +371,27 @@
         return;
       }
 
-      transactions.push({ description, type, amount });
-      saveTransactions();
-      renderTransactions();
-      updateTotals();
+      const transactionsRef = collection(db, 'users', currentUser.uid, 'transactions');
+      await addDoc(transactionsRef, {
+        description,
+        type,
+        amount,
+        createdAt: serverTimestamp()
+      });
+
       document.getElementById('transaction-form').reset();
     });
 
     // Logout function
-    function logout() {
-      if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('currentUser');
-        window.location.href = 'login.html';
-      }
+    async function logout() {
+      const confirmLogout = confirm('Are you sure you want to logout?');
+      if (!confirmLogout) return;
+
+      await signOut(auth);
+      window.location.href = 'login.html';
     }
 
-    // Start app on page load
+    window.logout = logout;
     initApp();
   </script>
 </body>
