@@ -442,6 +442,17 @@
       renderCalendar();
     });
 
+    // Summary month navigation
+    document.getElementById('summary-prev-month').addEventListener('click', () => {
+      summaryMonth.setMonth(summaryMonth.getMonth() - 1);
+      updateTotals();
+    });
+
+    document.getElementById('summary-next-month').addEventListener('click', () => {
+      summaryMonth.setMonth(summaryMonth.getMonth() + 1);
+      updateTotals();
+    });
+
     document.getElementById('logout-button').addEventListener('click', logout);
     setDefaultDate();
     initApp();
