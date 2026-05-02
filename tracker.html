@@ -5,122 +5,267 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Finance Tracker</title>
   <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f7fb;
+      --surface: rgba(255,255,255,0.92);
+      --surface-strong: rgba(255,255,255,0.98);
+      --text: #172b4d;
+      --muted: #576574;
+      --border: rgba(15, 23, 42, 0.08);
+      --primary: #5b6cea;
+      --primary-strong: #3b4ac0;
+      --accent: #2aa8a7;
+      --danger: #ef4b5b;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    }
+    .dark {
+      color-scheme: dark;
+      --bg: #101418;
+      --surface: rgba(18, 25, 33, 0.92);
+      --surface-strong: rgba(26, 34, 46, 0.98);
+      --text: #e6edf8;
+      --muted: #94a3b8;
+      --border: rgba(148, 163, 184, 0.18);
+      --primary: #7c8cff;
+      --primary-strong: #5c6aff;
+      --accent: #4fd1c5;
+      --danger: #fb7185;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
+    html, body {
+      min-height: 100%;
+    }
     body {
-      font-family: Arial, sans-serif;
-      color: #1d1d1d;
-      background: #f7f9fc;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at top left, rgba(91, 108, 234, 0.12), transparent 30%),
+                  radial-gradient(circle at bottom right, rgba(42, 168, 167, 0.12), transparent 25%),
+                  var(--bg);
+      color: var(--text);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(91, 108, 234, 0.1), transparent 20%),
+                  radial-gradient(circle at bottom right, rgba(42, 168, 167, 0.1), transparent 20%);
+      pointer-events: none;
     }
     .navbar {
-      background: #2a4d7f;
-      color: white;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      background: transparent;
+      color: var(--text);
+      padding: 24px 20px 0;
     }
     .navbar-content {
-      max-width: 900px;
+      max-width: 920px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 16px;
+    }
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
     .navbar h1 {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
+      letter-spacing: -0.03em;
       margin: 0;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
     }
     .navbar-user {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .navbar-user span {
-      font-size: 0.95rem;
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
-    .logout-btn {
-      background: #dc3545;
-      color: white;
-      border: none;
+    .logout-btn,
+    .theme-btn {
+      background: rgba(255,255,255,0.85);
+      color: var(--text);
+      border: 1px solid var(--border);
       padding: 10px 16px;
-      border-radius: 6px;
+      border-radius: 999px;
       cursor: pointer;
       font-size: 0.95rem;
-      transition: background 0.3s;
+      transition: transform 0.2s ease, background 0.3s ease, color 0.3s ease;
+      min-width: 80px;
     }
-    .logout-btn:hover {
-      background: #c82333;
+    .logout-btn:hover,
+    .theme-btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.98);
     }
     .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
+      max-width: 920px;
+      margin: 20px auto 40px;
+      padding: 0 16px 32px;
     }
     .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
-      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 28px;
       margin-bottom: 24px;
+      backdrop-filter: blur(14px);
     }
     h2 {
-      color: #2a4d7f;
+      color: var(--text);
       margin-bottom: 20px;
-      font-size: 1.3rem;
+      font-size: 1.25rem;
     }
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
     label {
       display: block;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-weight: 600;
-      color: #333;
+      color: var(--text);
+      font-size: 0.95rem;
     }
-    input, select {
+    input {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #d1d7e0;
-      border-radius: 8px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.72);
+      color: var(--text);
       font-size: 1rem;
-      box-sizing: border-box;
-      transition: border-color 0.3s;
+      transition: border-color 0.3s ease, transform 0.2s ease;
     }
-    input:focus, select:focus {
+    input:focus {
       outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(92, 106, 255, 0.12);
+      transform: translateY(-1px);
     }
     .form-row {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
+      grid-template-columns: 1.4fr 1fr 1fr;
+      gap: 18px;
+      align-items: flex-end;
     }
     .form-row .form-group {
       margin-bottom: 0;
     }
-    @media (max-width: 768px) {
+    .radio-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .radio-option {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.7);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.25s ease, border-color 0.25s ease;
+    }
+    .radio-option input {
+      accent-color: var(--primary);
+    }
+    .radio-option:hover {
+      background: rgba(255,255,255,0.95);
+    }
+    .radio-option input:checked + span {
+      font-weight: 700;
+      color: var(--primary-strong);
+    }
+    .form-row button {
+      align-self: stretch;
+      margin-top: 6px;
+      border-radius: 16px;
+    }
+    .totals {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    .total-card {
+      background: linear-gradient(135deg, rgba(91,108,234,0.95), rgba(58,83,240,0.95));
+      color: white;
+      border-radius: 24px;
+      padding: 24px;
+      text-align: center;
+      min-height: 130px;
+    }
+    .total-card-label {
+      font-size: 0.9rem;
+      opacity: 0.85;
+      margin-bottom: 12px;
+    }
+    .total-card-amount {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      background: transparent;
+    }
+    th {
+      color: var(--muted);
+      padding: 16px 14px;
+      text-align: left;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 16px 14px;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+    tr:hover {
+      background: rgba(255,255,255,0.5);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+    @media (max-width: 840px) {
+      .navbar-content,
+      .totals {
+        grid-template-columns: 1fr;
+      }
       .form-row {
         grid-template-columns: 1fr;
       }
     }
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #667eea;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #5568d3;
-    }
+  </style>
     .totals {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -185,10 +330,18 @@
 <body>
   <div class="navbar">
     <div class="navbar-content">
-      <h1>💰 Finance Tracker</h1>
+      <div class="navbar-left">
+        <div>
+          <h1>💰 Finance Tracker</h1>
+          <div class="meta">Track income and expenses with a calm, cozy dashboard</div>
+        </div>
+      </div>
       <div class="navbar-user">
         <span>Welcome, <strong id="username-display"></strong></span>
-        <button id="logout-button" class="logout-btn">Logout</button>
+        <div class="button-group">
+          <button id="theme-toggle" class="theme-btn">Dark Mode</button>
+          <button id="logout-button" class="logout-btn">Logout</button>
+        </div>
       </div>
     </div>
   </div>
@@ -220,11 +373,17 @@
             <input type="text" id="description" placeholder="e.g., Grocery, Salary" required />
           </div>
           <div class="form-group">
-            <label for="type">Type</label>
-            <select id="type">
-              <option value="expense">Expense</option>
-              <option value="income">Income</option>
-            </select>
+            <label>Type</label>
+            <div class="radio-row">
+              <label class="radio-option">
+                <input type="radio" name="transaction-type" value="expense" checked />
+                <span>Expense</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="transaction-type" value="income" />
+                <span>Income</span>
+              </label>
+            </div>
           </div>
           <div class="form-group">
             <label for="amount">Amount</label>
@@ -276,8 +435,25 @@
     let transactions = [];
     let unsubscribe = null;
 
+    function setTheme(theme) {
+      document.body.classList.toggle('dark', theme === 'dark');
+      const button = document.getElementById('theme-toggle');
+      button.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+      localStorage.setItem('finance-theme', theme);
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('finance-theme') || 'light';
+      setTheme(savedTheme);
+      document.getElementById('theme-toggle').addEventListener('click', () => {
+        const nextTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
+        setTheme(nextTheme);
+      });
+    }
+
     // Initialize app
     function initApp() {
+      initTheme();
       onAuthStateChanged(auth, (user) => {
         if (!user) {
           window.location.href = 'login.html';
@@ -363,7 +539,7 @@
       e.preventDefault();
 
       const description = document.getElementById('description').value.trim();
-      const type = document.getElementById('type').value;
+      const type = document.querySelector('input[name="transaction-type"]:checked').value;
       const amount = parseFloat(document.getElementById('amount').value);
 
       if (!description || amount <= 0) {
