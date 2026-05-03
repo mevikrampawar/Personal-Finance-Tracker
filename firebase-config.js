@@ -22,7 +22,7 @@ import { getAnalytics } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase
  */
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
+  apiKey: "AIzaSyCS8otGc8nh1YJMU_UnvgJwLdD_uF50gww",
   authDomain: "personal-finance-tracker-babac.firebaseapp.com",
   projectId: "personal-finance-tracker-babac",
   storageBucket: "personal-finance-tracker-babac.firebasestorage.app",
@@ -32,7 +32,7 @@ const firebaseConfig = {
 };
 
 // Validate Firebase configuration
-if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY_HERE") {
+if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "AIzaSyCS8otGc8nh1YJMU_UnvgJwLdD_uF50gww") {
   console.warn('⚠️ Firebase API key not configured. Please update firebase-config.js with your credentials.');
 }
 
