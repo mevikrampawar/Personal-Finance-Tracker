@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description" content="Personal Finance Tracker - Track income and expenses with ease" />
   <meta name="theme-color" content="#5b6cea" />
   <title>Finance Tracker - Personal Finance Management</title>
@@ -19,18 +19,56 @@
         </div>
       </div>
       <div class="navbar-user">
-        <span>Welcome, <strong id="username-display">User</strong></span>
-        <div class="button-group" role="toolbar" aria-label="User controls">
-          <button id="theme-toggle" class="theme-btn" aria-label="Toggle dark/light mode">
-            Dark Mode
-          </button>
-          <button id="logout-button" class="logout-btn" aria-label="Logout from account">
-            Logout
-          </button>
-        </div>
+        <span class="welcome-text">Welcome, <strong id="username-display">User</strong></span>
+        <details class="account-menu" open>
+          <summary aria-label="Open account menu">
+            <span class="account-menu-icon" aria-hidden="true">☰</span>
+          </summary>
+          <div class="button-group" role="toolbar" aria-label="User controls">
+            <button id="theme-toggle" class="theme-btn" aria-label="Toggle dark/light mode">
+              Dark Mode
+            </button>
+            <button id="categories-panel-toggle" class="manage-categories-btn" type="button" aria-expanded="false" aria-controls="categories-panel">
+              Categories
+            </button>
+            <button id="logout-button" class="logout-btn" aria-label="Logout from account">
+              Logout
+            </button>
+          </div>
+        </details>
       </div>
     </div>
   </nav>
+
+  <div id="categories-overlay" class="inline-panel-overlay" hidden></div>
+  <aside id="categories-panel" class="inline-panel" aria-labelledby="categories-title" aria-hidden="true">
+    <div class="inline-panel-header">
+      <div>
+        <p class="panel-kicker">Expense Setup</p>
+        <h2 id="categories-title">Manage Expense Categories</h2>
+      </div>
+      <button type="button" id="categories-panel-close" class="panel-close-btn" aria-label="Close categories panel">×</button>
+    </div>
+    <div class="categories-management">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="new-category">New Category</label>
+          <input
+            type="text"
+            id="new-category"
+            placeholder="e.g., Personal, Education, Grocery"
+          />
+        </div>
+        <button type="button" id="add-category-btn" class="submit-btn">Add Category</button>
+      </div>
+      <div class="categories-list">
+        <h3>Current Categories</h3>
+        <ul id="categories-ul" class="categories-ul">
+          <!-- Categories will be populated here -->
+        </ul>
+      </div>
+    </div>
+  </aside>
 
   <main class="container">
     <!-- Summary Month Selector -->
@@ -150,30 +188,6 @@
 
         <button type="submit" class="submit-btn">Add Transaction</button>
       </form>
-    </section>
-
-    <!-- Expense Categories Management -->
-    <section class="card" aria-labelledby="categories-title">
-      <h2 id="categories-title">Manage Expense Categories</h2>
-      <div class="categories-management">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="new-category">New Category</label>
-            <input 
-              type="text" 
-              id="new-category" 
-              placeholder="e.g., Personal, Education, Grocery"
-            />
-          </div>
-          <button type="button" id="add-category-btn" class="submit-btn">Add Category</button>
-        </div>
-        <div class="categories-list">
-          <h3>Current Categories</h3>
-          <ul id="categories-ul" class="categories-ul">
-            <!-- Categories will be populated here -->
-          </ul>
-        </div>
-      </div>
     </section>
 
     <!-- Calendar & Transaction History -->

@@ -542,6 +542,93 @@ function setupEventListeners() {
   transactionTypeRadios.forEach(radio => {
     radio.addEventListener('change', toggleCategoryField);
   });
+
+  setupAccountMenu();
+  setupCategoriesPanel();
+}
+
+/**
+ * Keep top account actions visible on desktop and tucked into a menu on mobile.
+ */
+function setupAccountMenu() {
+  const accountMenu = document.querySelector('.account-menu');
+  if (!accountMenu) return;
+
+  const mobileQuery = window.matchMedia('(max-width: 768px)');
+
+  const syncAccountMenu = () => {
+    if (mobileQuery.matches) {
+      accountMenu.removeAttribute('open');
+    } else {
+      accountMenu.setAttribute('open', '');
+    }
+  };
+
+  syncAccountMenu();
+  mobileQuery.addEventListener('change', syncAccountMenu);
+
+  document.addEventListener('click', (event) => {
+    if (!mobileQuery.matches || !accountMenu.open || accountMenu.contains(event.target)) {
+      return;
+    }
+
+    accountMenu.removeAttribute('open');
+  });
+}
+
+/**
+ * Open category management as an inline in-app panel.
+ */
+function setupCategoriesPanel() {
+  const panel = document.getElementById('categories-panel');
+  const overlay = document.getElementById('categories-overlay');
+  const toggle = document.getElementById('categories-panel-toggle');
+  const closeBtn = document.getElementById('categories-panel-close');
+  const accountMenu = document.querySelector('.account-menu');
+  const mobileQuery = window.matchMedia('(max-width: 768px)');
+
+  if (!panel || !overlay || !toggle || !closeBtn) return;
+
+  const openPanel = () => {
+    panel.classList.add('is-open');
+    panel.setAttribute('aria-hidden', 'false');
+    overlay.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+
+    if (mobileQuery.matches && accountMenu) {
+      accountMenu.removeAttribute('open');
+    }
+
+    const newCategoryInput = document.getElementById('new-category');
+    if (newCategoryInput) {
+      newCategoryInput.focus();
+    }
+  };
+
+  const closePanel = () => {
+    panel.classList.remove('is-open');
+    panel.setAttribute('aria-hidden', 'true');
+    overlay.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+  };
+
+  toggle.addEventListener('click', () => {
+    if (panel.classList.contains('is-open')) {
+      closePanel();
+    } else {
+      openPanel();
+    }
+  });
+
+  closeBtn.addEventListener('click', closePanel);
+  overlay.addEventListener('click', closePanel);
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && panel.classList.contains('is-open')) {
+      closePanel();
+      toggle.focus();
+    }
+  });
 }
 
 /**
