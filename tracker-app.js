@@ -85,7 +85,7 @@ function initApp() {
 
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      window.location.href = 'login.html';
+      window.location.href = 'index.html';
       return;
     }
 
@@ -235,7 +235,7 @@ async function logout() {
     }
 
     await signOut(auth);
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
   } catch (error) {
     handleError('Logout failed', error);
   }
