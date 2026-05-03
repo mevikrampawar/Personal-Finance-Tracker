@@ -115,6 +115,12 @@
                 </div>
               </fieldset>
             </div>
+            <div class="form-group" id="category-group" style="display: block;">
+              <label for="category">Category</label>
+              <select id="category" aria-required="true" required>
+                <option value="">Select Category</option>
+              </select>
+            </div>
             <div class="form-group">
               <label for="amount">Amount</label>
               <input 
@@ -146,6 +152,30 @@
       </form>
     </section>
 
+    <!-- Expense Categories Management -->
+    <section class="card" aria-labelledby="categories-title">
+      <h2 id="categories-title">Manage Expense Categories</h2>
+      <div class="categories-management">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="new-category">New Category</label>
+            <input 
+              type="text" 
+              id="new-category" 
+              placeholder="e.g., Personal, Education, Grocery"
+            />
+          </div>
+          <button type="button" id="add-category-btn" class="submit-btn">Add Category</button>
+        </div>
+        <div class="categories-list">
+          <h3>Current Categories</h3>
+          <ul id="categories-ul" class="categories-ul">
+            <!-- Categories will be populated here -->
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <!-- Calendar & Transaction History -->
     <section class="card" aria-labelledby="calendar-title">
       <h2 id="calendar-title">📅 Transaction Calendar</h2>
@@ -175,13 +205,14 @@
               <tr>
                 <th scope="col">Description</th>
                 <th scope="col">Type</th>
+                <th scope="col">Category</th>
                 <th scope="col">Amount</th>
                 <th scope="col">Action</th>
               </tr>
             </thead>
             <tbody id="date-transaction-table">
               <tr>
-                <td colspan="4">
+                <td colspan="5">
                   <div class="empty-state">
                     <div class="empty-state-icon" aria-hidden="true">📭</div>
                     <div>No transactions on this date</div>

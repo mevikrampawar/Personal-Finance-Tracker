@@ -322,6 +322,7 @@ function createTransactionRow(transaction, showDate = false) {
     <tr>
       <td>${descriptionHTML}</td>
       <td><span aria-label="${isIncome ? 'Income' : 'Expense'}">${icon} ${isIncome ? 'Income' : 'Expense'}</span></td>
+      <td>${transaction.category || '-'}</td>
       <td class="${amountClass}">${formatCurrency(transaction.amount)}</td>
       <td>
         <button class="delete-transaction-btn" data-id="${transaction.id}" type="button" aria-label="Delete transaction">Delete</button>
@@ -337,7 +338,7 @@ function createTransactionRow(transaction, showDate = false) {
 function createEmptyStateHTML() {
   return `
     <tr>
-      <td colspan="4">
+      <td colspan="5">
         <div class="empty-state">
           <div class="empty-state-icon" aria-hidden="true">📭</div>
           <div>No transactions found</div>

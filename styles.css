@@ -490,7 +490,7 @@ body.dark .total-card {
 
 .form-row {
   display: grid;
-  grid-template-columns: 1.3fr 0.9fr 0.8fr;
+  grid-template-columns: 1.2fr 0.8fr 1fr 0.8fr;
   gap: var(--spacing-lg);
   align-items: flex-end;
 }
@@ -982,6 +982,56 @@ tr:hover {
     font-size: 2.5rem;
     margin-bottom: var(--spacing-xs);
   }
+}
+
+/* ==================== Categories Management ==================== */
+
+.categories-management {
+  margin-top: var(--spacing-lg);
+}
+
+.categories-list {
+  margin-top: var(--spacing-xl);
+}
+
+.categories-list h3 {
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-lg);
+  color: var(--text);
+}
+
+.categories-ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+}
+
+.categories-ul li {
+  background: var(--primary-light);
+  color: var(--primary-strong);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.categories-ul .delete-category {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  padding: 0;
+  margin-left: var(--spacing-xs);
+}
+
+.categories-ul .delete-category:hover {
+  color: var(--danger-strong);
 }
 
 /* ==================== Print Styles ==================== */

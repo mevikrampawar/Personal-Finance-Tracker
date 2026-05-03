@@ -12,6 +12,9 @@ import {
   addDoc,
   deleteDoc,
   doc,
+  getDoc,
+  setDoc,
+  updateDoc,
   onSnapshot
 } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import {
@@ -30,6 +33,7 @@ import {
 const appState = {
   currentUser: null,
   transactions: [],
+  categories: [],
   unsubscribe: null,
   selectedDate: new Date(),
   displayMonth: new Date(),
@@ -95,6 +99,7 @@ function initApp() {
       usernameDisplay.textContent = user.displayName || user.email;
     }
 
+    loadCategories();
     loadTransactions();
   });
 }
@@ -133,6 +138,34 @@ function loadTransactions() {
 }
 
 /**
+ * Load expense categories from Firestore
+ */
+async function loadCategories() {
+  if (!appState.currentUser) {
+    console.error('User not authenticated');
+    return;
+  }
+
+  try {
+    const categoriesRef = doc(db, 'users', appState.currentUser.uid);
+    const categoriesDoc = await getDoc(categoriesRef);
+    
+    if (categoriesDoc.exists()) {
+      appState.categories = categoriesDoc.data().expenseCategories || [];
+    } else {
+      // Default categories
+      appState.categories = ['Personal', 'Education', 'Grocery'];
+      await setDoc(categoriesRef, { expenseCategories: appState.categories });
+    }
+    
+    updateCategoryDropdown();
+    renderCategoriesList();
+  } catch (error) {
+    handleError('Unable to load categories', error);
+  }
+}
+
+/**
  * Handle transaction form submission
  * @param {Event} event - Form submission event
  */
@@ -141,6 +174,7 @@ async function handleTransactionSubmit(event) {
 
   const descriptionEl = document.getElementById('description');
   const typeEl = document.querySelector('input[name="transaction-type"]:checked');
+  const categoryEl = document.getElementById('category');
   const amountEl = document.getElementById('amount');
   const dateEl = document.getElementById('transaction-date');
 
@@ -153,10 +187,16 @@ async function handleTransactionSubmit(event) {
   const type = typeEl.value;
   const amount = parseFloat(amountEl.value);
   const dateStr = dateEl.value;
+  const category = type === 'expense' ? categoryEl.value.trim() : '';
 
   // Validation
   if (!description) {
     showNotification('Please enter a description', 'error');
+    return;
+  }
+
+  if (type === 'expense' && !category) {
+    showNotification('Please select a category for expenses', 'error');
     return;
   }
 
@@ -179,6 +219,7 @@ async function handleTransactionSubmit(event) {
     await addDoc(transactionsRef, {
       description,
       type,
+      category,
       amount,
       createdAt: transactionDate
     });
@@ -188,11 +229,124 @@ async function handleTransactionSubmit(event) {
     if (form) {
       form.reset();
       setDefaultDate();
+      toggleCategoryField();
     }
 
     showNotification('Transaction added successfully', 'success');
   } catch (error) {
     handleError('Failed to add transaction', error);
+  }
+}
+
+/**
+ * Update the category dropdown options
+ */
+function updateCategoryDropdown() {
+  const categorySelect = document.getElementById('category');
+  if (!categorySelect) return;
+
+  categorySelect.innerHTML = '<option value="">Select Category</option>';
+  appState.categories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    categorySelect.appendChild(option);
+  });
+}
+
+/**
+ * Render the categories list
+ */
+function renderCategoriesList() {
+  const categoriesUl = document.getElementById('categories-ul');
+  if (!categoriesUl) return;
+
+  categoriesUl.innerHTML = '';
+  appState.categories.forEach((cat, index) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      ${cat}
+      <button class="delete-category" data-index="${index}" aria-label="Delete ${cat} category">×</button>
+    `;
+    categoriesUl.appendChild(li);
+  });
+}
+
+/**
+ * Add a new category
+ */
+async function addCategory() {
+  const newCategoryInput = document.getElementById('new-category');
+  if (!newCategoryInput) return;
+
+  const newCategory = newCategoryInput.value.trim();
+  if (!newCategory) {
+    showNotification('Please enter a category name', 'error');
+    return;
+  }
+
+  if (appState.categories.includes(newCategory)) {
+    showNotification('Category already exists', 'error');
+    return;
+  }
+
+  try {
+    appState.categories.push(newCategory);
+    await updateCategoriesInDB();
+    updateCategoryDropdown();
+    renderCategoriesList();
+    newCategoryInput.value = '';
+    showNotification('Category added successfully', 'success');
+  } catch (error) {
+    handleError('Failed to add category', error);
+  }
+}
+
+/**
+ * Delete a category
+ */
+async function deleteCategory(index) {
+  if (index < 0 || index >= appState.categories.length) return;
+
+  const categoryToDelete = appState.categories[index];
+  if (confirm(`Are you sure you want to delete the "${categoryToDelete}" category?`)) {
+    try {
+      appState.categories.splice(index, 1);
+      await updateCategoriesInDB();
+      updateCategoryDropdown();
+      renderCategoriesList();
+      showNotification('Category deleted successfully', 'success');
+    } catch (error) {
+      handleError('Failed to delete category', error);
+    }
+  }
+}
+
+/**
+ * Update categories in Firestore
+ */
+async function updateCategoriesInDB() {
+  const categoriesRef = doc(db, 'users', appState.currentUser.uid);
+  await setDoc(categoriesRef, { expenseCategories: appState.categories }, { merge: true });
+}
+
+/**
+ * Toggle category field visibility based on transaction type
+ */
+function toggleCategoryField() {
+  const typeEl = document.querySelector('input[name="transaction-type"]:checked');
+  const categoryGroup = document.getElementById('category-group');
+  const categorySelect = document.getElementById('category');
+
+  if (typeEl && categoryGroup && categorySelect) {
+    if (typeEl.value === 'expense') {
+      categoryGroup.style.display = 'block';
+      categorySelect.required = true;
+    } else {
+      categoryGroup.style.display = 'none';
+      categorySelect.required = false;
+      categorySelect.value = '';
+    }
   }
 }
 
@@ -366,6 +520,28 @@ function setupEventListeners() {
   if (transactionTable) {
     transactionTable.addEventListener('click', handleDeleteClick);
   }
+
+  // Category management
+  const addCategoryBtn = document.getElementById('add-category-btn');
+  if (addCategoryBtn) {
+    addCategoryBtn.addEventListener('click', addCategory);
+  }
+
+  const categoriesUl = document.getElementById('categories-ul');
+  if (categoriesUl) {
+    categoriesUl.addEventListener('click', (event) => {
+      if (event.target.classList.contains('delete-category')) {
+        const index = parseInt(event.target.dataset.index);
+        deleteCategory(index);
+      }
+    });
+  }
+
+  // Transaction type change
+  const transactionTypeRadios = document.querySelectorAll('input[name="transaction-type"]');
+  transactionTypeRadios.forEach(radio => {
+    radio.addEventListener('change', toggleCategoryField);
+  });
 }
 
 /**
