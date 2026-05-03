@@ -3,137 +3,197 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Finance Tracker</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Personal Finance Tracker - Track income and expenses with ease" />
+  <meta name="theme-color" content="#5b6cea" />
+  <title>Finance Tracker - Personal Finance Management</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="navbar">
+  <!-- Navigation -->
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
     <div class="navbar-content">
       <div class="navbar-left">
         <div>
           <h1>💰 Finance Tracker</h1>
-          <div class="meta">Track income and expenses with a calm, cozy dashboard</div>
+          <p class="meta">Track income and expenses with a calm, cozy dashboard</p>
         </div>
       </div>
       <div class="navbar-user">
-        <span>Welcome, <strong id="username-display"></strong></span>
-        <div class="button-group">
-          <button id="theme-toggle" class="theme-btn">Dark Mode</button>
-          <button id="logout-button" class="logout-btn">Logout</button>
+        <span>Welcome, <strong id="username-display">User</strong></span>
+        <div class="button-group" role="toolbar" aria-label="User controls">
+          <button id="theme-toggle" class="theme-btn" aria-label="Toggle dark/light mode">
+            Dark Mode
+          </button>
+          <button id="logout-button" class="logout-btn" aria-label="Logout from account">
+            Logout
+          </button>
         </div>
       </div>
     </div>
-  </div>
+  </nav>
 
-  <div class="container">
+  <main class="container">
     <!-- Summary Month Selector -->
-    <div class="summary-header">
-      <h2>Monthly Summary</h2>
+    <section class="summary-header" aria-labelledby="summary-title">
+      <h2 id="summary-title">Monthly Summary</h2>
       <div class="summary-controls">
-        <button type="button" id="summary-prev-month" class="summary-nav">←</button>
-        <span id="summary-month-year" class="summary-month-display"></span>
-        <input type="month" id="summary-month-picker" class="summary-month-picker" />
-        <button type="button" id="summary-next-month" class="summary-nav">→</button>
+        <button type="button" id="summary-prev-month" class="summary-nav" aria-label="Previous month">
+          ←
+        </button>
+        <span id="summary-month-year" class="summary-month-display" aria-live="polite">
+          January 2024
+        </span>
+        <input 
+          type="month" 
+          id="summary-month-picker" 
+          class="summary-month-picker"
+          aria-label="Select month and year"
+        />
+        <button type="button" id="summary-next-month" class="summary-nav" aria-label="Next month">
+          →
+        </button>
       </div>
-    </div>
+    </section>
 
     <!-- Summary Cards -->
-    <div class="totals">
-      <div class="total-card">
+    <section class="totals" aria-labelledby="summary-title">
+      <article class="total-card">
         <div class="total-card-label">Total Income</div>
-        <div class="total-card-amount" id="income-total">₹0.00</div>
-      </div>
-      <div class="total-card">
+        <div class="total-card-amount" id="income-total" aria-live="polite">₹0.00</div>
+      </article>
+      <article class="total-card">
         <div class="total-card-label">Total Expenses</div>
-        <div class="total-card-amount" id="expense-total">₹0.00</div>
-      </div>
-      <div class="total-card">
+        <div class="total-card-amount" id="expense-total" aria-live="polite">₹0.00</div>
+      </article>
+      <article class="total-card">
         <div class="total-card-label">Balance</div>
-        <div class="total-card-amount" id="balance-total">₹0.00</div>
-      </div>
-    </div>
+        <div class="total-card-amount" id="balance-total" aria-live="polite">₹0.00</div>
+      </article>
+    </section>
 
     <!-- Add Transaction Form -->
-    <div class="card">
-      <h2>Add New Transaction</h2>
-      <form id="transaction-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="description">Description</label>
-            <input type="text" id="description" placeholder="e.g., Grocery, Salary" required />
-          </div>
-          <div class="form-group">
-            <label>Type</label>
-            <div class="radio-row">
-              <label class="radio-option">
-                <input type="radio" name="transaction-type" value="expense" checked />
-                <span>Expense</span>
-              </label>
-              <label class="radio-option">
-                <input type="radio" name="transaction-type" value="income" />
-                <span>Income</span>
-              </label>
+    <section class="card" aria-labelledby="form-title">
+      <h2 id="form-title">Add New Transaction</h2>
+      <form id="transaction-form" novalidate>
+        <fieldset>
+          <legend class="sr-only">Transaction Details</legend>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="description">Description</label>
+              <input 
+                type="text" 
+                id="description" 
+                placeholder="e.g., Grocery, Salary"
+                aria-required="true"
+                required 
+              />
+            </div>
+            <div class="form-group">
+              <fieldset>
+                <legend>Type</legend>
+                <div class="radio-row">
+                  <label class="radio-option">
+                    <input 
+                      type="radio" 
+                      name="transaction-type" 
+                      value="expense"
+                      checked
+                      aria-label="Expense transaction"
+                    />
+                    <span>Expense</span>
+                  </label>
+                  <label class="radio-option">
+                    <input 
+                      type="radio" 
+                      name="transaction-type" 
+                      value="income"
+                      aria-label="Income transaction"
+                    />
+                    <span>Income</span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+            <div class="form-group">
+              <label for="amount">Amount</label>
+              <input 
+                type="number" 
+                id="amount" 
+                placeholder="0.00" 
+                step="0.01" 
+                min="0"
+                aria-required="true"
+                required 
+              />
             </div>
           </div>
-          <div class="form-group">
-            <label for="amount">Amount</label>
-            <input type="number" id="amount" placeholder="0.00" step="0.01" min="0" required />
+
+          <div class="form-row-single">
+            <div class="form-group">
+              <label for="transaction-date">Date</label>
+              <input 
+                type="date" 
+                id="transaction-date"
+                aria-required="true"
+                required 
+              />
+            </div>
           </div>
-        </div>
-        <div class="form-row-single">
-          <div class="form-group">
-            <label for="transaction-date">Date</label>
-            <input type="date" id="transaction-date" required />
-          </div>
-        </div>
-        <button type="submit">Add Transaction</button>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">Add Transaction</button>
       </form>
-    </div>
+    </section>
 
     <!-- Calendar & Transaction History -->
-    <div class="card">
-      <h2>📅 Transaction Calendar</h2>
+    <section class="card" aria-labelledby="calendar-title">
+      <h2 id="calendar-title">📅 Transaction Calendar</h2>
       
       <!-- Calendar Grid -->
-      <div class="calendar-container">
+      <article class="calendar-container" aria-label="Month calendar">
         <div class="calendar-weekdays">
-          <div class="weekday">Sun</div>
-          <div class="weekday">Mon</div>
-          <div class="weekday">Tue</div>
-          <div class="weekday">Wed</div>
-          <div class="weekday">Thu</div>
-          <div class="weekday">Fri</div>
-          <div class="weekday">Sat</div>
+          <div class="weekday" role="columnheader">Sun</div>
+          <div class="weekday" role="columnheader">Mon</div>
+          <div class="weekday" role="columnheader">Tue</div>
+          <div class="weekday" role="columnheader">Wed</div>
+          <div class="weekday" role="columnheader">Thu</div>
+          <div class="weekday" role="columnheader">Fri</div>
+          <div class="weekday" role="columnheader">Sat</div>
         </div>
-        <div class="calendar-days" id="calendar-days"></div>
-      </div>
+        <div class="calendar-days" id="calendar-days" role="grid"></div>
+      </article>
 
       <!-- Date Details View -->
-      <div class="date-details-section">
-        <h3>Transactions for <span id="selected-date-display">Today</span></h3>
-        <table class="date-transactions-table">
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th>Type</th>
-              <th>Amount</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="date-transaction-table">
-            <tr>
-              <td colspan="4">
-                <div class="empty-state">
-                  <div class="empty-state-icon">📭</div>
-                  <div>No transactions on this date</div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+      <article class="date-details-section" aria-labelledby="date-details-title">
+        <h3 id="date-details-title">
+          Transactions for <span id="selected-date-display">Today</span>
+        </h3>
+        <div class="table-wrapper">
+          <table class="date-transactions-table">
+            <thead>
+              <tr>
+                <th scope="col">Description</th>
+                <th scope="col">Type</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody id="date-transaction-table">
+              <tr>
+                <td colspan="4">
+                  <div class="empty-state">
+                    <div class="empty-state-icon" aria-hidden="true">📭</div>
+                    <div>No transactions on this date</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+  </main>
 
   <script type="module" src="./tracker-app.js"></script>
 </body>
