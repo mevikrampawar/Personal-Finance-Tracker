@@ -185,6 +185,23 @@ label {
 
 /* ==================== Form Elements ==================== */
 
+fieldset {
+  border: none;      /* Remove default border */
+  padding: 0;        /* Remove padding */
+  margin: 0;         /* Remove margin */
+}
+
+legend {
+  padding: 0;        /* Remove legend padding */
+  margin: 0;         /* Remove legend margin */
+}
+
+form {
+  border: none;      /* Ensure form is clean */
+  background: transparent;
+  padding: 0;
+}
+
 input,
 select {
   width: 100%;
