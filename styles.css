@@ -153,6 +153,20 @@ button:hover {
   box-shadow: 0 16px 32px rgba(79, 113, 255, 0.22);
 }
 
+.delete-transaction-btn {
+  width: auto;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(239, 75, 91, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(239, 75, 91, 0.2);
+  font-weight: 700;
+}
+
+.delete-transaction-btn:hover {
+  background: rgba(239, 75, 91, 0.14);
+}
+
 .navbar {
   background: transparent;
   color: var(--text);
