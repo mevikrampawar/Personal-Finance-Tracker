@@ -18,10 +18,13 @@ const currencyConfig = {
  */
 export function setTheme(theme) {
   document.body.classList.toggle('dark', theme === 'dark');
-  const button = document.getElementById('theme-toggle');
-  if (button) {
-    button.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
-  }
+  const buttons = [
+    document.getElementById('theme-toggle'),
+    document.getElementById('mobile-theme-toggle')
+  ].filter(Boolean);
+  buttons.forEach(button => {
+    button.textContent = theme === 'dark' ? '☀' : '◐';
+  });
   localStorage.setItem('finance-theme', theme);
 }
 
@@ -31,13 +34,16 @@ export function setTheme(theme) {
 export function initTheme() {
   const savedTheme = localStorage.getItem('finance-theme') || 'light';
   setTheme(savedTheme);
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
+  const themeToggles = [
+    document.getElementById('theme-toggle'),
+    document.getElementById('mobile-theme-toggle')
+  ].filter(Boolean);
+  themeToggles.forEach(themeToggle => {
     themeToggle.addEventListener('click', () => {
       const nextTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
       setTheme(nextTheme);
     });
-  }
+  });
 }
 
 /**
@@ -114,7 +120,7 @@ export function formatCurrency(value) {
  * @param {*} transactionDate - Firestore Timestamp or JavaScript Date
  * @returns {Date} - JavaScript Date object
  */
-function toLocalDate(transactionDate) {
+export function toLocalDate(transactionDate) {
   if (!transactionDate) return null;
   return transactionDate.toDate ? transactionDate.toDate() : new Date(transactionDate);
 }
@@ -149,6 +155,42 @@ export function getTransactionsForMonth(transactions, month) {
     if (!t.createdAt) return false;
     const tDate = toLocalDate(t.createdAt);
     return tDate && tDate.getFullYear() === year && tDate.getMonth() === monthIndex;
+  });
+}
+
+/**
+ * Apply transaction filters to a list.
+ * @param {Array} transactions - Transactions to filter
+ * @param {Object} filters - Filter configuration
+ * @returns {Array} - Filtered transactions
+ */
+export function applyTransactionFilters(transactions, filters = {}) {
+  if (!Array.isArray(transactions)) return [];
+
+  const search = (filters.search || '').trim().toLowerCase();
+  const type = filters.type || 'all';
+  const category = filters.category || 'all';
+  const minAmount = filters.minAmount === '' || filters.minAmount == null ? null : Number(filters.minAmount);
+  const maxAmount = filters.maxAmount === '' || filters.maxAmount == null ? null : Number(filters.maxAmount);
+  const fromDate = filters.fromDate ? new Date(`${filters.fromDate}T00:00:00`) : null;
+  const toDate = filters.toDate ? new Date(`${filters.toDate}T23:59:59`) : null;
+
+  return transactions.filter(transaction => {
+    const amount = Number(transaction.amount || 0);
+    const description = String(transaction.description || '').toLowerCase();
+    const transactionCategory = String(transaction.category || '').toLowerCase();
+    const transactionDate = toLocalDate(transaction.createdAt);
+
+    if (search && !description.includes(search) && !transactionCategory.includes(search)) return false;
+    if (type !== 'all' && transaction.type !== type) return false;
+    if (category !== 'all' && transaction.category !== category) return false;
+    if (minAmount !== null && !Number.isNaN(minAmount) && amount < minAmount) return false;
+    if (maxAmount !== null && !Number.isNaN(maxAmount) && amount > maxAmount) return false;
+    if ((fromDate || toDate) && !transactionDate) return false;
+    if (fromDate && transactionDate && transactionDate < fromDate) return false;
+    if (toDate && transactionDate && transactionDate > toDate) return false;
+
+    return true;
   });
 }
 
@@ -243,8 +285,8 @@ function createCalendarDayElement(day, className) {
  * @param {Array} transactions - All transactions
  * @param {Date} selectedDate - Selected date to show
  */
-export function updateDateDetailsView(transactions, selectedDate) {
-  const dateTransactions = getTransactionsForDate(transactions, selectedDate);
+export function updateDateDetailsView(transactions, selectedDate, filters = {}) {
+  const dateTransactions = applyTransactionFilters(getTransactionsForDate(transactions, selectedDate), filters);
   const tableBody = document.getElementById('date-transaction-table');
   const dateDisplay = document.getElementById('selected-date-display');
 
@@ -252,14 +294,7 @@ export function updateDateDetailsView(transactions, selectedDate) {
 
   dateDisplay.textContent = formatDateDisplay(selectedDate);
 
-  if (dateTransactions.length === 0) {
-    tableBody.innerHTML = createEmptyStateHTML();
-    return;
-  }
-
-  tableBody.innerHTML = dateTransactions
-    .map(transaction => createTransactionRow(transaction, true))
-    .join('');
+  renderTransactionRows(tableBody, dateTransactions, true);
 }
 
 /**
@@ -267,8 +302,8 @@ export function updateDateDetailsView(transactions, selectedDate) {
  * @param {Array} transactions - All transactions
  * @param {Date} summaryMonth - Month to summarize
  */
-export function updateMonthTransactionsList(transactions, summaryMonth) {
-  const monthTransactions = getTransactionsForMonth(transactions, summaryMonth);
+export function updateMonthTransactionsList(transactions, summaryMonth, filters = {}) {
+  const monthTransactions = applyTransactionFilters(getTransactionsForMonth(transactions, summaryMonth), filters);
   const tableBody = document.getElementById('date-transaction-table');
   const dateDisplay = document.getElementById('selected-date-display');
 
@@ -277,20 +312,13 @@ export function updateMonthTransactionsList(transactions, summaryMonth) {
   const monthYear = `${monthNames[summaryMonth.getMonth()]} ${summaryMonth.getFullYear()}`;
   dateDisplay.textContent = monthYear;
 
-  if (monthTransactions.length === 0) {
-    tableBody.innerHTML = createEmptyStateHTML();
-    return;
-  }
-
   const sorted = [...monthTransactions].sort((a, b) => {
     const dateA = toLocalDate(a.createdAt);
     const dateB = toLocalDate(b.createdAt);
     return dateB - dateA;
   });
 
-  tableBody.innerHTML = sorted
-    .map(transaction => createTransactionRow(transaction, false))
-    .join('');
+  renderTransactionRows(tableBody, sorted, false);
 }
 
 /**
@@ -299,53 +327,113 @@ export function updateMonthTransactionsList(transactions, summaryMonth) {
  * @param {boolean} showDate - Whether to show date (false for month view)
  * @returns {string} - HTML string for table row
  */
+function renderTransactionRows(tableBody, transactions, showDate = false) {
+  tableBody.innerHTML = '';
+
+  if (transactions.length === 0) {
+    tableBody.appendChild(createEmptyStateRow());
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  transactions.forEach(transaction => {
+    fragment.appendChild(createTransactionRow(transaction, showDate));
+  });
+  tableBody.appendChild(fragment);
+}
+
+/**
+ * Create a transaction row with DOM APIs so user-entered values are escaped.
+ * @param {Object} transaction - Transaction object
+ * @param {boolean} showDate - Whether to show date
+ * @returns {HTMLTableRowElement} - Transaction table row
+ */
 function createTransactionRow(transaction, showDate = false) {
   const isIncome = transaction.type === 'income';
   const amountClass = isIncome ? 'amount-income' : 'amount-expense';
   const icon = isIncome ? '📈' : '📉';
+  const row = document.createElement('tr');
+  const descriptionCell = document.createElement('td');
 
-  let descriptionHTML;
   if (showDate) {
-    descriptionHTML = transaction.description;
+    descriptionCell.textContent = transaction.description || '';
   } else {
     const date = toLocalDate(transaction.createdAt);
-    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    descriptionHTML = `
-      <div class="transaction-row">
-        <div class="transaction-date">${dateStr}</div>
-        <div class="transaction-description">${transaction.description}</div>
-      </div>
-    `;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'transaction-row';
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'transaction-date';
+    dateEl.textContent = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '-';
+
+    const descriptionEl = document.createElement('div');
+    descriptionEl.className = 'transaction-description';
+    descriptionEl.textContent = transaction.description || '';
+
+    wrapper.append(dateEl, descriptionEl);
+    descriptionCell.appendChild(wrapper);
   }
 
-  return `
-    <tr>
-      <td>${descriptionHTML}</td>
-      <td><span aria-label="${isIncome ? 'Income' : 'Expense'}">${icon} ${isIncome ? 'Income' : 'Expense'}</span></td>
-      <td>${transaction.category || '-'}</td>
-      <td class="${amountClass}">${formatCurrency(transaction.amount)}</td>
-      <td>
-        <button class="delete-transaction-btn" data-id="${transaction.id}" type="button" aria-label="Delete transaction">Delete</button>
-      </td>
-    </tr>
-  `;
+  const typeCell = document.createElement('td');
+  const typeSpan = document.createElement('span');
+  typeSpan.setAttribute('aria-label', isIncome ? 'Income' : 'Expense');
+  typeSpan.textContent = `${icon} ${isIncome ? 'Income' : 'Expense'}`;
+  typeCell.appendChild(typeSpan);
+
+  const categoryCell = document.createElement('td');
+  categoryCell.textContent = transaction.category || '-';
+
+  const amountCell = document.createElement('td');
+  amountCell.className = amountClass;
+  amountCell.textContent = formatCurrency(Number(transaction.amount || 0));
+
+  const actionCell = document.createElement('td');
+  const actionGroup = document.createElement('div');
+  actionGroup.className = 'table-actions';
+
+  const editButton = document.createElement('button');
+  editButton.className = 'edit-transaction-btn';
+  editButton.dataset.id = transaction.id;
+  editButton.type = 'button';
+  editButton.textContent = 'Edit';
+  editButton.setAttribute('aria-label', 'Edit transaction');
+
+  const deleteButton = document.createElement('button');
+  deleteButton.className = 'delete-transaction-btn';
+  deleteButton.dataset.id = transaction.id;
+  deleteButton.type = 'button';
+  deleteButton.textContent = 'Delete';
+  deleteButton.setAttribute('aria-label', 'Delete transaction');
+
+  actionGroup.append(editButton, deleteButton);
+  actionCell.appendChild(actionGroup);
+  row.append(descriptionCell, typeCell, categoryCell, amountCell, actionCell);
+
+  return row;
 }
 
 /**
  * Create empty state HTML
  * @returns {string} - HTML for empty state
  */
-function createEmptyStateHTML() {
-  return `
-    <tr>
-      <td colspan="5">
-        <div class="empty-state">
-          <div class="empty-state-icon" aria-hidden="true">📭</div>
-          <div>No transactions found</div>
-        </div>
-      </td>
-    </tr>
-  `;
+function createEmptyStateRow(message = 'No transactions found') {
+  const row = document.createElement('tr');
+  const cell = document.createElement('td');
+  const empty = document.createElement('div');
+  const icon = document.createElement('div');
+  const text = document.createElement('div');
+
+  cell.colSpan = 5;
+  empty.className = 'empty-state';
+  icon.className = 'empty-state-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = '📭';
+  text.textContent = message;
+
+  empty.append(icon, text);
+  cell.appendChild(empty);
+  row.appendChild(cell);
+  return row;
 }
 
 /**
@@ -377,6 +465,273 @@ export function updateTotals(transactions, summaryMonth) {
     balanceEl.classList.toggle('balance-positive', balance >= 0);
     balanceEl.classList.toggle('balance-negative', balance < 0);
   }
+}
+
+/**
+ * Render category filter options.
+ * @param {Array} categories - Expense categories
+ */
+export function renderCategoryFilters(categories) {
+  const filterSelect = document.getElementById('filter-category');
+  const recurringSelect = document.getElementById('recurring-category');
+  [filterSelect, recurringSelect].forEach(select => {
+    if (!select) return;
+    const firstLabel = select.id === 'filter-category' ? 'All Categories' : 'Select Category';
+    const firstValue = select.id === 'filter-category' ? 'all' : '';
+    const previous = select.value;
+    select.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.value = firstValue;
+    defaultOption.textContent = firstLabel;
+    select.appendChild(defaultOption);
+    categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      select.appendChild(option);
+    });
+    if ([...select.options].some(option => option.value === previous)) {
+      select.value = previous;
+    }
+  });
+}
+
+/**
+ * Render category totals for a month.
+ * @param {Array} transactions - All transactions
+ * @param {Date} summaryMonth - Selected month
+ */
+export function renderCategoryBreakdown(transactions, summaryMonth) {
+  const container = document.getElementById('category-breakdown');
+  if (!container) return;
+
+  const monthTransactions = getTransactionsForMonth(transactions, summaryMonth)
+    .filter(transaction => transaction.type === 'expense');
+  const totals = getCategoryExpenseTotals(monthTransactions);
+  const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+  const totalExpense = entries.reduce((sum, [, amount]) => sum + amount, 0);
+
+  container.innerHTML = '';
+  if (entries.length === 0) {
+    container.appendChild(createPanelEmptyState('No expenses for this month'));
+    return;
+  }
+
+  entries.forEach(([category, amount]) => {
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    const label = document.createElement('div');
+    label.className = 'breakdown-label';
+    label.textContent = category || 'Uncategorized';
+    const amountEl = document.createElement('div');
+    amountEl.className = 'breakdown-amount';
+    amountEl.textContent = formatCurrency(amount);
+    const meter = document.createElement('div');
+    meter.className = 'progress-track';
+    const fill = document.createElement('div');
+    fill.className = 'progress-fill';
+    fill.style.width = `${Math.min((amount / totalExpense) * 100, 100)}%`;
+    meter.appendChild(fill);
+    row.append(label, amountEl, meter);
+    container.appendChild(row);
+  });
+}
+
+/**
+ * Render budget usage by category.
+ * @param {Array} transactions - All transactions
+ * @param {Date} summaryMonth - Selected month
+ * @param {Object} budgets - Category budget map
+ */
+export function renderBudgetSummary(transactions, summaryMonth, budgets = {}) {
+  const container = document.getElementById('budget-summary');
+  if (!container) return;
+
+  const monthExpenses = getTransactionsForMonth(transactions, summaryMonth)
+    .filter(transaction => transaction.type === 'expense');
+  const totals = getCategoryExpenseTotals(monthExpenses);
+  const budgetEntries = Object.entries(budgets)
+    .filter(([, budget]) => Number(budget) > 0)
+    .sort(([a], [b]) => a.localeCompare(b));
+
+  container.innerHTML = '';
+  if (budgetEntries.length === 0) {
+    container.appendChild(createPanelEmptyState('No budgets set'));
+    return;
+  }
+
+  budgetEntries.forEach(([category, budget]) => {
+    const spent = totals[category] || 0;
+    const budgetAmount = Number(budget);
+    const percent = budgetAmount > 0 ? Math.min((spent / budgetAmount) * 100, 100) : 0;
+    const row = document.createElement('div');
+    row.className = 'budget-row';
+    row.classList.toggle('over-budget', spent > budgetAmount);
+
+    const label = document.createElement('div');
+    label.className = 'budget-label';
+    label.textContent = category;
+    const amount = document.createElement('div');
+    amount.className = 'budget-amount';
+    amount.textContent = `${formatCurrency(spent)} / ${formatCurrency(budgetAmount)}`;
+    const meter = document.createElement('div');
+    meter.className = 'progress-track';
+    const fill = document.createElement('div');
+    fill.className = 'progress-fill';
+    fill.style.width = `${percent}%`;
+    meter.appendChild(fill);
+    row.append(label, amount, meter);
+    container.appendChild(row);
+  });
+}
+
+/**
+ * Render chart canvases for selected month.
+ * @param {Array} transactions - All transactions
+ * @param {Date} summaryMonth - Selected month
+ */
+export function renderCharts(transactions, summaryMonth) {
+  const monthTransactions = getTransactionsForMonth(transactions, summaryMonth);
+  renderIncomeExpenseChart(monthTransactions);
+  renderCategoryChart(monthTransactions.filter(transaction => transaction.type === 'expense'));
+}
+
+function getCategoryExpenseTotals(expenses) {
+  return expenses.reduce((totals, transaction) => {
+    const category = transaction.category || 'Uncategorized';
+    totals[category] = (totals[category] || 0) + Number(transaction.amount || 0);
+    return totals;
+  }, {});
+}
+
+function createPanelEmptyState(message) {
+  const empty = document.createElement('div');
+  empty.className = 'panel-empty-state';
+  empty.textContent = message;
+  return empty;
+}
+
+function setupCanvas(canvas) {
+  if (!canvas) return null;
+  const context = canvas.getContext('2d');
+  const rect = canvas.getBoundingClientRect();
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = Math.max(Math.floor(rect.width * ratio), 1);
+  canvas.height = Math.max(Math.floor(rect.height * ratio), 1);
+  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  context.clearRect(0, 0, rect.width, rect.height);
+  return { context, width: rect.width, height: rect.height };
+}
+
+function getCssColor(name, fallback) {
+  const value = getComputedStyle(document.body).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
+function renderIncomeExpenseChart(monthTransactions) {
+  const canvas = document.getElementById('income-expense-chart');
+  const setup = setupCanvas(canvas);
+  if (!setup) return;
+
+  const { context, width, height } = setup;
+  const income = monthTransactions
+    .filter(transaction => transaction.type === 'income')
+    .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+  const expense = monthTransactions
+    .filter(transaction => transaction.type === 'expense')
+    .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+
+  drawBarChart(context, width, height, [
+    { label: 'Income', value: income, color: getCssColor('--success', '#10b981') },
+    { label: 'Expenses', value: expense, color: getCssColor('--danger', '#ef4b5b') }
+  ]);
+}
+
+function renderCategoryChart(expenses) {
+  const canvas = document.getElementById('category-chart');
+  const setup = setupCanvas(canvas);
+  if (!setup) return;
+
+  const entries = Object.entries(getCategoryExpenseTotals(expenses))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  const colors = ['#5b6cea', '#2aa8a7', '#ef4b5b', '#f59e0b', '#8b5cf6'];
+  drawBarChart(setup.context, setup.width, setup.height, entries.map(([label, value], index) => ({
+    label,
+    value,
+    color: colors[index % colors.length]
+  })));
+}
+
+function drawBarChart(context, width, height, items) {
+  const textColor = getCssColor('--text', '#172b4d');
+  const mutedColor = getCssColor('--muted', '#576574');
+  const max = Math.max(...items.map(item => item.value), 0);
+  const padding = 32;
+  const chartHeight = height - 72;
+  const barAreaWidth = width - padding * 2;
+
+  context.font = '12px system-ui, sans-serif';
+  context.fillStyle = mutedColor;
+
+  if (max <= 0 || items.length === 0) {
+    context.textAlign = 'center';
+    context.fillText('No data for this month', width / 2, height / 2);
+    return;
+  }
+
+  const gap = 16;
+  const barWidth = Math.max((barAreaWidth - gap * (items.length - 1)) / items.length, 24);
+  items.forEach((item, index) => {
+    const x = padding + index * (barWidth + gap);
+    const barHeight = (item.value / max) * chartHeight;
+    const y = height - 42 - barHeight;
+
+    context.fillStyle = item.color;
+    fillRoundedRect(context, x, y, barWidth, barHeight, 8);
+
+    context.fillStyle = textColor;
+    context.textAlign = 'center';
+    context.fillText(formatCompactCurrency(item.value), x + barWidth / 2, y - 8);
+    context.fillStyle = mutedColor;
+    context.fillText(truncateLabel(item.label, 12), x + barWidth / 2, height - 16);
+  });
+}
+
+function formatCompactCurrency(value) {
+  return new Intl.NumberFormat(currencyConfig.locale, {
+    style: 'currency',
+    currency: currencyConfig.code,
+    notation: 'compact',
+    maximumFractionDigits: 1
+  }).format(value);
+}
+
+function fillRoundedRect(context, x, y, width, height, radius) {
+  if (typeof context.roundRect === 'function') {
+    context.beginPath();
+    context.roundRect(x, y, width, height, radius);
+    context.fill();
+    return;
+  }
+
+  const safeRadius = Math.min(radius, width / 2, height / 2);
+  context.beginPath();
+  context.moveTo(x + safeRadius, y);
+  context.lineTo(x + width - safeRadius, y);
+  context.quadraticCurveTo(x + width, y, x + width, y + safeRadius);
+  context.lineTo(x + width, y + height - safeRadius);
+  context.quadraticCurveTo(x + width, y + height, x + width - safeRadius, y + height);
+  context.lineTo(x + safeRadius, y + height);
+  context.quadraticCurveTo(x, y + height, x, y + height - safeRadius);
+  context.lineTo(x, y + safeRadius);
+  context.quadraticCurveTo(x, y, x + safeRadius, y);
+  context.fill();
+}
+
+function truncateLabel(label, maxLength) {
+  const text = String(label);
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}...` : text;
 }
 
 /**

@@ -4,241 +4,465 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="description" content="Personal Finance Tracker - Track income and expenses with ease" />
-  <meta name="theme-color" content="#5b6cea" />
+  <meta name="theme-color" content="#00a76f" />
   <title>Finance Tracker - Personal Finance Management</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="navbar" aria-label="Main navigation">
-    <div class="navbar-content">
-      <div class="navbar-left">
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">₹</div>
         <div>
-          <h1>💰 Finance Tracker</h1>
-          <p class="meta">Track income and expenses with a calm, cozy dashboard</p>
+          <h1>Finance Tracker</h1>
+          <p>Personal money dashboard</p>
         </div>
       </div>
-      <div class="navbar-user">
-        <span class="welcome-text">Welcome, <strong id="username-display">User</strong></span>
-        <details class="account-menu">
-          <summary aria-label="Open account menu">
-            <span class="account-menu-icon" aria-hidden="true">☰</span>
-          </summary>
-          <div class="button-group" role="toolbar" aria-label="User controls">
-            <button id="theme-toggle" class="theme-btn" aria-label="Toggle dark/light mode">
-              Dark Mode
-            </button>
-            <button id="categories-panel-toggle" class="manage-categories-btn" type="button" aria-expanded="false" aria-controls="categories-panel">
-              Categories
-            </button>
-            <button id="logout-button" class="logout-btn" aria-label="Logout from account">
-              Logout
-            </button>
-          </div>
-        </details>
+
+      <nav class="sidebar-nav">
+        <a href="#/overview" class="nav-item is-active" data-route="overview" aria-current="page">
+          <span aria-hidden="true">⌂</span>
+          <span>Overview</span>
+        </a>
+        <a href="#/add" class="nav-item" data-route="add">
+          <span aria-hidden="true">＋</span>
+          <span>Add</span>
+        </a>
+        <a href="#/transactions" class="nav-item" data-route="transactions">
+          <span aria-hidden="true">▦</span>
+          <span>Transactions</span>
+        </a>
+        <a href="#/categories" class="nav-item" data-route="categories">
+          <span aria-hidden="true">◫</span>
+          <span>Budgets</span>
+        </a>
+        <a href="#/recurring" class="nav-item" data-route="recurring">
+          <span aria-hidden="true">↻</span>
+          <span>Recurring</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <span class="avatar" aria-hidden="true">U</span>
+          <span>Welcome, <strong id="username-display">User</strong></span>
+        </div>
+        <div class="sidebar-actions">
+          <button id="theme-toggle" class="icon-action-btn" type="button" aria-label="Toggle dark/light mode">◐</button>
+          <button id="logout-button" class="icon-action-btn danger-icon" type="button" aria-label="Logout from account">⎋</button>
+        </div>
       </div>
+    </aside>
+
+    <div class="mobile-topbar">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">₹</div>
+        <div>
+          <h1>Finance Tracker</h1>
+          <p id="mobile-month-label">Overview</p>
+        </div>
+      </div>
+      <button id="mobile-theme-toggle" class="icon-action-btn" type="button" aria-label="Toggle dark/light mode">◐</button>
     </div>
+
+    <div class="content-shell">
+      <main id="app-main" class="container" tabindex="-1">
+        <div class="app-pages">
+          <section class="app-page is-active" data-page="overview" aria-labelledby="summary-title">
+            <div class="page-heading">
+              <p class="page-kicker">Dashboard</p>
+              <div class="page-title-row">
+                <div>
+                  <h2 id="summary-title">Overview</h2>
+                  <p class="page-subtitle">Month-level cash flow, budgets, and category signals.</p>
+                </div>
+                <div class="summary-controls">
+                  <button type="button" id="summary-prev-month" class="summary-nav" aria-label="Previous month">
+                    ←
+                  </button>
+                  <span id="summary-month-year" class="summary-month-display" aria-live="polite">
+                    January 2024
+                  </span>
+                  <input
+                    type="month"
+                    id="summary-month-picker"
+                    class="summary-month-picker"
+                    aria-label="Select month and year"
+                  />
+                  <button type="button" id="summary-next-month" class="summary-nav" aria-label="Next month">
+                    →
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <section class="totals" aria-labelledby="summary-title">
+              <article class="total-card">
+                <div class="total-card-label">Total Income</div>
+                <div class="total-card-amount" id="income-total" aria-live="polite">₹0.00</div>
+              </article>
+              <article class="total-card">
+                <div class="total-card-label">Total Expenses</div>
+                <div class="total-card-amount" id="expense-total" aria-live="polite">₹0.00</div>
+              </article>
+              <article class="total-card">
+                <div class="total-card-label">Balance</div>
+                <div class="total-card-amount" id="balance-total" aria-live="polite">₹0.00</div>
+              </article>
+            </section>
+
+            <div class="quick-actions" aria-label="Quick actions">
+              <a href="#/add" class="quick-action" data-route="add">
+                <span aria-hidden="true">＋</span>
+                <strong>Add Entry</strong>
+                <small>Record money movement</small>
+              </a>
+              <a href="#/transactions" class="quick-action" data-route="transactions">
+                <span aria-hidden="true">▦</span>
+                <strong>Review</strong>
+                <small>Filter and export</small>
+              </a>
+              <a href="#/categories" class="quick-action" data-route="categories">
+                <span aria-hidden="true">◫</span>
+                <strong>Budgets</strong>
+                <small>Tune category limits</small>
+              </a>
+            </div>
+
+            <section class="insights-grid" aria-label="Monthly insights">
+              <article class="card compact-card">
+                <h2>Expense Breakdown</h2>
+                <div id="category-breakdown" class="category-breakdown"></div>
+              </article>
+              <article class="card compact-card">
+                <h2>Budget Progress</h2>
+                <div id="budget-summary" class="budget-summary"></div>
+              </article>
+            </section>
+
+            <section class="card" aria-labelledby="charts-title">
+              <div class="section-header">
+                <h2 id="charts-title">Charts</h2>
+              </div>
+              <div class="charts-grid">
+                <div class="chart-panel">
+                  <h3>Income vs Expenses</h3>
+                  <canvas id="income-expense-chart" width="520" height="280" aria-label="Income versus expenses chart"></canvas>
+                </div>
+                <div class="chart-panel">
+                  <h3>Category Spend</h3>
+                  <canvas id="category-chart" width="520" height="280" aria-label="Category spending chart"></canvas>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <section class="app-page" data-page="add" aria-labelledby="form-title" hidden>
+            <div class="page-heading">
+              <p class="page-kicker">Transaction</p>
+              <h2 id="form-title">Add Transaction</h2>
+              <p class="page-subtitle">Capture income or spending with category and date.</p>
+            </div>
+
+            <section class="card" aria-labelledby="form-title">
+              <form id="transaction-form" novalidate>
+                <fieldset>
+                  <legend class="sr-only">Transaction Details</legend>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="description">Description</label>
+                      <input
+                        type="text"
+                        id="description"
+                        placeholder="e.g., Grocery, Salary"
+                        aria-required="true"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <fieldset>
+                        <legend>Type</legend>
+                        <div class="radio-row">
+                          <label class="radio-option">
+                            <input
+                              type="radio"
+                              name="transaction-type"
+                              value="expense"
+                              checked
+                              aria-label="Expense transaction"
+                            />
+                            <span>Expense</span>
+                          </label>
+                          <label class="radio-option">
+                            <input
+                              type="radio"
+                              name="transaction-type"
+                              value="income"
+                              aria-label="Income transaction"
+                            />
+                            <span>Income</span>
+                          </label>
+                        </div>
+                      </fieldset>
+                    </div>
+                    <div class="form-group" id="category-group" style="display: block;">
+                      <label for="category">Category</label>
+                      <select id="category" aria-required="true" required>
+                        <option value="">Select Category</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="amount">Amount</label>
+                      <input
+                        type="number"
+                        id="amount"
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                        aria-required="true"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-row-single">
+                    <div class="form-group">
+                      <label for="transaction-date">Date</label>
+                      <input
+                        type="date"
+                        id="transaction-date"
+                        aria-required="true"
+                        required
+                      />
+                    </div>
+                  </div>
+                </fieldset>
+
+                <div class="form-actions">
+                  <button type="submit" id="transaction-submit-btn" class="submit-btn">Add Transaction</button>
+                  <button type="button" id="cancel-edit-btn" class="secondary-action-btn" hidden>Cancel Edit</button>
+                </div>
+              </form>
+            </section>
+          </section>
+
+          <section class="app-page" data-page="transactions" aria-labelledby="calendar-title" hidden>
+            <div class="page-heading">
+              <p class="page-kicker">Ledger</p>
+              <h2 id="calendar-title">Transactions</h2>
+              <p class="page-subtitle">Browse the selected month, narrow the list, and export records.</p>
+            </div>
+
+            <section class="card" aria-labelledby="calendar-title">
+              <div class="transaction-tools" aria-label="Transaction filters">
+                <div class="form-group">
+                  <label for="filter-search">Search</label>
+                  <input type="search" id="filter-search" placeholder="Description or category" />
+                </div>
+                <div class="form-group">
+                  <label for="filter-type">Type</label>
+                  <select id="filter-type">
+                    <option value="all">All</option>
+                    <option value="expense">Expenses</option>
+                    <option value="income">Income</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="filter-category">Category</label>
+                  <select id="filter-category">
+                    <option value="all">All Categories</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="filter-min">Min Amount</label>
+                  <input type="number" id="filter-min" min="0" step="0.01" placeholder="0" />
+                </div>
+                <div class="form-group">
+                  <label for="filter-max">Max Amount</label>
+                  <input type="number" id="filter-max" min="0" step="0.01" placeholder="Any" />
+                </div>
+                <div class="form-group">
+                  <label for="filter-from-date">From Date</label>
+                  <input type="date" id="filter-from-date" />
+                </div>
+                <div class="form-group">
+                  <label for="filter-to-date">To Date</label>
+                  <input type="date" id="filter-to-date" />
+                </div>
+                <div class="tool-actions">
+                  <button type="button" id="clear-filters-btn" class="secondary-action-btn">Clear</button>
+                  <button type="button" id="export-csv-btn" class="secondary-action-btn">Export CSV</button>
+                </div>
+              </div>
+
+              <article class="calendar-container" aria-label="Month calendar">
+                <div class="calendar-weekdays">
+                  <div class="weekday" role="columnheader">Sun</div>
+                  <div class="weekday" role="columnheader">Mon</div>
+                  <div class="weekday" role="columnheader">Tue</div>
+                  <div class="weekday" role="columnheader">Wed</div>
+                  <div class="weekday" role="columnheader">Thu</div>
+                  <div class="weekday" role="columnheader">Fri</div>
+                  <div class="weekday" role="columnheader">Sat</div>
+                </div>
+                <div class="calendar-days" id="calendar-days"></div>
+              </article>
+
+              <article class="date-details-section" aria-labelledby="date-details-title">
+                <h3 id="date-details-title">
+                  Transactions for <span id="selected-date-display">Today</span>
+                </h3>
+                <div class="table-wrapper">
+                  <table class="date-transactions-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Description</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="date-transaction-table">
+                      <tr>
+                        <td colspan="5">
+                          <div class="empty-state">
+                            <div class="empty-state-icon" aria-hidden="true">□</div>
+                            <div>No transactions on this date</div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            </section>
+          </section>
+
+          <section id="categories-panel" class="app-page" data-page="categories" aria-labelledby="categories-title" hidden>
+            <div class="page-heading">
+              <p class="page-kicker">Planning</p>
+              <h2 id="categories-title">Budgets</h2>
+              <p class="page-subtitle">Keep categories and monthly limits in their own records.</p>
+            </div>
+
+            <section class="card categories-management" aria-labelledby="categories-title">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="new-category">New Category</label>
+                  <input
+                    type="text"
+                    id="new-category"
+                    placeholder="e.g., Personal, Education, Grocery"
+                  />
+                </div>
+                <button type="button" id="add-category-btn" class="submit-btn">Add Category</button>
+              </div>
+
+              <div class="categories-list">
+                <h3>Current Categories</h3>
+                <ul id="categories-ul" class="categories-ul"></ul>
+              </div>
+
+              <div class="budget-management">
+                <h3>Monthly Budgets</h3>
+                <div id="budget-fields" class="budget-fields"></div>
+                <button type="button" id="save-budgets-btn" class="submit-btn">Save Budgets</button>
+              </div>
+            </section>
+          </section>
+
+          <section id="recurring-panel" class="app-page" data-page="recurring" aria-labelledby="recurring-title" hidden>
+            <div class="page-heading">
+              <p class="page-kicker">Automation</p>
+              <h2 id="recurring-title">Recurring</h2>
+              <p class="page-subtitle">Prepare monthly entries and apply them to the selected month.</p>
+            </div>
+
+            <section class="card recurring-management" aria-labelledby="recurring-title">
+              <form id="recurring-form" novalidate>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="recurring-description">Description</label>
+                    <input type="text" id="recurring-description" placeholder="e.g., Salary, Rent" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="recurring-amount">Amount</label>
+                    <input type="number" id="recurring-amount" placeholder="0.00" step="0.01" min="0" required />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="recurring-type">Type</label>
+                    <select id="recurring-type" required>
+                      <option value="expense">Expense</option>
+                      <option value="income">Income</option>
+                    </select>
+                  </div>
+                  <div class="form-group" id="recurring-category-group">
+                    <label for="recurring-category">Category</label>
+                    <select id="recurring-category" required>
+                      <option value="">Select Category</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="recurring-day">Day of Month</label>
+                    <input type="number" id="recurring-day" min="1" max="31" value="1" required />
+                  </div>
+                </div>
+                <button type="submit" class="submit-btn">Add Recurring Transaction</button>
+              </form>
+
+              <div class="recurring-actions">
+                <button type="button" id="apply-recurring-btn" class="secondary-action-btn">Apply Recurring for Selected Month</button>
+              </div>
+
+              <div class="categories-list">
+                <h3>Active Recurring</h3>
+                <ul id="recurring-ul" class="categories-ul"></ul>
+              </div>
+            </section>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <a href="#/overview" class="bottom-nav-item is-active" data-route="overview" aria-current="page">
+      <span aria-hidden="true">⌂</span>
+      <span>Home</span>
+    </a>
+    <a href="#/add" class="bottom-nav-item" data-route="add">
+      <span aria-hidden="true">＋</span>
+      <span>Add</span>
+    </a>
+    <a href="#/transactions" class="bottom-nav-item" data-route="transactions">
+      <span aria-hidden="true">▦</span>
+      <span>List</span>
+    </a>
+    <a href="#/categories" class="bottom-nav-item" data-route="categories">
+      <span aria-hidden="true">◫</span>
+      <span>Budget</span>
+    </a>
+    <a href="#/recurring" class="bottom-nav-item" data-route="recurring">
+      <span aria-hidden="true">↻</span>
+      <span>Auto</span>
+    </a>
   </nav>
 
-  <div id="categories-overlay" class="inline-panel-overlay" hidden></div>
-  <aside id="categories-panel" class="inline-panel" aria-labelledby="categories-title" aria-hidden="true">
-    <div class="inline-panel-header">
-      <div>
-        <p class="panel-kicker">Expense Setup</p>
-        <h2 id="categories-title">Manage Expense Categories</h2>
-      </div>
-      <button type="button" id="categories-panel-close" class="panel-close-btn" aria-label="Close categories panel">×</button>
-    </div>
-    <div class="categories-management">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="new-category">New Category</label>
-          <input
-            type="text"
-            id="new-category"
-            placeholder="e.g., Personal, Education, Grocery"
-          />
-        </div>
-        <button type="button" id="add-category-btn" class="submit-btn">Add Category</button>
-      </div>
-      <div class="categories-list">
-        <h3>Current Categories</h3>
-        <ul id="categories-ul" class="categories-ul">
-          <!-- Categories will be populated here -->
-        </ul>
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <div id="confirm-modal" class="confirm-modal" hidden>
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h2 id="confirm-title">Confirm Action</h2>
+      <p id="confirm-message"></p>
+      <div class="confirm-actions">
+        <button type="button" id="confirm-cancel-btn" class="secondary-action-btn">Cancel</button>
+        <button type="button" id="confirm-ok-btn" class="danger-action-btn">Confirm</button>
       </div>
     </div>
-  </aside>
-
-  <main class="container">
-    <!-- Summary Month Selector -->
-    <section class="summary-header" aria-labelledby="summary-title">
-      <h2 id="summary-title">Monthly Summary</h2>
-      <div class="summary-controls">
-        <button type="button" id="summary-prev-month" class="summary-nav" aria-label="Previous month">
-          ←
-        </button>
-        <span id="summary-month-year" class="summary-month-display" aria-live="polite">
-          January 2024
-        </span>
-        <input 
-          type="month" 
-          id="summary-month-picker" 
-          class="summary-month-picker"
-          aria-label="Select month and year"
-        />
-        <button type="button" id="summary-next-month" class="summary-nav" aria-label="Next month">
-          →
-        </button>
-      </div>
-    </section>
-
-    <!-- Summary Cards -->
-    <section class="totals" aria-labelledby="summary-title">
-      <article class="total-card">
-        <div class="total-card-label">Total Income</div>
-        <div class="total-card-amount" id="income-total" aria-live="polite">₹0.00</div>
-      </article>
-      <article class="total-card">
-        <div class="total-card-label">Total Expenses</div>
-        <div class="total-card-amount" id="expense-total" aria-live="polite">₹0.00</div>
-      </article>
-      <article class="total-card">
-        <div class="total-card-label">Balance</div>
-        <div class="total-card-amount" id="balance-total" aria-live="polite">₹0.00</div>
-      </article>
-    </section>
-
-    <!-- Add Transaction Form -->
-    <section class="card" aria-labelledby="form-title">
-      <h2 id="form-title">Add New Transaction</h2>
-      <form id="transaction-form" novalidate>
-        <fieldset>
-          <legend class="sr-only">Transaction Details</legend>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="description">Description</label>
-              <input 
-                type="text" 
-                id="description" 
-                placeholder="e.g., Grocery, Salary"
-                aria-required="true"
-                required 
-              />
-            </div>
-            <div class="form-group">
-              <fieldset>
-                <legend>Type</legend>
-                <div class="radio-row">
-                  <label class="radio-option">
-                    <input 
-                      type="radio" 
-                      name="transaction-type" 
-                      value="expense"
-                      checked
-                      aria-label="Expense transaction"
-                    />
-                    <span>Expense</span>
-                  </label>
-                  <label class="radio-option">
-                    <input 
-                      type="radio" 
-                      name="transaction-type" 
-                      value="income"
-                      aria-label="Income transaction"
-                    />
-                    <span>Income</span>
-                  </label>
-                </div>
-              </fieldset>
-            </div>
-            <div class="form-group" id="category-group" style="display: block;">
-              <label for="category">Category</label>
-              <select id="category" aria-required="true" required>
-                <option value="">Select Category</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="amount">Amount</label>
-              <input 
-                type="number" 
-                id="amount" 
-                placeholder="0.00" 
-                step="0.01" 
-                min="0"
-                aria-required="true"
-                required 
-              />
-            </div>
-          </div>
-
-          <div class="form-row-single">
-            <div class="form-group">
-              <label for="transaction-date">Date</label>
-              <input 
-                type="date" 
-                id="transaction-date"
-                aria-required="true"
-                required 
-              />
-            </div>
-          </div>
-        </fieldset>
-
-        <button type="submit" class="submit-btn">Add Transaction</button>
-      </form>
-    </section>
-
-    <!-- Calendar & Transaction History -->
-    <section class="card" aria-labelledby="calendar-title">
-      <h2 id="calendar-title">📅 Transaction Calendar</h2>
-      
-      <!-- Calendar Grid -->
-      <article class="calendar-container" aria-label="Month calendar">
-        <div class="calendar-weekdays">
-          <div class="weekday" role="columnheader">Sun</div>
-          <div class="weekday" role="columnheader">Mon</div>
-          <div class="weekday" role="columnheader">Tue</div>
-          <div class="weekday" role="columnheader">Wed</div>
-          <div class="weekday" role="columnheader">Thu</div>
-          <div class="weekday" role="columnheader">Fri</div>
-          <div class="weekday" role="columnheader">Sat</div>
-        </div>
-        <div class="calendar-days" id="calendar-days"></div>
-      </article>
-
-      <!-- Date Details View -->
-      <article class="date-details-section" aria-labelledby="date-details-title">
-        <h3 id="date-details-title">
-          Transactions for <span id="selected-date-display">Today</span>
-        </h3>
-        <div class="table-wrapper">
-          <table class="date-transactions-table">
-            <thead>
-              <tr>
-                <th scope="col">Description</th>
-                <th scope="col">Type</th>
-                <th scope="col">Category</th>
-                <th scope="col">Amount</th>
-                <th scope="col">Action</th>
-              </tr>
-            </thead>
-            <tbody id="date-transaction-table">
-              <tr>
-                <td colspan="5">
-                  <div class="empty-state">
-                    <div class="empty-state-icon" aria-hidden="true">📭</div>
-                    <div>No transactions on this date</div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </article>
-    </section>
-  </main>
+  </div>
 
   <script type="module" src="./tracker-app.js"></script>
 </body>
