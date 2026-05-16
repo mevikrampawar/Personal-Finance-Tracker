@@ -651,7 +651,7 @@ body.dark .total-card {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(var(--field-min), 1fr));
   gap: var(--content-gap);
-  align-items: end;
+  align-items: start;
 }
 
 .form-row-single {
@@ -670,9 +670,8 @@ body.dark .total-card {
 .radio-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2px;
+  gap: 0;
   align-items: center;
-  min-height: var(--control-height);
   padding: 3px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -685,7 +684,7 @@ body.dark .total-card {
   align-items: center;
   justify-content: center;
   gap: var(--spacing-xs);
-  min-height: var(--control-height);
+  min-height: calc(var(--control-height) - 6px);
   padding: 0 var(--spacing-md);
   border-radius: calc(var(--radius-md) - 3px);
   border: 0;
@@ -721,6 +720,8 @@ body.dark .total-card {
 }
 
 .radio-option span {
+  display: flex;
+  align-items: center;
   user-select: none;
 }
 
@@ -1157,10 +1158,10 @@ tr:hover {
 
   .radio-option {
     min-width: 0;
-    min-height: var(--control-height);
+    min-height: calc(var(--control-height) - 6px); 
     padding: 0 var(--spacing-sm);
     font-size: 0.9rem;
-    border-radius: var(--radius-md);
+    border-radius: calc(var(--radius-md) - 3px);
   }
 
   .summary-header {
