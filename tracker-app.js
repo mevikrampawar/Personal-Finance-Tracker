@@ -1298,8 +1298,9 @@ function setupEventListeners() {
   const categoriesUl = document.getElementById('categories-ul');
   if (categoriesUl) {
     categoriesUl.addEventListener('click', (event) => {
-      if (event.target.classList.contains('delete-category')) {
-        const index = parseInt(event.target.dataset.index);
+      const button = event.target.closest('.delete-category');
+      if (button) {
+        const index = parseInt(button.dataset.index);
         deleteCategory(index);
       }
     });
