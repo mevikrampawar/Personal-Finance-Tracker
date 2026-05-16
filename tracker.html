@@ -6,6 +6,8 @@
   <meta name="description" content="Personal Finance Tracker - Track income and expenses with ease" />
   <meta name="theme-color" content="#00a76f" />
   <title>Finance Tracker - Personal Finance Management</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/font/lucide.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -21,23 +23,23 @@
 
       <nav class="sidebar-nav">
         <a href="#/overview" class="nav-item is-active" data-route="overview" aria-current="page">
-          <span aria-hidden="true">⌂</span>
+          <i class="bi bi-grid-1x2-fill" aria-hidden="true"></i>
           <span>Overview</span>
         </a>
         <a href="#/add" class="nav-item" data-route="add">
-          <span aria-hidden="true">＋</span>
+          <i class="bi bi-plus-circle-fill" aria-hidden="true"></i>
           <span>Add</span>
         </a>
         <a href="#/transactions" class="nav-item" data-route="transactions">
-          <span aria-hidden="true">▦</span>
+          <i class="bi bi-list-ul" aria-hidden="true"></i>
           <span>Transactions</span>
         </a>
         <a href="#/categories" class="nav-item" data-route="categories">
-          <span aria-hidden="true">◫</span>
+          <i class="bi bi-wallet2" aria-hidden="true"></i>
           <span>Budgets</span>
         </a>
         <a href="#/recurring" class="nav-item" data-route="recurring">
-          <span aria-hidden="true">↻</span>
+          <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
           <span>Recurring</span>
         </a>
       </nav>
@@ -48,8 +50,11 @@
           <span>Welcome, <strong id="username-display">User</strong></span>
         </div>
         <div class="sidebar-actions">
-          <button id="theme-toggle" class="icon-action-btn galaxy-theme-toggle" type="button" aria-label="Toggle dark/light mode"></button>
+          <button id="theme-toggle" class="icon-action-btn galaxy-theme-toggle" type="button" aria-label="Toggle dark/light mode">
+            <i class="lucide lucide-sun-moon theme-switch-track" aria-hidden="true"></i>
+          </button>
           <button id="logout-button" class="icon-action-btn danger-icon galaxy-logout-btn" type="button" aria-label="Logout from account">
+            <i class="lucide lucide-log-out" aria-hidden="true"></i>
             <span class="logout-door" aria-hidden="true"></span>
             <span class="logout-arrow" aria-hidden="true"></span>
           </button>
@@ -65,7 +70,9 @@
           <p id="mobile-month-label">Overview</p>
         </div>
       </div>
-      <button id="mobile-theme-toggle" class="icon-action-btn galaxy-theme-toggle" type="button" aria-label="Toggle dark/light mode"></button>
+      <button id="mobile-theme-toggle" class="icon-action-btn galaxy-theme-toggle" type="button" aria-label="Toggle dark/light mode">
+        <i class="lucide lucide-sun-moon theme-switch-track" aria-hidden="true"></i>
+      </button>
     </div>
 
     <div class="content-shell">
@@ -434,23 +441,23 @@
 
   <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
     <a href="#/overview" class="bottom-nav-item is-active" data-route="overview" aria-current="page">
-      <span aria-hidden="true">⌂</span>
+      <i class="bi bi-grid-1x2-fill" aria-hidden="true"></i>
       <span>Home</span>
     </a>
     <a href="#/add" class="bottom-nav-item" data-route="add">
-      <span aria-hidden="true">＋</span>
+      <i class="bi bi-plus-circle-fill" aria-hidden="true"></i>
       <span>Add</span>
     </a>
     <a href="#/transactions" class="bottom-nav-item" data-route="transactions">
-      <span aria-hidden="true">▦</span>
+      <i class="bi bi-list-ul" aria-hidden="true"></i>
       <span>List</span>
     </a>
     <a href="#/categories" class="bottom-nav-item" data-route="categories">
-      <span aria-hidden="true">◫</span>
+      <i class="bi bi-wallet2" aria-hidden="true"></i>
       <span>Budget</span>
     </a>
     <a href="#/recurring" class="bottom-nav-item" data-route="recurring">
-      <span aria-hidden="true">↻</span>
+      <i class="bi bi-arrow-repeat" aria-hidden="true"></i>
       <span>Auto</span>
     </a>
   </nav>
