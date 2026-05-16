@@ -45,6 +45,7 @@ const appState = {
   categoryRecords: [],
   categories: [],
   categoryBudgets: {},
+  categoryStorage: 'subcollection',
   recurringTransactions: [],
   unsubscribe: null,
   categoryUnsubscribe: null,
@@ -239,19 +240,24 @@ function loadCategories() {
   }
 
   appState.categoryUnsubscribe = onSnapshot(q, async (snapshot) => {
+    appState.categoryStorage = 'subcollection';
     if (snapshot.empty && !migrationChecked) {
       migrationChecked = true;
       let migrated = false;
       try {
         migrated = await migrateLegacyCategories(categoriesRef);
       } catch (error) {
+        if (isPermissionDenied(error)) {
+          loadLegacyCategories('Category subcollection writes are blocked by Firestore rules. Using user-profile category storage instead.');
+          return;
+        }
         handleError('Unable to prepare category records', error);
         return;
       }
       if (migrated) return;
     }
 
-    appState.categoryRecords = snapshot.docs
+    const records = snapshot.docs
       .map(categoryDoc => {
         const data = categoryDoc.data();
         const name = String(data.name || '').trim();
@@ -262,22 +268,83 @@ function loadCategories() {
         };
       })
       .filter(category => category.name);
-    appState.categories = appState.categoryRecords.map(category => category.name);
-    appState.categoryBudgets = appState.categoryRecords.reduce((budgets, category) => {
-      if (category.monthlyBudget > 0) {
-        budgets[category.name] = category.monthlyBudget;
-      }
-      return budgets;
-    }, {});
-
-    updateCategoryDropdown();
-    renderCategoriesList();
-    renderBudgetFields();
-    renderCategoryFilters(appState.categories);
-    refreshDashboard();
+    applyCategoryRecords(records);
   }, (error) => {
+    if (isPermissionDenied(error)) {
+      loadLegacyCategories('Category subcollection reads are blocked by Firestore rules. Using user-profile category storage instead.');
+      return;
+    }
     handleError('Unable to load categories', error);
   });
+}
+
+function loadLegacyCategories(reason) {
+  if (!appState.currentUser) return;
+
+  const userRef = doc(db, 'users', appState.currentUser.uid);
+  appState.categoryStorage = 'legacy';
+
+  if (appState.categoryUnsubscribe) {
+    appState.categoryUnsubscribe();
+  }
+
+  if (reason) {
+    console.warn(reason);
+  }
+
+  appState.categoryUnsubscribe = onSnapshot(userRef, async (snapshot) => {
+    const userData = snapshot.exists() ? snapshot.data() : {};
+    const categories = Array.isArray(userData.expenseCategories)
+      ? userData.expenseCategories
+      : defaultCategories;
+    const budgets = userData.categoryBudgets || {};
+    const records = buildLegacyCategoryRecords(categories, budgets);
+
+    applyCategoryRecords(records);
+
+    if (!snapshot.exists()) {
+      try {
+        await saveLegacyCategoryState(records);
+      } catch (error) {
+        handleError('Unable to prepare default categories', error);
+      }
+    }
+  }, (error) => {
+    handleError('Unable to load categories from user profile', error);
+  });
+}
+
+function buildLegacyCategoryRecords(categories, budgets = {}) {
+  return [...new Set(
+    categories
+      .map(category => String(category || '').trim())
+      .filter(Boolean)
+  )].map((name, index) => ({
+    id: `legacy-${index}`,
+    name,
+    monthlyBudget: Number(budgets[name] || 0)
+  }));
+}
+
+function applyCategoryRecords(records) {
+  appState.categoryRecords = records;
+  appState.categories = records.map(category => category.name);
+  appState.categoryBudgets = records.reduce((budgets, category) => {
+    if (category.monthlyBudget > 0) {
+      budgets[category.name] = category.monthlyBudget;
+    }
+    return budgets;
+  }, {});
+
+  updateCategoryDropdown();
+  renderCategoriesList();
+  renderBudgetFields();
+  renderCategoryFilters(appState.categories);
+  refreshDashboard();
+}
+
+function isPermissionDenied(error) {
+  return error?.code === 'permission-denied' || /permission/i.test(error?.message || '');
 }
 
 /**
@@ -317,6 +384,25 @@ async function migrateLegacyCategories(categoriesRef) {
   }, { merge: true });
 
   return true;
+}
+
+async function saveLegacyCategoryState(records = appState.categoryRecords) {
+  const categories = records.map(category => category.name);
+  const categoryBudgets = records.reduce((budgets, category) => {
+    if (Number(category.monthlyBudget) > 0) {
+      budgets[category.name] = Number(category.monthlyBudget);
+    }
+    return budgets;
+  }, {});
+
+  const userRef = doc(db, 'users', appState.currentUser.uid);
+  await setDoc(userRef, {
+    expenseCategories: categories,
+    categoryBudgets,
+    categoryStorage: 'legacy',
+    schemaVersion: 1,
+    updatedAt: new Date()
+  }, { merge: true });
 }
 
 /**
@@ -531,6 +617,22 @@ async function addCategory() {
   }
 
   try {
+    if (appState.categoryStorage === 'legacy') {
+      const records = [
+        ...appState.categoryRecords,
+        {
+          id: `legacy-${appState.categoryRecords.length}`,
+          name: newCategory,
+          monthlyBudget: 0
+        }
+      ];
+      applyCategoryRecords(records);
+      await saveLegacyCategoryState(records);
+      newCategoryInput.value = '';
+      showNotification('Category added successfully', 'success');
+      return;
+    }
+
     const categoriesRef = collection(db, 'users', appState.currentUser.uid, 'categories');
     await addDoc(categoriesRef, {
       name: newCategory,
@@ -541,6 +643,11 @@ async function addCategory() {
     newCategoryInput.value = '';
     showNotification('Category added successfully', 'success');
   } catch (error) {
+    if (isPermissionDenied(error)) {
+      loadLegacyCategories('Category subcollection writes are blocked by Firestore rules. Retrying with user-profile category storage.');
+      window.setTimeout(addCategory, 0);
+      return;
+    }
     handleError('Failed to add category', error);
   }
 }
@@ -554,10 +661,23 @@ async function deleteCategory(index) {
   const categoryToDelete = appState.categoryRecords[index];
   if (await confirmAction(`Delete the "${categoryToDelete.name}" category? Existing transactions will keep their saved category name.`)) {
     try {
+      if (appState.categoryStorage === 'legacy') {
+        const records = appState.categoryRecords.filter((_, recordIndex) => recordIndex !== index);
+        applyCategoryRecords(records);
+        await saveLegacyCategoryState(records);
+        showNotification('Category deleted successfully', 'success');
+        return;
+      }
+
       const categoryRef = doc(db, 'users', appState.currentUser.uid, 'categories', categoryToDelete.id);
       await deleteDoc(categoryRef);
       showNotification('Category deleted successfully', 'success');
     } catch (error) {
+      if (isPermissionDenied(error)) {
+        loadLegacyCategories('Category subcollection deletes are blocked by Firestore rules. Using user-profile category storage instead.');
+        showNotification('Category permissions changed. Please try deleting again.', 'error');
+        return;
+      }
       handleError('Failed to delete category', error);
     }
   }
@@ -590,11 +710,27 @@ async function saveBudgets() {
   });
 
   try {
+    if (appState.categoryStorage === 'legacy') {
+      const records = appState.categoryRecords.map(category => ({
+        ...category,
+        monthlyBudget: Number(nextBudgets[category.name] || 0)
+      }));
+      applyCategoryRecords(records);
+      await saveLegacyCategoryState(records);
+      showNotification('Budgets saved', 'success');
+      return;
+    }
+
     await Promise.all(updates);
     appState.categoryBudgets = nextBudgets;
     renderBudgetSummary(appState.transactions, appState.summaryMonth, appState.categoryBudgets);
     showNotification('Budgets saved', 'success');
   } catch (error) {
+    if (isPermissionDenied(error)) {
+      loadLegacyCategories('Category subcollection updates are blocked by Firestore rules. Retrying budgets with user-profile category storage.');
+      window.setTimeout(saveBudgets, 0);
+      return;
+    }
     handleError('Failed to save budgets', error);
   }
 }
