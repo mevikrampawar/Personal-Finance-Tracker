@@ -9,7 +9,10 @@
   <link rel="stylesheet" href="styles.css" />
   <style>
     body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background:
+        radial-gradient(circle at top left, rgba(45, 212, 191, 0.2), transparent 26rem),
+        radial-gradient(circle at 90% 15%, rgba(59, 130, 246, 0.16), transparent 24rem),
+        var(--bg);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -18,9 +21,10 @@
     }
 
     .login-page {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      background: var(--surface-raised);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-xl);
       padding: 40px;
       max-width: 400px;
       width: 100%;
@@ -28,14 +32,14 @@
 
     .login-page h1 {
       text-align: center;
-      color: #2a4d7f;
+      color: var(--text);
       margin: 0 0 10px;
       font-size: 1.8rem;
     }
 
     .login-subtitle {
       text-align: center;
-      color: #666;
+      color: var(--muted);
       margin-bottom: 30px;
       font-size: 0.95rem;
     }
@@ -49,49 +53,52 @@
     .login-form button {
       width: 100%;
       padding: 12px;
-      background: #667eea;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
       color: white;
-      border: none;
-      border-radius: 8px;
+      border: 2px solid color-mix(in srgb, var(--primary) 60%, var(--border));
+      border-radius: var(--radius-md);
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.3s ease;
+      box-shadow: 0 5px 0 rgba(24, 34, 48, 0.14);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
     }
 
     .login-form button:hover {
-      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 rgba(24, 34, 48, 0.12);
     }
 
     .login-form button:active {
-      transform: scale(0.98);
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 rgba(24, 34, 48, 0.18);
     }
 
     #message {
       margin-top: 20px;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: var(--radius-md);
       text-align: center;
       display: none;
       font-weight: 500;
     }
 
     #message.error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
+      background: var(--danger-light);
+      color: var(--danger);
+      border: 1px solid var(--danger-lighter);
     }
 
     #message.success {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
+      background: var(--primary-light);
+      color: var(--primary-strong);
+      border: 1px solid var(--primary);
     }
 
     .loading {
       display: none;
       text-align: center;
-      color: #666;
+      color: var(--muted);
       font-size: 0.9rem;
     }
 

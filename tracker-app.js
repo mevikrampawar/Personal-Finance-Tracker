@@ -1407,6 +1407,7 @@ function setRoute(route, options = {}) {
 
     if (focusMain) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.getElementById('app-main')?.scrollTo({ top: 0, behavior: 'smooth' });
       document.getElementById('app-main')?.focus({ preventScroll: true });
     }
   };
