@@ -546,11 +546,11 @@ function renderCategoriesList() {
     const label = document.createElement('span');
     label.textContent = category.name;
     const button = document.createElement('button');
-    button.className = 'delete-category';
+    button.className = 'delete-category galaxy-delete-btn';
     button.dataset.index = String(index);
     button.dataset.id = category.id;
     button.type = 'button';
-    button.textContent = '×';
+    button.innerHTML = '<span class="delete-lid" aria-hidden="true"></span><span class="delete-can" aria-hidden="true"></span>';
     button.setAttribute('aria-label', `Delete ${category.name} category`);
     li.append(label, button);
     categoriesUl.appendChild(li);
@@ -1055,10 +1055,10 @@ function renderRecurringList() {
     const label = document.createElement('span');
     label.textContent = `${item.description} · ${item.type} · ${formatCurrency(Number(item.amount || 0))} · day ${item.dayOfMonth}`;
     const button = document.createElement('button');
-    button.className = 'delete-recurring';
+    button.className = 'delete-recurring galaxy-delete-btn';
     button.dataset.id = item.id;
     button.type = 'button';
-    button.textContent = '×';
+    button.innerHTML = '<span class="delete-lid" aria-hidden="true"></span><span class="delete-can" aria-hidden="true"></span>';
     button.setAttribute('aria-label', `Delete ${item.description} recurring transaction`);
     li.append(label, button);
     list.appendChild(li);
@@ -1179,7 +1179,15 @@ function showNotification(message, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  toast.textContent = message;
+  toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  const icon = document.createElement('span');
+  icon.className = 'toast-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = type === 'success' ? 'OK' : type === 'error' ? '!' : 'i';
+  const text = document.createElement('span');
+  text.className = 'toast-message';
+  text.textContent = message;
+  toast.append(icon, text);
   container.appendChild(toast);
   window.setTimeout(() => {
     toast.classList.add('is-hiding');

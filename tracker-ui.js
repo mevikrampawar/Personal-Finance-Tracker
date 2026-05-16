@@ -23,7 +23,16 @@ export function setTheme(theme) {
     document.getElementById('mobile-theme-toggle')
   ].filter(Boolean);
   buttons.forEach(button => {
-    button.textContent = theme === 'dark' ? '☀' : '◐';
+    button.setAttribute('aria-pressed', String(theme === 'dark'));
+    button.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+    if (!button.querySelector('.theme-switch-track')) {
+      button.innerHTML = `
+        <span class="theme-switch-track" aria-hidden="true">
+          <span class="theme-switch-orbit"></span>
+          <span class="theme-switch-thumb"></span>
+        </span>
+      `;
+    }
   });
   localStorage.setItem('finance-theme', theme);
 }
@@ -402,7 +411,7 @@ function createTransactionRow(transaction, showDate = false) {
   deleteButton.className = 'delete-transaction-btn';
   deleteButton.dataset.id = transaction.id;
   deleteButton.type = 'button';
-  deleteButton.textContent = 'Delete';
+  deleteButton.innerHTML = '<span class="delete-lid" aria-hidden="true"></span><span class="delete-can" aria-hidden="true"></span><span class="delete-label">Delete</span>';
   deleteButton.setAttribute('aria-label', 'Delete transaction');
 
   actionGroup.append(editButton, deleteButton);
