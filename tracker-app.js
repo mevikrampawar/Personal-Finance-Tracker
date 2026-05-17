@@ -1435,6 +1435,9 @@ function setupRouting() {
       if (!route || !routeConfig[route]) return;
 
       event.preventDefault();
+      if (route === 'add' && appState.editingTransactionId) {
+        resetTransactionForm();
+      }
       if (route === appState.activeRoute) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
