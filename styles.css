@@ -7460,3 +7460,290 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     font-size: 0.82rem !important;
   }
 }
+
+/* ==================== Date Picker and Mobile Form Alignment Fixes ==================== */
+
+#transaction-form,
+#transaction-form fieldset,
+#transaction-form .form-row,
+#transaction-form .form-row-single,
+#transaction-form .form-group,
+.transaction-tools,
+.transaction-tools .form-group {
+  min-width: 0 !important;
+}
+
+#transaction-form .form-row-single {
+  width: 100% !important;
+  grid-template-columns: minmax(0, 340px) !important;
+}
+
+#transaction-form input,
+#transaction-form select,
+#transaction-form .radio-row,
+#transaction-form .cashflow-switch,
+.transaction-tools input,
+.transaction-tools select:not(.visually-managed-select) {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+#transaction-form .cashflow-switch,
+.transaction-tools .type-filter-switch {
+  max-inline-size: none !important;
+}
+
+.summary-month-display {
+  display: none !important;
+}
+
+.summary-controls {
+  overflow: visible !important;
+  grid-template-columns: 44px minmax(11rem, 13.5rem) 44px !important;
+}
+
+.summary-month-picker {
+  position: relative !important;
+  z-index: 1 !important;
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  padding: 0 12px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 999px !important;
+  background: var(--glass-input, var(--surface-strong)) !important;
+  color: var(--text) !important;
+  -webkit-text-fill-color: currentColor !important;
+  caret-color: auto !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  -moz-appearance: auto !important;
+  cursor: pointer !important;
+  color-scheme: light !important;
+}
+
+body.dark .summary-month-picker,
+[data-theme="dark"] .summary-month-picker {
+  color-scheme: dark !important;
+}
+
+.summary-month-picker:focus,
+.summary-month-picker:focus-visible {
+  border-color: rgba(10, 132, 255, 0.82) !important;
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.18) !important;
+  outline: none !important;
+}
+
+body.dark .summary-month-picker:focus,
+body.dark .summary-month-picker:focus-visible,
+[data-theme="dark"] .summary-month-picker:focus,
+[data-theme="dark"] .summary-month-picker:focus-visible {
+  box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.26) !important;
+}
+
+input[type="date"] {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  padding: 0 12px 0 14px !important;
+  background-image: none !important;
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  -moz-appearance: auto !important;
+}
+
+input[type="date"]::-webkit-date-and-time-value,
+input[type="date"]::-webkit-datetime-edit,
+.summary-month-picker::-webkit-date-and-time-value,
+.summary-month-picker::-webkit-datetime-edit {
+  min-width: 0 !important;
+  text-align: left !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+.summary-month-picker::-webkit-calendar-picker-indicator {
+  position: static !important;
+  inset: auto !important;
+  width: 24px !important;
+  height: 24px !important;
+  margin: 0 !important;
+  padding: 2px !important;
+  background: revert !important;
+  cursor: pointer !important;
+  opacity: 0.78 !important;
+}
+
+body.dark input[type="date"]::-webkit-calendar-picker-indicator,
+body.dark .summary-month-picker::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] .summary-month-picker::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.15) !important;
+  opacity: 0.88 !important;
+}
+
+@media (max-width: 700px) {
+  html,
+  body,
+  .app-shell,
+  .content-shell,
+  .container,
+  .app-pages,
+  .app-page {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .app-shell {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .app-shell,
+  .content-shell,
+  .container {
+    inline-size: 100vw !important;
+    max-inline-size: 100vw !important;
+  }
+
+  .container {
+    box-sizing: border-box !important;
+  }
+
+  .page-title-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .page-title-row > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #transaction-form .form-row,
+  #transaction-form .form-row-single {
+    width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  #transaction-form .form-row-single {
+    margin-block: 14px 16px !important;
+  }
+
+  #transaction-form .form-actions {
+    margin-top: 14px !important;
+  }
+
+  #transaction-form .cashflow-switch {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    inline-size: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  #transaction-form .cashflow-option {
+    min-width: 0 !important;
+    padding-inline: 8px !important;
+  }
+
+  #transaction-form .cashflow-option span {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .summary-controls {
+    width: 100% !important;
+    max-width: 100% !important;
+    grid-template-columns: 42px minmax(0, 1fr) 42px !important;
+  }
+
+  .summary-nav {
+    inline-size: 42px !important;
+    block-size: 42px !important;
+    min-inline-size: 42px !important;
+    min-block-size: 42px !important;
+  }
+
+  .summary-month-picker {
+    height: 42px !important;
+    min-height: 42px !important;
+    font-size: 0.94rem !important;
+    padding-inline: 10px !important;
+  }
+
+  .transaction-tools {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 14px !important;
+    gap: 14px !important;
+  }
+
+  .transaction-tools .form-group,
+  .transaction-tools .filter-type-group {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .transaction-tools .type-filter-switch {
+    inline-size: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .transaction-tools .tool-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-content: stretch !important;
+  }
+
+  .transaction-tools .tool-actions .secondary-action-btn {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 420px) {
+  #transaction-form .cashflow-option,
+  .transaction-tools .cashflow-choice {
+    gap: 5px !important;
+    padding-inline: 5px !important;
+  }
+
+  #transaction-form .cashflow-option span,
+  .transaction-tools .cashflow-choice span {
+    font-size: 0.8rem !important;
+  }
+
+  #transaction-form .cashflow-option > i,
+  .transaction-tools .cashflow-choice > i {
+    inline-size: 15px !important;
+    block-size: 15px !important;
+    font-size: 0.86rem !important;
+  }
+}
