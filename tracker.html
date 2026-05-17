@@ -72,13 +72,18 @@
           <p id="mobile-month-label">Overview</p>
         </div>
       </div>
-      <button id="mobile-theme-toggle" class="icon-action-btn galaxy-theme-toggle" type="button" aria-label="Toggle dark/light mode">
-        <span class="theme-switch-track" aria-hidden="true">
-          <span class="theme-switch-icon theme-switch-sun"><i class="bi bi-sun-fill" aria-hidden="true"></i></span>
-          <span class="theme-switch-icon theme-switch-moon"><i class="bi bi-moon-stars-fill" aria-hidden="true"></i></span>
-          <span class="theme-switch-thumb"></span>
-        </span>
-      </button>
+      <div class="mobile-topbar-actions" aria-label="Account actions">
+        <button id="mobile-logout-button" class="icon-action-btn danger-icon galaxy-logout-btn mobile-logout-button" type="button" aria-label="Logout from account" title="Logout">
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+        </button>
+        <button id="mobile-theme-toggle" class="icon-action-btn galaxy-theme-toggle" type="button" aria-label="Toggle dark/light mode">
+          <span class="theme-switch-track" aria-hidden="true">
+            <span class="theme-switch-icon theme-switch-sun"><i class="bi bi-sun-fill" aria-hidden="true"></i></span>
+            <span class="theme-switch-icon theme-switch-moon"><i class="bi bi-moon-stars-fill" aria-hidden="true"></i></span>
+            <span class="theme-switch-thumb"></span>
+          </span>
+        </button>
+      </div>
     </div>
 
     <div class="content-shell">

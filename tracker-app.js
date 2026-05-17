@@ -917,6 +917,19 @@ function handleMonthPickerChange(event) {
   updateSummaryMonthDisplay();
 }
 
+function openNativePicker(input) {
+  if (!input) return;
+
+  input.focus({ preventScroll: true });
+  if (typeof input.showPicker === 'function') {
+    try {
+      input.showPicker();
+    } catch (error) {
+      // Browsers only allow showPicker during direct user activation.
+    }
+  }
+}
+
 /**
  * Handle delete transaction button click
  * @param {Event} event - Click event
@@ -1336,10 +1349,9 @@ function setupEventListeners() {
   }
 
   // Logout button
-  const logoutBtn = document.getElementById('logout-button');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', logout);
-  }
+  [document.getElementById('logout-button'), document.getElementById('mobile-logout-button')]
+    .filter(Boolean)
+    .forEach(button => button.addEventListener('click', logout));
 
   // Month navigation
   const prevBtn = document.getElementById('summary-prev-month');
@@ -1356,6 +1368,18 @@ function setupEventListeners() {
   const monthPicker = document.getElementById('summary-month-picker');
   if (monthPicker) {
     monthPicker.addEventListener('change', handleMonthPickerChange);
+    monthPicker.addEventListener('click', (event) => {
+      event.stopPropagation();
+      openNativePicker(monthPicker);
+    });
+  }
+
+  const summaryControls = document.querySelector('.summary-controls');
+  if (summaryControls && monthPicker) {
+    summaryControls.addEventListener('click', (event) => {
+      if (event.target.closest('.summary-nav')) return;
+      openNativePicker(monthPicker);
+    });
   }
 
   // Transaction table delete buttons
