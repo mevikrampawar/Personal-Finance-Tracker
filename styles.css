@@ -1571,17 +1571,14 @@ tr:hover {
     box-shadow: none;
   }
 
-  .form-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .transaction-tools {
-    grid-template-columns: 1fr;
-  }
-
   .tool-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .tool-actions .secondary-action-btn {
+    width: 100%;
   }
 
   .budget-field {
@@ -1686,11 +1683,83 @@ tr:hover {
   }
 
   .form-row {
+    display: grid;
+    grid-template-columns: 1fr;
     gap: var(--content-gap);
   }
 
+  .form-row .form-group {
+    width: 100%;
+    min-width: 0;
+  }
+
   .form-row-single {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--content-gap);
     margin-block: var(--content-gap);
+  }
+
+  .form-row-single .form-group {
+    width: 100%;
+    min-width: 0;
+  }
+
+  #transaction-form .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--content-gap);
+  }
+
+  #transaction-form .form-row .form-group {
+    width: 100%;
+  }
+
+  #transaction-form .cashflow-field {
+    width: 100%;
+  }
+
+  .form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .form-actions button[type="submit"] {
+    width: 100%;
+  }
+
+  .form-actions .secondary-action-btn {
+    width: 100%;
+  }
+
+  .transaction-tools {
+    display: flex;
+    flex-direction: column;
+    gap: var(--content-gap);
+  }
+
+  .transaction-tools .form-group {
+    width: 100%;
+  }
+
+  .transaction-tools .filter-type-group {
+    width: 100%;
+  }
+
+  .transaction-tools .type-filter-switch {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .tool-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .tool-actions .secondary-action-btn {
+    width: 100%;
   }
 
   #transaction-form > button {
@@ -1904,6 +1973,30 @@ tr:hover {
 
   .mobile-topbar p {
     font-size: 0.76rem;
+  }
+
+  .mobile-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .mobile-topbar-actions .icon-action-btn {
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    border-radius: 10px;
+    padding: 0;
+  }
+
+  .mobile-logout-button {
+    background: var(--danger-light);
+    color: var(--danger);
+    border: 1px solid var(--danger-lighter);
+  }
+
+  .mobile-logout-button:hover {
+    background: var(--danger-lighter);
   }
 
   .mobile-bottom-nav {
@@ -3186,6 +3279,54 @@ body.dark .total-card {
     grid-template-columns: repeat(2, minmax(14rem, 1fr));
   }
 
+@media (max-width: 768px) {
+  #transaction-form .form-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--content-gap) !important;
+  }
+
+  #transaction-form .form-row .form-group {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #transaction-form .form-row > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+  }
+
+  #transaction-form .form-row-single {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--content-gap) !important;
+  }
+
+  #transaction-form .form-row-single .form-group {
+    width: 100% !important;
+  }
+
+  #transaction-form .cashflow-field {
+    width: 100% !important;
+  }
+
+  #transaction-form .cashflow-switch {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  #transaction-form .form-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--spacing-sm) !important;
+  }
+
+  #transaction-form .form-actions button {
+    width: 100% !important;
+  }
+}
+
   .transaction-tools {
     grid-template-columns: repeat(3, minmax(12rem, 1fr));
   }
@@ -3196,6 +3337,39 @@ body.dark .total-card {
 
   .transaction-tools .tool-actions {
     grid-column: auto / span 2;
+  }
+
+  @media (max-width: 768px) {
+    .transaction-tools {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: var(--content-gap) !important;
+    }
+
+    .transaction-tools .form-group {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .transaction-tools .filter-type-group {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .transaction-tools .type-filter-switch {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .transaction-tools .tool-actions {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: var(--spacing-sm) !important;
+    }
+
+    .transaction-tools .tool-actions button {
+      width: 100% !important;
+    }
   }
 }
 
@@ -7745,5 +7919,74 @@ body.dark .summary-month-picker::-webkit-calendar-picker-indicator,
     inline-size: 15px !important;
     block-size: 15px !important;
     font-size: 0.86rem !important;
+  }
+}
+
+/* Mobile transaction filter containment only */
+@media (max-width: 768px) {
+  .app-page[data-page="transactions"] .transaction-tools {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    inline-size: 100% !important;
+    max-inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    box-sizing: border-box !important;
+    gap: 14px !important;
+    padding: 14px !important;
+    overflow-x: hidden !important;
+  }
+
+  .app-page[data-page="transactions"] .transaction-tools > .form-group,
+  .app-page[data-page="transactions"] .transaction-tools > .filter-type-group,
+  .app-page[data-page="transactions"] .transaction-tools > .tool-actions {
+    grid-column: 1 / -1 !important;
+    inline-size: 100% !important;
+    max-inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .app-page[data-page="transactions"] .transaction-tools input,
+  .app-page[data-page="transactions"] .transaction-tools select:not(.visually-managed-select),
+  .app-page[data-page="transactions"] .transaction-tools .type-filter-switch {
+    inline-size: 100% !important;
+    width: 100% !important;
+    max-inline-size: 100% !important;
+    min-inline-size: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .app-page[data-page="transactions"] .transaction-tools .type-filter-switch {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    overflow: hidden !important;
+  }
+
+  .app-page[data-page="transactions"] .transaction-tools .cashflow-choice {
+    min-inline-size: 0 !important;
+    padding-inline: clamp(4px, 2vw, 8px) !important;
+    gap: 5px !important;
+  }
+
+  .app-page[data-page="transactions"] .transaction-tools .cashflow-choice span {
+    min-inline-size: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .app-page[data-page="transactions"] .transaction-tools .tool-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-content: stretch !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .app-page[data-page="transactions"] .transaction-tools .tool-actions .secondary-action-btn {
+    inline-size: 100% !important;
+    width: 100% !important;
+    min-inline-size: 0 !important;
+    max-inline-size: 100% !important;
   }
 }
