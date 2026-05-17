@@ -537,14 +537,46 @@ function updateCategoryDropdown() {
  * Render the categories list
  */
 function renderCategoriesList() {
-  const categoriesUl = document.getElementById('categories-ul');
-  if (!categoriesUl) return;
+  const categoriesContainer = document.getElementById('categories-ul');
+  if (!categoriesContainer) return;
 
-  categoriesUl.innerHTML = '';
+  categoriesContainer.innerHTML = '';
+
+  if (appState.categoryRecords.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'panel-note';
+    empty.textContent = 'No categories yet.';
+    categoriesContainer.appendChild(empty);
+    return;
+  }
+
+  const table = document.createElement('table');
+  table.className = 'categories-table';
+
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+  ['Category', 'Saved Budget', 'Action'].forEach(label => {
+    const th = document.createElement('th');
+    th.scope = 'col';
+    th.textContent = label;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+
+  const tbody = document.createElement('tbody');
   appState.categoryRecords.forEach((category, index) => {
-    const li = document.createElement('li');
-    const label = document.createElement('span');
-    label.textContent = category.name;
+    const row = document.createElement('tr');
+    const nameCell = document.createElement('td');
+    const name = document.createElement('span');
+    name.className = 'category-table-name';
+    name.textContent = category.name;
+
+    const budgetCell = document.createElement('td');
+    const budget = document.createElement('span');
+    budget.className = category.monthlyBudget > 0 ? 'budget-pill' : 'budget-pill no-budget';
+    budget.textContent = category.monthlyBudget > 0 ? formatCurrency(category.monthlyBudget) : 'No limit';
+
+    const actionCell = document.createElement('td');
     const button = document.createElement('button');
     button.className = 'delete-category galaxy-delete-btn';
     button.dataset.index = String(index);
@@ -552,9 +584,16 @@ function renderCategoriesList() {
     button.type = 'button';
     button.innerHTML = '<span class="delete-lid" aria-hidden="true"></span><span class="delete-can" aria-hidden="true"></span>';
     button.setAttribute('aria-label', `Delete ${category.name} category`);
-    li.append(label, button);
-    categoriesUl.appendChild(li);
+
+    nameCell.appendChild(name);
+    budgetCell.appendChild(budget);
+    actionCell.appendChild(button);
+    row.append(nameCell, budgetCell, actionCell);
+    tbody.appendChild(row);
   });
+
+  table.append(thead, tbody);
+  categoriesContainer.appendChild(table);
 }
 
 /**
@@ -949,7 +988,13 @@ function clearFilters() {
     const element = document.getElementById(id);
     if (element) element.value = value;
   });
-  syncFiltersFromUI();
+
+  const filterType = document.getElementById('filter-type');
+  if (filterType) {
+    filterType.dispatchEvent(new Event('change', { bubbles: true }));
+  } else {
+    syncFiltersFromUI();
+  }
 }
 
 /**
@@ -1154,6 +1199,47 @@ function toggleRecurringCategoryField() {
   }
 }
 
+function setupSelectSwitch(selectId, switchId) {
+  const select = document.getElementById(selectId);
+  const switchEl = document.getElementById(switchId);
+  if (!select || !switchEl) return;
+
+  const choices = [...switchEl.querySelectorAll('[data-value]')];
+  const syncSwitch = () => {
+    const value = select.value || choices[0]?.dataset.value || '';
+    switchEl.dataset.value = value;
+    choices.forEach(choice => {
+      const isActive = choice.dataset.value === value;
+      choice.classList.toggle('is-active', isActive);
+      choice.setAttribute('aria-checked', String(isActive));
+    });
+  };
+
+  choices.forEach(choice => {
+    choice.addEventListener('click', () => {
+      if (select.value === choice.dataset.value) return;
+      select.value = choice.dataset.value;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      syncSwitch();
+    });
+    choice.addEventListener('keydown', (event) => {
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+      event.preventDefault();
+      const currentIndex = choices.findIndex(item => item.dataset.value === select.value);
+      const direction = event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 1;
+      const nextChoice = choices[(currentIndex + direction + choices.length) % choices.length];
+      nextChoice?.click();
+      nextChoice?.focus();
+    });
+  });
+
+  select.addEventListener('change', syncSwitch);
+  select.form?.addEventListener('reset', () => {
+    window.requestAnimationFrame(syncSwitch);
+  });
+  syncSwitch();
+}
+
 /**
  * Display error notification to user
  * @param {string} message - Error message
@@ -1319,8 +1405,11 @@ function setupEventListeners() {
     }
   });
 
+  setupSelectSwitch('filter-type', 'filter-type-switch');
   document.getElementById('clear-filters-btn')?.addEventListener('click', clearFilters);
   document.getElementById('export-csv-btn')?.addEventListener('click', exportCsv);
+
+  setupSelectSwitch('recurring-type', 'recurring-type-switch');
 
   const recurringForm = document.getElementById('recurring-form');
   if (recurringForm) {

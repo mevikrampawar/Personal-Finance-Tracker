@@ -2408,34 +2408,6 @@ select:focus,
   transition: left var(--transition-normal), background var(--transition-normal), box-shadow var(--transition-normal), transform var(--transition-fast);
 }
 
-.theme-switch-orbit {
-  position: absolute;
-  inset: 0;
-}
-
-.theme-switch-orbit::before,
-.theme-switch-orbit::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
-  transition: opacity var(--transition-normal), transform var(--transition-normal);
-}
-
-.theme-switch-orbit::before {
-  width: 7px;
-  height: 7px;
-  right: 18px;
-  top: 8px;
-}
-
-.theme-switch-orbit::after {
-  width: 4px;
-  height: 4px;
-  right: 9px;
-  bottom: 9px;
-}
-
 .galaxy-theme-toggle[aria-pressed="true"] .theme-switch-track {
   background: linear-gradient(145deg, #182230, #344054);
   border-color: #475467;
@@ -2474,58 +2446,6 @@ select:focus,
 .galaxy-logout-btn:hover::before {
   opacity: 1;
   transform: scale(1);
-}
-
-.logout-door,
-.logout-arrow {
-  position: absolute;
-  z-index: 1;
-  transition: transform var(--transition-fast);
-}
-
-.logout-door {
-  left: 12px;
-  width: 13px;
-  height: 18px;
-  border: 2px solid currentColor;
-  border-right: 0;
-  border-radius: 3px 0 0 3px;
-}
-
-.logout-arrow {
-  right: 11px;
-  width: 14px;
-  height: 2px;
-  background: currentColor;
-}
-
-.logout-arrow::before,
-.logout-arrow::after {
-  content: "";
-  position: absolute;
-  right: -1px;
-  width: 7px;
-  height: 2px;
-  border-radius: 2px;
-  background: currentColor;
-}
-
-.logout-arrow::before {
-  top: -4px;
-  transform: rotate(45deg);
-}
-
-.logout-arrow::after {
-  bottom: -4px;
-  transform: rotate(-45deg);
-}
-
-.galaxy-logout-btn:hover .logout-arrow {
-  transform: translateX(4px);
-}
-
-.galaxy-logout-btn:hover .logout-door {
-  transform: translateX(-1px);
 }
 
 .delete-transaction-btn,
@@ -3806,9 +3726,7 @@ body.dark {
   box-shadow: none !important;
 }
 
-.galaxy-logout-btn::before,
-.logout-door,
-.logout-arrow {
+.galaxy-logout-btn::before {
   display: none !important;
 }
 
@@ -4811,11 +4729,8 @@ body.dark .mobile-topbar .icon-action-btn.galaxy-theme-toggle {
   line-height: 1 !important;
 }
 
-.theme-switch-orbit,
 .theme-switch-thumb,
-.galaxy-logout-btn::before,
-.logout-door,
-.logout-arrow {
+.galaxy-logout-btn::before {
   display: none !important;
 }
 
@@ -6324,4 +6239,638 @@ body.dark .mobile-bottom-nav .bottom-nav-item.is-active i {
 .delete-category:hover {
   background: #ff3b30 !important;
   color: #ffffff !important;
+}
+
+/* ==================== UI Cleanup Overrides ==================== */
+
+.sidebar-actions {
+  align-items: center !important;
+}
+
+.sidebar-actions .icon-action-btn.galaxy-theme-toggle,
+.mobile-topbar .icon-action-btn.galaxy-theme-toggle {
+  position: relative !important;
+  flex: 0 0 66px !important;
+  inline-size: 66px !important;
+  block-size: 38px !important;
+  min-inline-size: 66px !important;
+  min-block-size: 38px !important;
+  max-inline-size: 66px !important;
+  max-block-size: 38px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  transform: none !important;
+}
+
+.sidebar-actions .icon-action-btn.galaxy-theme-toggle .theme-switch-track,
+.sidebar-actions .icon-action-btn.galaxy-theme-toggle[aria-pressed="true"] .theme-switch-track,
+.mobile-topbar .icon-action-btn.galaxy-theme-toggle .theme-switch-track,
+.mobile-topbar .icon-action-btn.galaxy-theme-toggle[aria-pressed="true"] .theme-switch-track {
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  align-items: center !important;
+  justify-items: center !important;
+  inline-size: 66px !important;
+  block-size: 38px !important;
+  min-inline-size: 66px !important;
+  min-block-size: 38px !important;
+  max-inline-size: 66px !important;
+  max-block-size: 38px !important;
+  padding: 3px !important;
+  border: 1px solid rgba(60, 60, 67, 0.16) !important;
+  border-radius: 999px !important;
+  background: rgba(120, 120, 128, 0.18) !important;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.72) !important;
+  overflow: hidden !important;
+  transform: none !important;
+}
+
+body.dark .sidebar-actions .icon-action-btn.galaxy-theme-toggle .theme-switch-track,
+body.dark .sidebar-actions .icon-action-btn.galaxy-theme-toggle[aria-pressed="true"] .theme-switch-track,
+body.dark .mobile-topbar .icon-action-btn.galaxy-theme-toggle .theme-switch-track,
+body.dark .mobile-topbar .icon-action-btn.galaxy-theme-toggle[aria-pressed="true"] .theme-switch-track {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.sidebar-actions .theme-switch-icon,
+.mobile-topbar .theme-switch-icon {
+  position: relative !important;
+  z-index: 2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  inline-size: 30px !important;
+  block-size: 30px !important;
+  color: #8e8e93 !important;
+  font-size: 0.88rem !important;
+  line-height: 1 !important;
+}
+
+.sidebar-actions .theme-switch-icon i,
+.mobile-topbar .theme-switch-icon i {
+  position: static !important;
+  display: block !important;
+  inline-size: auto !important;
+  block-size: auto !important;
+  font-size: inherit !important;
+  line-height: 1 !important;
+}
+
+.sidebar-actions .theme-switch-sun,
+.mobile-topbar .theme-switch-sun {
+  color: #ff9f0a !important;
+}
+
+.sidebar-actions .theme-switch-moon,
+.mobile-topbar .theme-switch-moon {
+  color: #5e5ce6 !important;
+}
+
+body.dark .sidebar-actions .theme-switch-moon,
+body.dark .mobile-topbar .theme-switch-moon {
+  color: #8e8cff !important;
+}
+
+.sidebar-actions .icon-action-btn.galaxy-theme-toggle .theme-switch-thumb,
+.sidebar-actions .icon-action-btn.galaxy-theme-toggle[aria-pressed="true"] .theme-switch-thumb,
+.mobile-topbar .icon-action-btn.galaxy-theme-toggle .theme-switch-thumb,
+.mobile-topbar .icon-action-btn.galaxy-theme-toggle[aria-pressed="true"] .theme-switch-thumb {
+  position: absolute !important;
+  z-index: 1 !important;
+  inset-block-start: 3px !important;
+  inset-inline-start: 3px !important;
+  display: block !important;
+  inline-size: 30px !important;
+  block-size: 30px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.8) inset,
+    0 5px 14px rgba(0, 0, 0, 0.18),
+    0 1px 4px rgba(0, 0, 0, 0.12) !important;
+  transform: translateX(0) !important;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.18s ease !important;
+  pointer-events: none !important;
+}
+
+.sidebar-actions .icon-action-btn.galaxy-theme-toggle[aria-pressed="true"] .theme-switch-thumb,
+.mobile-topbar .icon-action-btn.galaxy-theme-toggle[aria-pressed="true"] .theme-switch-thumb {
+  background: rgba(58, 58, 60, 0.98) !important;
+  transform: translateX(28px) !important;
+}
+
+.cashflow-field legend,
+.form-group > label {
+  min-height: 22px !important;
+  margin-bottom: 10px !important;
+  color: var(--text) !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+.form-row,
+.transaction-tools {
+  align-items: start !important;
+}
+
+.transaction-tools {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)) !important;
+  gap: 14px !important;
+}
+
+.transaction-tools .filter-type-group {
+  grid-column: span 2 !important;
+}
+
+.cashflow-switch,
+.cashflow-switch.radio-row,
+.select-cashflow-switch,
+.type-filter-switch {
+  position: relative !important;
+  display: grid !important;
+  align-items: center !important;
+  gap: 3px !important;
+  inline-size: min(100%, 22rem) !important;
+  min-block-size: 44px !important;
+  padding: 3px !important;
+  border: 1px solid rgba(60, 60, 67, 0.14) !important;
+  border-radius: 999px !important;
+  background: rgba(120, 120, 128, 0.16) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(16px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.15) !important;
+}
+
+.cashflow-switch,
+.cashflow-switch.radio-row,
+.select-cashflow-switch {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.type-filter-switch {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  inline-size: min(100%, 25rem) !important;
+}
+
+body.dark .cashflow-switch,
+body.dark .cashflow-switch.radio-row,
+body.dark .select-cashflow-switch,
+body.dark .type-filter-switch {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.cashflow-switch::before {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 0 !important;
+  inset-block: 3px !important;
+  inset-inline-start: 3px !important;
+  inline-size: calc((100% - 9px) / 2) !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.78) inset,
+    0 5px 14px rgba(0, 0, 0, 0.14),
+    0 1px 4px rgba(0, 0, 0, 0.1) !important;
+  transform: translateX(0) !important;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.18s ease !important;
+}
+
+body.dark .cashflow-switch::before {
+  background: rgba(58, 58, 60, 0.98) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 7px 18px rgba(0, 0, 0, 0.42) !important;
+}
+
+.cashflow-switch:has(input[value="income"]:checked)::before,
+.select-cashflow-switch[data-value="income"]::before {
+  transform: translateX(calc(100% + 3px)) !important;
+}
+
+.type-filter-switch::before {
+  inline-size: calc((100% - 12px) / 3) !important;
+}
+
+.type-filter-switch[data-value="expense"]::before {
+  transform: translateX(calc(100% + 3px)) !important;
+}
+
+.type-filter-switch[data-value="income"]::before {
+  transform: translateX(calc(200% + 6px)) !important;
+}
+
+.cashflow-option,
+.radio-option.cashflow-option,
+.cashflow-choice {
+  position: relative !important;
+  z-index: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  min-inline-size: 0 !important;
+  min-block-size: 38px !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: #6e6e73 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  cursor: pointer !important;
+}
+
+.cashflow-option input[type="radio"] {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2 !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+}
+
+.cashflow-option span,
+.cashflow-choice span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  inline-size: auto !important;
+  min-inline-size: 0 !important;
+  padding: 0 !important;
+  color: inherit !important;
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.cashflow-option span i,
+.cashflow-choice > i {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  inline-size: 18px !important;
+  block-size: 18px !important;
+  font-size: 1rem !important;
+  line-height: 1 !important;
+}
+
+.cashflow-choice[data-value="all"] > i {
+  color: #0071e3 !important;
+}
+
+.cashflow-option:first-child span i,
+.cashflow-choice[data-value="expense"] > i {
+  color: #ff453a !important;
+}
+
+.cashflow-option:last-child span i,
+.cashflow-choice[data-value="income"] > i {
+  color: #30d158 !important;
+}
+
+.cashflow-option input[type="radio"]:checked + span,
+.cashflow-choice.is-active {
+  color: #1d1d1f !important;
+}
+
+body.dark .cashflow-option,
+body.dark .radio-option.cashflow-option,
+body.dark .cashflow-choice {
+  color: #a1a1a6 !important;
+}
+
+body.dark .cashflow-option input[type="radio"]:checked + span,
+body.dark .cashflow-choice.is-active {
+  color: #f5f5f7 !important;
+}
+
+.cashflow-option input[type="radio"]:focus-visible + span,
+.cashflow-choice:focus-visible {
+  outline: 2px solid rgba(10, 132, 255, 0.72) !important;
+  outline-offset: 2px !important;
+}
+
+@media (max-width: 760px) {
+  .form-row,
+  .transaction-tools {
+    grid-template-columns: 1fr !important;
+  }
+
+  .transaction-tools .filter-type-group,
+  .transaction-tools .tool-actions {
+    grid-column: 1 / -1 !important;
+  }
+
+  .cashflow-switch,
+  .cashflow-switch.radio-row,
+  .select-cashflow-switch,
+  .type-filter-switch {
+    inline-size: 100% !important;
+  }
+
+  .cashflow-option,
+  .radio-option.cashflow-option,
+  .cashflow-choice {
+    padding-inline: 6px !important;
+  }
+
+  .cashflow-option span,
+  .cashflow-choice span {
+    font-size: 0.86rem !important;
+  }
+}
+
+/* ==================== Form Focus Polish ==================== */
+
+.visually-managed-select {
+  position: absolute !important;
+  inset: auto !important;
+  inline-size: 1px !important;
+  block-size: 1px !important;
+  min-inline-size: 1px !important;
+  min-block-size: 1px !important;
+  max-inline-size: 1px !important;
+  max-block-size: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+}
+
+#transaction-form .form-row,
+#recurring-form .form-row,
+.transaction-tools {
+  align-items: end !important;
+  gap: 18px 20px !important;
+}
+
+#transaction-form .form-row {
+  grid-template-columns:
+    minmax(220px, 1.15fr)
+    minmax(230px, 0.95fr)
+    minmax(220px, 1fr)
+    minmax(180px, 0.85fr) !important;
+}
+
+#transaction-form .form-row-single {
+  grid-template-columns: minmax(220px, 340px) !important;
+  margin-block: 2px 18px !important;
+}
+
+#recurring-form .form-row:first-of-type {
+  grid-template-columns: repeat(2, minmax(260px, 1fr)) !important;
+}
+
+#recurring-form .form-row:nth-of-type(2) {
+  grid-template-columns:
+    minmax(240px, 0.9fr)
+    minmax(240px, 1fr)
+    minmax(170px, 0.65fr) !important;
+}
+
+.transaction-tools {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  padding: clamp(18px, 2.1vw, 26px) !important;
+  margin-bottom: var(--spacing-xl) !important;
+}
+
+.transaction-tools .filter-type-group {
+  grid-column: span 2 !important;
+}
+
+.transaction-tools .tool-actions {
+  grid-column: 1 / -1 !important;
+  min-height: 0 !important;
+  margin-top: 2px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+#transaction-form .form-group,
+#recurring-form .form-group,
+.transaction-tools .form-group {
+  min-width: 0 !important;
+}
+
+#transaction-form input,
+#transaction-form select,
+#recurring-form input,
+#recurring-form select:not(.visually-managed-select),
+.transaction-tools input,
+.transaction-tools select:not(.visually-managed-select) {
+  height: 44px !important;
+  min-height: 44px !important;
+  border-radius: 14px !important;
+}
+
+.cashflow-field {
+  min-width: 0 !important;
+}
+
+.cashflow-field legend,
+#transaction-form .form-group > label,
+#recurring-form .form-group > label,
+.transaction-tools .form-group > label {
+  min-height: 20px !important;
+  margin-bottom: 9px !important;
+  font-size: 0.94rem !important;
+  line-height: 1.2 !important;
+}
+
+.cashflow-switch,
+.cashflow-switch.radio-row,
+.select-cashflow-switch,
+.type-filter-switch {
+  block-size: 44px !important;
+  min-block-size: 44px !important;
+  inline-size: min(100%, 260px) !important;
+  padding: 3px !important;
+  gap: 3px !important;
+}
+
+.type-filter-switch {
+  inline-size: min(100%, 360px) !important;
+}
+
+.cashflow-option,
+.radio-option.cashflow-option,
+.cashflow-choice {
+  min-block-size: 36px !important;
+  block-size: 36px !important;
+  padding: 0 12px !important;
+  gap: 7px !important;
+}
+
+.cashflow-option span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  line-height: 1 !important;
+}
+
+.cashflow-choice {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.cashflow-choice span {
+  display: block !important;
+  line-height: 1 !important;
+}
+
+.cashflow-option span i,
+.cashflow-choice > i {
+  inline-size: 18px !important;
+  block-size: 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1rem !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+.cashflow-option input[type="radio"]:checked + span,
+.cashflow-choice.is-active {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#transaction-form .form-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 14px !important;
+}
+
+#transaction-form .form-actions .submit-btn,
+#recurring-form > .submit-btn {
+  width: auto !important;
+  min-width: 230px !important;
+  max-width: 320px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding-inline: 24px !important;
+  border-radius: 999px !important;
+}
+
+#transaction-form .form-actions .submit-btn {
+  flex: 0 1 300px !important;
+}
+
+#transaction-form .form-actions .secondary-action-btn {
+  width: auto !important;
+  min-width: 150px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding-inline: 22px !important;
+}
+
+#recurring-form > .submit-btn {
+  display: flex !important;
+  margin: 8px 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.recurring-actions {
+  margin-top: 12px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+}
+
+.recurring-actions .secondary-action-btn,
+.transaction-tools .tool-actions .secondary-action-btn {
+  width: auto !important;
+  min-width: 140px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding-inline: 22px !important;
+  border-radius: 999px !important;
+  flex: 0 0 auto !important;
+}
+
+.recurring-actions .secondary-action-btn {
+  min-width: 290px !important;
+}
+
+@media (max-width: 1180px) {
+  #transaction-form .form-row,
+  #recurring-form .form-row:first-of-type,
+  #recurring-form .form-row:nth-of-type(2),
+  .transaction-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .transaction-tools .filter-type-group,
+  .transaction-tools .tool-actions {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+@media (max-width: 700px) {
+  #transaction-form .form-row,
+  #transaction-form .form-row-single,
+  #recurring-form .form-row:first-of-type,
+  #recurring-form .form-row:nth-of-type(2),
+  .transaction-tools {
+    grid-template-columns: 1fr !important;
+  }
+
+  #transaction-form .form-actions,
+  .transaction-tools .tool-actions,
+  .recurring-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  #transaction-form .form-actions .submit-btn,
+  #transaction-form .form-actions .secondary-action-btn,
+  #recurring-form > .submit-btn,
+  .recurring-actions .secondary-action-btn,
+  .transaction-tools .tool-actions .secondary-action-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  .cashflow-switch,
+  .cashflow-switch.radio-row,
+  .select-cashflow-switch,
+  .type-filter-switch {
+    inline-size: 100% !important;
+  }
 }

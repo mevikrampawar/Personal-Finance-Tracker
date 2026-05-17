@@ -51,12 +51,14 @@
         </div>
         <div class="sidebar-actions">
           <button id="theme-toggle" class="icon-action-btn galaxy-theme-toggle" type="button" aria-label="Toggle dark/light mode">
-            <i class="lucide lucide-sun-moon theme-switch-track" aria-hidden="true"></i>
+            <span class="theme-switch-track" aria-hidden="true">
+              <span class="theme-switch-icon theme-switch-sun"><i class="bi bi-sun-fill" aria-hidden="true"></i></span>
+              <span class="theme-switch-icon theme-switch-moon"><i class="bi bi-moon-stars-fill" aria-hidden="true"></i></span>
+              <span class="theme-switch-thumb"></span>
+            </span>
           </button>
-          <button id="logout-button" class="icon-action-btn danger-icon galaxy-logout-btn" type="button" aria-label="Logout from account">
-            <i class="lucide lucide-log-out" aria-hidden="true"></i>
-            <span class="logout-door" aria-hidden="true"></span>
-            <span class="logout-arrow" aria-hidden="true"></span>
+          <button id="logout-button" class="icon-action-btn danger-icon galaxy-logout-btn" type="button" aria-label="Logout from account" title="Logout">
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
           </button>
         </div>
       </div>
@@ -71,7 +73,11 @@
         </div>
       </div>
       <button id="mobile-theme-toggle" class="icon-action-btn galaxy-theme-toggle" type="button" aria-label="Toggle dark/light mode">
-        <i class="lucide lucide-sun-moon theme-switch-track" aria-hidden="true"></i>
+        <span class="theme-switch-track" aria-hidden="true">
+          <span class="theme-switch-icon theme-switch-sun"><i class="bi bi-sun-fill" aria-hidden="true"></i></span>
+          <span class="theme-switch-icon theme-switch-moon"><i class="bi bi-moon-stars-fill" aria-hidden="true"></i></span>
+          <span class="theme-switch-thumb"></span>
+        </span>
       </button>
     </div>
 
@@ -191,10 +197,10 @@
                       />
                     </div>
                     <div class="form-group">
-                      <fieldset>
+                      <fieldset class="cashflow-field">
                         <legend>Type</legend>
-                        <div class="radio-row">
-                          <label class="radio-option">
+                        <div class="radio-row cashflow-switch">
+                          <label class="radio-option cashflow-option">
                             <input
                               type="radio"
                               name="transaction-type"
@@ -202,16 +208,16 @@
                               checked
                               aria-label="Expense transaction"
                             />
-                            <span>Expense</span>
+                            <span><i class="bi bi-arrow-down-left-circle-fill" aria-hidden="true"></i> Expense</span>
                           </label>
-                          <label class="radio-option">
+                          <label class="radio-option cashflow-option">
                             <input
                               type="radio"
                               name="transaction-type"
                               value="income"
                               aria-label="Income transaction"
                             />
-                            <span>Income</span>
+                            <span><i class="bi bi-arrow-up-right-circle-fill" aria-hidden="true"></i> Income</span>
                           </label>
                         </div>
                       </fieldset>
@@ -270,13 +276,33 @@
                   <label for="filter-search">Search</label>
                   <input type="search" id="filter-search" placeholder="Description or category" />
                 </div>
-                <div class="form-group">
+                <div class="form-group filter-type-group">
                   <label for="filter-type">Type</label>
-                  <select id="filter-type">
+                  <select id="filter-type" class="visually-managed-select" aria-hidden="true" tabindex="-1">
                     <option value="all">All</option>
                     <option value="expense">Expenses</option>
                     <option value="income">Income</option>
                   </select>
+                  <div
+                    id="filter-type-switch"
+                    class="cashflow-switch type-filter-switch"
+                    role="radiogroup"
+                    aria-label="Transaction type filter"
+                    data-value="all"
+                  >
+                    <button type="button" class="cashflow-choice is-active" role="radio" aria-checked="true" data-value="all">
+                      <i class="bi bi-list-ul" aria-hidden="true"></i>
+                      <span>All</span>
+                    </button>
+                    <button type="button" class="cashflow-choice" role="radio" aria-checked="false" data-value="expense">
+                      <i class="bi bi-arrow-down-left-circle-fill" aria-hidden="true"></i>
+                      <span>Expense</span>
+                    </button>
+                    <button type="button" class="cashflow-choice" role="radio" aria-checked="false" data-value="income">
+                      <i class="bi bi-arrow-up-right-circle-fill" aria-hidden="true"></i>
+                      <span>Income</span>
+                    </button>
+                  </div>
                 </div>
                 <div class="form-group">
                   <label for="filter-category">Category</label>
@@ -372,7 +398,7 @@
 
               <div class="categories-list">
                 <h3>Current Categories</h3>
-                <ul id="categories-ul" class="categories-ul"></ul>
+                <div id="categories-ul" class="categories-table-shell"></div>
               </div>
 
               <div class="budget-management">
@@ -405,10 +431,26 @@
                 <div class="form-row">
                   <div class="form-group">
                     <label for="recurring-type">Type</label>
-                    <select id="recurring-type" required>
+                    <select id="recurring-type" class="visually-managed-select" required aria-hidden="true" tabindex="-1">
                       <option value="expense">Expense</option>
                       <option value="income">Income</option>
                     </select>
+                    <div
+                      id="recurring-type-switch"
+                      class="cashflow-switch select-cashflow-switch"
+                      role="radiogroup"
+                      aria-label="Recurring transaction type"
+                      data-value="expense"
+                    >
+                      <button type="button" class="cashflow-choice is-active" role="radio" aria-checked="true" data-value="expense">
+                        <i class="bi bi-arrow-down-left-circle-fill" aria-hidden="true"></i>
+                        <span>Expense</span>
+                      </button>
+                      <button type="button" class="cashflow-choice" role="radio" aria-checked="false" data-value="income">
+                        <i class="bi bi-arrow-up-right-circle-fill" aria-hidden="true"></i>
+                        <span>Income</span>
+                      </button>
+                    </div>
                   </div>
                   <div class="form-group" id="recurring-category-group">
                     <label for="recurring-category">Category</label>

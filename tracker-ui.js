@@ -23,12 +23,15 @@ export function setTheme(theme) {
     document.getElementById('mobile-theme-toggle')
   ].filter(Boolean);
   buttons.forEach(button => {
+    const nextLabel = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
     button.setAttribute('aria-pressed', String(theme === 'dark'));
-    button.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-    if (!button.querySelector('.theme-switch-track')) {
+    button.setAttribute('aria-label', nextLabel);
+    button.title = nextLabel;
+    if (!button.querySelector('.theme-switch-thumb')) {
       button.innerHTML = `
         <span class="theme-switch-track" aria-hidden="true">
-          <span class="theme-switch-orbit"></span>
+          <span class="theme-switch-icon theme-switch-sun"><i class="bi bi-sun-fill" aria-hidden="true"></i></span>
+          <span class="theme-switch-icon theme-switch-moon"><i class="bi bi-moon-stars-fill" aria-hidden="true"></i></span>
           <span class="theme-switch-thumb"></span>
         </span>
       `;
