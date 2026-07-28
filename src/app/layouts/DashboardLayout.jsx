@@ -86,10 +86,10 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-[100dvh] overflow-hidden bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden w-64 flex-col border-r bg-card lg:flex">
-        <div className="flex h-16 items-center gap-3 border-b px-6">
+      <aside className="hidden shrink-0 w-64 flex-col border-r bg-card lg:flex">
+        <div className="flex h-16 shrink-0 items-center gap-3 border-b px-6">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-lg">
             ₹
           </div>
@@ -146,9 +146,9 @@ export default function DashboardLayout() {
       </aside>
 
       {/* Main area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile topbar */}
-        <header className="flex h-14 items-center gap-3 border-b bg-card px-4 lg:hidden safe-top">
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Mobile topbar - fixed */}
+        <header className="shrink-0 flex h-14 items-center gap-3 border-b bg-card px-4 safe-top lg:hidden">
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="min-touch" aria-label="Open sidebar">
@@ -220,15 +220,18 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        {/* Page content - scrollable */}
+        <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
             <Outlet />
           </div>
         </main>
 
-        {/* Mobile bottom nav — redesigned with 5 items + FAB Add */}
-        <nav className="flex items-center justify-around border-t bg-card lg:hidden safe-bottom" style={{ minHeight: 'calc(max(56px, env(safe-area-inset-bottom)))' }}>
+        {/* Mobile bottom nav - fixed */}
+        <nav
+          className="shrink-0 flex items-center justify-around border-t bg-card lg:hidden safe-bottom"
+          style={{ height: 'calc(56px + env(safe-area-inset-bottom))' }}
+        >
           {BOTTOM_NAV.map((item, i) => {
             if (item === null) {
               return (

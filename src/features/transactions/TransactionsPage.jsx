@@ -5,7 +5,7 @@ import { formatCurrency } from '@/lib/currency'
 import { getTransactionsForMonth, getTransactionDate, formatMonthYear, formatShortDate, formatYearMonth } from '@/lib/date'
 import { exportToCSV } from '@/lib/csv'
 import { addMonths, subMonths } from 'date-fns'
-import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2, TrendingUp, TrendingDown, SlidersHorizontal } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,6 +28,7 @@ export default function TransactionsPage() {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [showFilters, setShowFilters] = useState(false)
   const navigate = useNavigate()
 
   const monthTransactions = useMemo(() => getTransactionsForMonth(transactions, month), [transactions, month])
@@ -83,6 +84,8 @@ export default function TransactionsPage() {
 
   const hasFilters = search || typeFilter !== 'all' || categoryFilter !== 'all' || minAmount || maxAmount || fromDate || toDate
 
+  const activeFilterCount = [search, typeFilter !== 'all' ? 1 : '', categoryFilter !== 'all' ? 1 : '', minAmount, maxAmount, fromDate, toDate].filter(Boolean).length
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -97,95 +100,142 @@ export default function TransactionsPage() {
             <Skeleton className="h-8 w-8 rounded-lg" />
           </div>
         </div>
-        <Skeleton className="h-32 rounded-xl" />
+        <Skeleton className="h-10 rounded-xl" />
         <Skeleton className="h-64 rounded-xl" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Header with month nav */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Ledger</p>
-          <h2 className="text-2xl font-bold tracking-tight">Transactions</h2>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Transactions</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="min-w-[140px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
+          <span className="min-w-[120px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
           <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())}>
+          <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())} className="hidden sm:flex">
             Today
           </Button>
         </div>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search description or category..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9"
-              />
+      {/* Search + filter toggle (mobile) / full filters (desktop) */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 h-10"
+          />
+        </div>
+        <Button
+          variant="outline"
+          size="icon"
+          className="min-touch sm:hidden relative"
+          onClick={() => setShowFilters(!showFilters)}
+          aria-label="Toggle filters"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          {activeFilterCount > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+              {activeFilterCount}
+            </span>
+          )}
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleExport} className="hidden sm:flex">
+          <Download className="h-3 w-3" /> Export
+        </Button>
+      </div>
+
+      {/* Filters - collapsible on mobile, always visible on desktop */}
+      <div className={`${showFilters ? 'block' : 'hidden'} sm:block`}>
+        <Card>
+          <CardContent className="p-3 sm:p-4">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Types" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="expense">Expenses</SelectItem>
+                  <SelectItem value="income">Income</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categoryNames.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="Min ₹"
+                  value={minAmount}
+                  onChange={(e) => setMinAmount(e.target.value)}
+                  className="h-10"
+                />
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="Max ₹"
+                  value={maxAmount}
+                  onChange={(e) => setMaxAmount(e.target.value)}
+                  className="h-10"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="h-10"
+                />
+                <Input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="h-10"
+                />
+              </div>
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="expense">Expenses</SelectItem>
-                <SelectItem value="income">Income</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categoryNames.map((c) => (
-                  <SelectItem key={c} value={c}>{c}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                type="number"
-                inputMode="decimal"
-                placeholder="Min"
-                value={minAmount}
-                onChange={(e) => setMinAmount(e.target.value)}
-              />
-              <Input
-                type="number"
-                inputMode="decimal"
-                placeholder="Max"
-                value={maxAmount}
-                onChange={(e) => setMaxAmount(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            {hasFilters && (
-              <Button variant="outline" size="sm" onClick={clearFilters}>
-                <X className="h-3 w-3" /> Clear
+            <div className="mt-2 flex items-center gap-2">
+              {hasFilters && (
+                <Button variant="outline" size="sm" onClick={clearFilters}>
+                  <X className="h-3 w-3" /> Clear
+                </Button>
+              )}
+              <Button variant="outline" size="sm" onClick={handleExport} className="sm:hidden ml-auto">
+                <Download className="h-3 w-3" /> Export
               </Button>
-            )}
-            <Button variant="outline" size="sm" onClick={handleExport} className="ml-auto">
-              <Download className="h-3 w-3" /> Export CSV
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Transaction count */}
+      <p className="text-xs text-muted-foreground">
+        {sorted.length} transaction{sorted.length !== 1 ? 's' : ''}
+        {hasFilters && ' filtered'}
+      </p>
 
       {/* Mobile card list */}
       <div className="space-y-2 sm:hidden">
@@ -199,27 +249,33 @@ export default function TransactionsPage() {
           sorted.map((t) => {
             const d = getTransactionDate(t)
             return (
-              <Card key={t.id} className="overflow-hidden">
-                <CardContent className="p-4">
+              <Card key={t.id} className="overflow-hidden active:bg-muted/20 transition-colors">
+                <CardContent className="p-3">
                   <div className="flex items-start justify-between">
-                    <span className="text-xs text-muted-foreground">{d ? formatShortDate(d) : '-'}</span>
-                    <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="gap-1 text-[10px]">
-                      {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                      {t.type}
-                    </Badge>
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <div className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-full ${t.type === 'income' ? 'bg-income/10' : 'bg-expense/10'}`}>
+                        {t.type === 'income' ? <TrendingUp className="h-4 w-4 text-income" /> : <TrendingDown className="h-4 w-4 text-expense" />}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate">{t.description}</p>
+                        <p className="text-xs text-muted-foreground">{d ? formatShortDate(d) : '-'}</p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0 ml-2">
+                      <p className={`text-sm tabular-nums font-semibold ${t.type === 'income' ? 'text-income' : 'text-expense'}`}>
+                        {formatCurrency(t.amount || 0)}
+                      </p>
+                      <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="mt-0.5 text-[10px] h-4 px-1.5">
+                        {t.type}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-sm font-medium">{t.description}</span>
-                    <span className={`text-sm tabular-nums font-semibold ${t.type === 'income' ? 'text-income' : 'text-expense'}`}>
-                      {formatCurrency(t.amount || 0)}
-                    </span>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between">
+                  <div className="mt-2 flex items-center justify-between border-t pt-2">
                     <div>
                       {t.category ? (
-                        <Badge variant="outline" className="text-[10px]">{t.category}</Badge>
+                        <Badge variant="outline" className="text-[10px] h-5">{t.category}</Badge>
                       ) : (
-                        <span className="text-xs text-muted-foreground">-</span>
+                        <span className="text-xs text-muted-foreground">No category</span>
                       )}
                     </div>
                     <div className="flex gap-1">
