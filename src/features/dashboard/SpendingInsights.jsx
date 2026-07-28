@@ -4,7 +4,6 @@ import { formatCurrency } from '@/lib/currency'
 import { subMonths } from 'date-fns'
 import { AlertTriangle, TrendingDown, TrendingUp, Lightbulb } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 
 export function SpendingInsights({ transactions, month, monthTransactions }) {
   const insights = useMemo(() => {
@@ -63,7 +62,7 @@ export function SpendingInsights({ transactions, month, monthTransactions }) {
         result.push({
           type: 'warning',
           icon: AlertTriangle,
-          text: `You're spending more than you earn this month. Consider reducing expenses.`,
+          text: "You're spending more than you earn this month. Consider reducing expenses.",
         })
       } else if (savingsRate > 20) {
         result.push({
@@ -91,31 +90,35 @@ export function SpendingInsights({ transactions, month, monthTransactions }) {
 
   if (insights.length === 0) return null
 
-  const badgeVariant = (type) => {
+  const typeStyle = (type) => {
     switch (type) {
-      case 'warning': return 'destructive'
-      case 'success': return 'secondary'
-      default: return 'outline'
+      case 'warning': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+      case 'success': return 'bg-income/10 text-income'
+      case 'info': return 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+      default: return 'bg-muted text-muted-foreground'
     }
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-sm">
           <Lightbulb className="h-4 w-4 text-amber-500" />
           Spending Insights
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {insights.map((insight, i) => {
+        <div className="space-y-2">
+          {insights.map((insight) => {
             const Icon = insight.icon
             return (
-              <div key={insight.text} className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
-                <Badge variant={badgeVariant(insight.type)} className="mt-0.5 shrink-0">
-                  <Icon />
-                </Badge>
+              <div
+                key={insight.text}
+                className="flex items-start gap-3 rounded-lg p-3 transition-colors hoverable:hover:bg-muted/30"
+              >
+                <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${typeStyle(insight.type)}`}>
+                  <Icon className="h-3.5 w-3.5" />
+                </div>
                 <p className="text-sm leading-relaxed text-muted-foreground">{insight.text}</p>
               </div>
             )

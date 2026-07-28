@@ -170,6 +170,25 @@
     min-height: 44px;
     min-width: 44px;
   }
+  .card-hover {
+    @apply transition-all duration-200 hoverable:hover:shadow-md hoverable:hover:-translate-y-0.5 active:translate-y-0;
+  }
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent;
+  }
+  .stat-value {
+    @apply text-2xl font-bold tabular-nums tracking-tight;
+  }
+  .stat-label {
+    @apply text-xs font-medium text-muted-foreground;
+  }
+  .animate-in {
+    animation: fade-in 0.2s ease-out;
+  }
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 }
 
 @keyframes ticker {
