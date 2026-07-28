@@ -5,8 +5,10 @@ import { formatCurrency } from '@/lib/currency'
 import { formatMonthYear, getTransactionsForMonth } from '@/lib/date'
 import { addMonths, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
-export default function MonthlyComparisonPage() {
+export function MonthlyComparisonPage() {
   const { user } = useAuth()
   const { data: transactions } = useFirestoreCollection(user?.uid, 'transactions')
   const [leftMonth, setLeftMonth] = useState(subMonths(new Date(), 1))
@@ -46,7 +48,6 @@ export default function MonthlyComparisonPage() {
     )
   }
 
-  // Merge all categories from both months
   const allCategories = [...new Set([
     ...Object.keys(stats.left.categories),
     ...Object.keys(stats.right.categories),
@@ -55,68 +56,86 @@ export default function MonthlyComparisonPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Analytics</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Analytics</p>
         <h2 className="text-2xl font-bold tracking-tight">Monthly Comparison</h2>
         <p className="mt-1 text-sm text-muted-foreground">Compare two months side by side.</p>
       </div>
 
-      {/* Month Pickers */}
       <div className="grid gap-4 sm:grid-cols-2">
-        {[
-          { label: 'Left Month', month: leftMonth, setMonth: setLeftMonth },
-          { label: 'Right Month', month: rightMonth, setMonth: setRightMonth },
-        ].map(({ label, month, setMonth }) => (
-          <div key={label} className="flex items-center gap-2 rounded-xl border bg-card p-3 shadow-sm">
-            <button onClick={() => setMonth((m) => subMonths(m, 1))} className="rounded-lg p-1.5 hover:bg-accent transition-colors" aria-label="Previous month">
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <span className="flex-1 text-center text-sm font-medium">{formatMonthYear(month)}</span>
-            <button onClick={() => setMonth((m) => addMonths(m, 1))} className="rounded-lg p-1.5 hover:bg-accent transition-colors" aria-label="Next month">
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        ))}
+        <Card className="flex items-center gap-2 p-3">
+          <Button variant="outline" size="icon" onClick={() => setLeftMonth((m) => subMonths(m, 1))} aria-label="Previous month">
+            <ChevronLeft />
+          </Button>
+          <span className="flex-1 text-center text-sm font-medium">{formatMonthYear(leftMonth)}</span>
+          <Button variant="outline" size="icon" onClick={() => setLeftMonth((m) => addMonths(m, 1))} aria-label="Next month">
+            <ChevronRight />
+          </Button>
+        </Card>
+        <Card className="flex items-center gap-2 p-3">
+          <Button variant="outline" size="icon" onClick={() => setRightMonth((m) => subMonths(m, 1))} aria-label="Previous month">
+            <ChevronLeft />
+          </Button>
+          <span className="flex-1 text-center text-sm font-medium">{formatMonthYear(rightMonth)}</span>
+          <Button variant="outline" size="icon" onClick={() => setRightMonth((m) => addMonths(m, 1))} aria-label="Next month">
+            <ChevronRight />
+          </Button>
+        </Card>
       </div>
 
-      {/* Summary Comparison */}
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-        <div className="grid grid-cols-3 border-b bg-muted/50">
-          <div className="px-4 py-3 text-sm font-medium text-muted-foreground">Metric</div>
-          <div className="px-4 py-3 text-center text-sm font-medium">{formatMonthYear(leftMonth)}</div>
-          <div className="px-4 py-3 text-center text-sm font-medium">{formatMonthYear(rightMonth)}</div>
-        </div>
-        {[
-          { label: 'Transactions', left: stats.left.count, right: stats.right.count },
-          { label: 'Income', left: stats.left.income, right: stats.right.income },
-          { label: 'Expenses', left: stats.left.expenses, right: stats.right.expenses },
-          { label: 'Balance', left: stats.left.balance, right: stats.right.balance },
-        ].map(({ label, left, right }) => (
-          <div key={label} className="grid grid-cols-3 border-b last:border-0">
-            <div className="px-4 py-3 text-sm font-medium">{label}</div>
-            <div className="px-4 py-3 text-center text-sm tabular-nums">
-              {label === 'Transactions' ? left : formatCurrency(left)}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Income</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold tabular-nums text-income">{formatCurrency(stats.left.income)}</div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">vs</span>
+              <span className="text-lg font-semibold tabular-nums">{formatCurrency(stats.right.income)}</span>
+              <ChangeIndicator prev={stats.left.income} curr={stats.right.income} />
             </div>
-            <div className="px-4 py-3 text-center text-sm tabular-nums">
-              {label === 'Transactions' ? right : formatCurrency(right)}
-              <span className="ml-2"><ChangeIndicator prev={left} curr={right} /></span>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Expenses</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold tabular-nums text-expense">{formatCurrency(stats.left.expenses)}</div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">vs</span>
+              <span className="text-lg font-semibold tabular-nums">{formatCurrency(stats.right.expenses)}</span>
+              <ChangeIndicator prev={stats.left.expenses} curr={stats.right.expenses} />
             </div>
-          </div>
-        ))}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Balance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold tabular-nums ${stats.left.balance >= 0 ? 'text-income' : 'text-expense'}`}>{formatCurrency(stats.left.balance)}</div>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">vs</span>
+              <span className={`text-lg font-semibold tabular-nums ${stats.right.balance >= 0 ? 'text-income' : 'text-expense'}`}>{formatCurrency(stats.right.balance)}</span>
+              <ChangeIndicator prev={stats.left.balance} curr={stats.right.balance} />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Category Comparison */}
       {allCategories.length > 0 && (
-        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b">
-            <h3 className="text-sm font-semibold">Category Comparison</h3>
-          </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Category Comparison</CardTitle>
+          </CardHeader>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Left</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Right</th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">{formatMonthYear(leftMonth)}</th>
+                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">{formatMonthYear(rightMonth)}</th>
                   <th className="px-4 py-3 text-right font-medium text-muted-foreground">Change</th>
                 </tr>
               </thead>
@@ -125,7 +144,7 @@ export default function MonthlyComparisonPage() {
                   const left = stats.left.categories[cat] || 0
                   const right = stats.right.categories[cat] || 0
                   return (
-                    <tr key={cat} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr key={cat} className="border-b last:border-0 transition-colors hover:bg-muted/30">
                       <td className="px-4 py-3 font-medium">{cat}</td>
                       <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(left)}</td>
                       <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(right)}</td>
@@ -136,8 +155,10 @@ export default function MonthlyComparisonPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   )
 }
+
+export default MonthlyComparisonPage

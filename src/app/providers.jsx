@@ -1,58 +1,72 @@
-import { createContext, useContext, useCallback, useState } from 'react'
-import ToastContainer from '@/components/ui/Toast'
-import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import { createContext, useContext, useCallback, useState, useRef } from 'react'
+import { Toaster, toast as sonnerToast } from 'sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 
 const ToastContext = createContext(null)
 const ConfirmContext = createContext(null)
 
-let toastId = 0
-
 export function AppProviders({ children }) {
-  const [toasts, setToasts] = useState([])
-  const [confirmState, setConfirmState] = useState({ open: false, message: '', resolve: null })
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [confirmMessage, setConfirmMessage] = useState('')
+  const confirmResolveRef = useRef(null)
 
-  const removeToast = useCallback((id) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id))
+  const toast = useCallback((message, { type, ...rest } = {}) => {
+    if (!type || type === 'info') sonnerToast(message, rest)
+    else if (type === 'success') sonnerToast.success(message, rest)
+    else if (type === 'error') sonnerToast.error(message, rest)
+    else if (type === 'warning') sonnerToast.warning(message, rest)
+    else sonnerToast(message, rest)
   }, [])
-
-  const toast = useCallback(
-    (message, { type = 'info', duration = 3000 } = {}) => {
-      const id = ++toastId
-      setToasts((prev) => [...prev, { id, message, type }])
-      if (duration > 0) {
-        setTimeout(() => removeToast(id), duration)
-      }
-    },
-    [removeToast],
-  )
 
   const confirm = useCallback((message) => {
     return new Promise((resolve) => {
-      setConfirmState({ open: true, message, resolve })
+      confirmResolveRef.current = resolve
+      setConfirmMessage(message)
+      setConfirmOpen(true)
     })
   }, [])
 
   const handleConfirm = () => {
-    confirmState.resolve?.(true)
-    setConfirmState({ open: false, message: '', resolve: null })
+    confirmResolveRef.current?.(true)
+    confirmResolveRef.current = null
+    setConfirmOpen(false)
   }
 
   const handleCancel = () => {
-    confirmState.resolve?.(false)
-    setConfirmState({ open: false, message: '', resolve: null })
+    confirmResolveRef.current?.(false)
+    confirmResolveRef.current = null
+    setConfirmOpen(false)
   }
 
   return (
-    <ToastContext.Provider value={{ toasts, toast, removeToast }}>
+    <ToastContext.Provider value={{ toast }}>
       <ConfirmContext.Provider value={{ confirm }}>
-        {children}
-        <ToastContainer toasts={toasts} onRemove={removeToast} />
-        <ConfirmDialog
-          open={confirmState.open}
-          message={confirmState.message}
-          onConfirm={handleConfirm}
-          onCancel={handleCancel}
-        />
+        <TooltipProvider>
+          {children}
+          <Toaster richColors position="bottom-right" />
+          <AlertDialog open={confirmOpen} onOpenChange={(open) => { if (!open) handleCancel() }}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm</AlertDialogTitle>
+                <AlertDialogDescription>{confirmMessage}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirm}>Confirm</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </TooltipProvider>
       </ConfirmContext.Provider>
     </ToastContext.Provider>
   )

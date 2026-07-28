@@ -1,25 +1,25 @@
 import { useMemo } from 'react'
 import { getTransactionsForMonth } from '@/lib/date'
 import { formatCurrency } from '@/lib/currency'
-import { addMonths, subMonths } from 'date-fns'
+import { subMonths } from 'date-fns'
 import { AlertTriangle, TrendingDown, TrendingUp, Lightbulb } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
-export default function SpendingInsights({ transactions, month }) {
+export function SpendingInsights({ transactions, month, monthTransactions }) {
   const insights = useMemo(() => {
     if (!transactions.length) return []
 
-    const currentMonth = getTransactionsForMonth(transactions, month)
     const prevMonth = getTransactionsForMonth(transactions, subMonths(month, 1))
 
-    const currentExpenses = currentMonth.filter((t) => t.type === 'expense')
+    const currentExpenses = monthTransactions.filter((t) => t.type === 'expense')
     const prevExpenses = prevMonth.filter((t) => t.type === 'expense')
-    const currentIncome = currentMonth.filter((t) => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0)
+    const currentIncome = monthTransactions.filter((t) => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0)
     const currentTotalExpenses = currentExpenses.reduce((s, t) => s + (t.amount || 0), 0)
     const prevTotalExpenses = prevExpenses.reduce((s, t) => s + (t.amount || 0), 0)
 
     const result = []
 
-    // Spending comparison
     if (prevTotalExpenses > 0 && currentTotalExpenses > 0) {
       const change = ((currentTotalExpenses - prevTotalExpenses) / prevTotalExpenses) * 100
       if (Math.abs(change) > 10) {
@@ -31,7 +31,6 @@ export default function SpendingInsights({ transactions, month }) {
       }
     }
 
-    // Category-level insights
     const currentCatTotals = {}
     currentExpenses.forEach((t) => {
       const cat = t.category || 'Uncategorized'
@@ -57,7 +56,6 @@ export default function SpendingInsights({ transactions, month }) {
       }
     })
 
-    // Savings rate
     if (currentIncome > 0) {
       const savings = currentIncome - currentTotalExpenses
       const savingsRate = (savings / currentIncome) * 100
@@ -76,7 +74,6 @@ export default function SpendingInsights({ transactions, month }) {
       }
     }
 
-    // Top spending category
     const topCategory = Object.entries(currentCatTotals).sort((a, b) => b[1] - a[1])[0]
     if (topCategory && currentTotalExpenses > 0) {
       const pct = (topCategory[1] / currentTotalExpenses) * 100
@@ -90,30 +87,43 @@ export default function SpendingInsights({ transactions, month }) {
     }
 
     return result.slice(0, 4)
-  }, [transactions, month])
+  }, [transactions, month, monthTransactions])
 
   if (insights.length === 0) return null
 
+  const badgeVariant = (type) => {
+    switch (type) {
+      case 'warning': return 'destructive'
+      case 'success': return 'secondary'
+      default: return 'outline'
+    }
+  }
+
   return (
-    <div className="rounded-xl border bg-card p-5 shadow-sm">
-      <h3 className="mb-3 text-sm font-semibold flex items-center gap-2">
-        <Lightbulb className="h-4 w-4 text-warning" />
-        Spending Insights
-      </h3>
-      <div className="space-y-2">
-        {insights.map((insight, i) => {
-          const Icon = insight.icon
-          const colorClass = insight.type === 'warning' ? 'text-warning bg-warning/10' : insight.type === 'success' ? 'text-income bg-income/10' : 'text-balance bg-balance/10'
-          return (
-            <div key={i} className="flex items-start gap-3 rounded-lg p-2.5 bg-muted/30">
-              <div className={`mt-0.5 rounded-md p-1 ${colorClass}`}>
-                <Icon className="h-3.5 w-3.5" />
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Lightbulb className="h-4 w-4 text-amber-500" />
+          Spending Insights
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {insights.map((insight, i) => {
+            const Icon = insight.icon
+            return (
+              <div key={i} className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+                <Badge variant={badgeVariant(insight.type)} className="mt-0.5 shrink-0">
+                  <Icon />
+                </Badge>
+                <p className="text-sm leading-relaxed text-muted-foreground">{insight.text}</p>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">{insight.text}</p>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
   )
 }
+
+export default SpendingInsights

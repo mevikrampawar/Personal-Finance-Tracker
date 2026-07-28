@@ -2,19 +2,24 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { getTransactionsForMonth, toLocalDate, formatShortDate, formatYearMonth, formatInputDate } from '@/lib/date'
+import { getTransactionsForMonth, toLocalDate, formatShortDate, formatYearMonth } from '@/lib/date'
 import { exportToCSV } from '@/lib/csv'
-import { useConfirmCtx, useToastCtx } from '@/app/providers'
 import { addMonths, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 
 export default function TransactionsPage() {
   const { user } = useAuth()
   const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions')
   const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
-  const { confirm } = useConfirmCtx()
-  const { toast } = useToastCtx()
   const [month, setMonth] = useState(new Date())
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -23,6 +28,7 @@ export default function TransactionsPage() {
   const [maxAmount, setMaxAmount] = useState('')
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const navigate = useNavigate()
 
   const monthTransactions = useMemo(() => getTransactionsForMonth(transactions, month), [transactions, month])
@@ -54,14 +60,15 @@ export default function TransactionsPage() {
     exportToCSV(sorted, `finance-transactions-${formatYearMonth(month)}.csv`)
   }
 
-  const handleDelete = async (id) => {
-    const ok = await confirm('Delete this transaction? This action cannot be undone.')
-    if (!ok) return
+  const handleDelete = async () => {
+    if (!deleteTarget) return
     try {
-      await remove(id)
-      toast('Transaction deleted', { type: 'success' })
+      await remove(deleteTarget)
+      toast.success('Transaction deleted')
     } catch {
-      toast('Failed to delete transaction', { type: 'error' })
+      toast.error('Failed to delete transaction')
+    } finally {
+      setDeleteTarget(null)
     }
   }
 
@@ -80,8 +87,19 @@ export default function TransactionsPage() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 w-48 animate-pulse rounded bg-muted" />
-        <div className="h-64 animate-pulse rounded-xl bg-muted" />
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-8 w-40" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-8 rounded-lg" />
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-8 w-8 rounded-lg" />
+          </div>
+        </div>
+        <Skeleton className="h-32 rounded-xl" />
+        <Skeleton className="h-64 rounded-xl" />
       </div>
     )
   }
@@ -94,79 +112,78 @@ export default function TransactionsPage() {
           <h2 className="text-2xl font-bold tracking-tight">Transactions</h2>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setMonth((m) => subMonths(m, 1))} className="rounded-lg border p-2 hover:bg-accent transition-colors" aria-label="Previous month">
+          <Button variant="outline" size="icon" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft className="h-4 w-4" />
-          </button>
+          </Button>
           <span className="min-w-[140px] text-center text-sm font-medium">{formatShortDate(month)}</span>
-          <button onClick={() => setMonth((m) => addMonths(m, 1))} className="rounded-lg border p-2 hover:bg-accent transition-colors" aria-label="Next month">
+          <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="rounded-xl border bg-card p-4 shadow-sm">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="Search description or category..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border bg-background pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search description or category..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="expense">Expenses</SelectItem>
+                <SelectItem value="income">Income</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categoryNames.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex gap-2">
+              <Input
+                type="number"
+                placeholder="Min"
+                value={minAmount}
+                onChange={(e) => setMinAmount(e.target.value)}
+              />
+              <Input
+                type="number"
+                placeholder="Max"
+                value={maxAmount}
+                onChange={(e) => setMaxAmount(e.target.value)}
+              />
+            </div>
           </div>
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="all">All Types</option>
-            <option value="expense">Expenses</option>
-            <option value="income">Income</option>
-          </select>
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="all">All Categories</option>
-            {categoryNames.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              placeholder="Min"
-              value={minAmount}
-              onChange={(e) => setMinAmount(e.target.value)}
-              className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            <input
-              type="number"
-              placeholder="Max"
-              value={maxAmount}
-              onChange={(e) => setMaxAmount(e.target.value)}
-              className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {hasFilters && (
+              <Button variant="outline" size="xs" onClick={clearFilters}>
+                <X className="h-3 w-3" /> Clear
+              </Button>
+            )}
+            <Button variant="outline" size="xs" onClick={handleExport} className="ml-auto">
+              <Download className="h-3 w-3" /> Export CSV
+            </Button>
           </div>
-        </div>
-        <div className="mt-3 flex gap-2">
-          {hasFilters && (
-            <button onClick={clearFilters} className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors">
-              <X className="h-3 w-3" /> Clear
-            </button>
-          )}
-          <button onClick={handleExport} className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-accent transition-colors ml-auto">
-            <Download className="h-3 w-3" /> Export CSV
-          </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Table */}
-      <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+      <Card>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -194,24 +211,24 @@ export default function TransactionsPage() {
                       <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">{d ? formatShortDate(d) : '-'}</td>
                       <td className="px-4 py-3 font-medium">{t.description}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                          t.type === 'income' ? 'bg-income/10 text-income' : 'bg-expense/10 text-expense'
-                        }`}>
+                        <Badge variant={t.type === 'income' ? 'success' : 'danger'} className="gap-1">
                           {t.type === 'income' ? '📈' : '📉'} {t.type}
-                        </span>
+                        </Badge>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">{t.category || '-'}</td>
+                      <td className="px-4 py-3">
+                        {t.category ? <Badge variant="outline">{t.category}</Badge> : <span className="text-muted-foreground">-</span>}
+                      </td>
                       <td className={`px-4 py-3 text-right tabular-nums font-medium ${t.type === 'income' ? 'text-income' : 'text-expense'}`}>
                         {formatCurrency(t.amount || 0)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => navigate(`/app/add?edit=${t.id}`)} className="rounded p-1.5 hover:bg-accent transition-colors" aria-label="Edit">
+                          <Button variant="ghost" size="icon-sm" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
                             <Edit className="h-3.5 w-3.5" />
-                          </button>
-                          <button onClick={() => handleDelete(t.id)} className="rounded p-1.5 hover:bg-destructive/10 text-destructive transition-colors" aria-label="Delete">
+                          </Button>
+                          <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(t.id)} aria-label="Delete" className="text-destructive hover:text-destructive">
                             <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -221,7 +238,21 @@ export default function TransactionsPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogMedia><Trash2 className="text-destructive" /></AlertDialogMedia>
+            <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

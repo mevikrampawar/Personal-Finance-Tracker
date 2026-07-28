@@ -1,45 +1,47 @@
 import { formatCurrency } from '@/lib/currency'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
 
-export default function BudgetProgress({ transactions, budgets }) {
-  const expenses = transactions.filter((t) => t.type === 'expense')
+export function BudgetProgress({ categories, monthTransactions }) {
+  const expenses = monthTransactions.filter((t) => t.type === 'expense')
   const totals = {}
   expenses.forEach((t) => {
     const cat = t.category || 'Uncategorized'
     totals[cat] = (totals[cat] || 0) + (t.amount || 0)
   })
 
-  const budgetEntries = Object.entries(budgets).filter(([, b]) => b > 0)
+  const budgetEntries = categories.filter((c) => c.monthlyBudget > 0)
 
   return (
-    <div className="rounded-xl border bg-card p-5 shadow-sm">
-      <h3 className="mb-4 text-sm font-semibold">Budget Progress</h3>
-      {budgetEntries.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No budgets set</p>
-      ) : (
-        <div className="space-y-3">
-          {budgetEntries.map(([cat, budget]) => {
-            const spent = totals[cat] || 0
-            const pct = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0
-            const over = spent > budget
-            return (
-              <div key={cat}>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="truncate">{cat}</span>
-                  <span className="tabular-nums font-medium">
-                    {formatCurrency(spent)} / {formatCurrency(budget)}
-                  </span>
-                </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={`h-full rounded-full transition-all ${over ? 'bg-destructive' : 'bg-primary'}`}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Budget Progress</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {budgetEntries.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No budgets set</p>
+        ) : (
+          <div className="space-y-4">
+            {budgetEntries.map((c) => {
+              const spent = totals[c.name] || 0
+              const pct = Math.min((spent / c.monthlyBudget) * 100, 100)
+              const over = spent > c.monthlyBudget
+              return (
+                <Progress
+                  key={c.name}
+                  value={pct}
+                  className={over ? '[&_[data-slot=progress-indicator]]:bg-destructive' : ''}
+                >
+                  <ProgressLabel>{c.name}</ProgressLabel>
+                  <ProgressValue>{formatCurrency(spent)} / {formatCurrency(c.monthlyBudget)}</ProgressValue>
+                </Progress>
+              )
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
+
+export default BudgetProgress

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
 import {
   TrendingUp, TrendingDown, Wallet, Target, BarChart3,
   Repeat, CreditCard, ArrowRight, Shield, Zap, Eye,
-  ChevronRight,
+  ChevronRight, Loader2,
 } from 'lucide-react'
 
 function useCountUp(end, duration = 2000, startOnView = true) {
@@ -121,7 +122,6 @@ function CandlestickChart() {
         const yBody = h - ((top - min) / range) * h
         const yHigh = h - ((c.high - min) / range) * h
         const yLow = h - ((c.low - min) / range) * h
-        const yMid = (yBody + yHigh) / 2
         return (
           <g key={i}>
             <line x1={x + cw / 2} y1={yHigh} x2={x + cw / 2} y2={yLow} stroke={bullish ? 'var(--color-income)' : 'var(--color-expense)'} strokeWidth="1" opacity="0.4" />
@@ -166,12 +166,19 @@ function StatBlock({ label, value, suffix, ref }) {
 
 function Nav({ onLogin }) {
   const [scrolled, setScrolled] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 10)
     window.addEventListener('scroll', handler, { passive: true })
     return () => window.removeEventListener('scroll', handler)
   }, [])
+
+  const handleClick = useCallback(async () => {
+    setLoading(true)
+    await onLogin()
+    setLoading(false)
+  }, [onLogin])
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-background/80 backdrop-blur-xl border-b shadow-sm' : ''}`}>
@@ -182,12 +189,10 @@ function Nav({ onLogin }) {
           </div>
           <span className="font-semibold text-sm sm:text-base">Finance Tracker</span>
         </div>
-        <button
-          onClick={onLogin}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow-md active:scale-95"
-        >
+        <Button onClick={handleClick} disabled={loading}>
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
           Sign In
-        </button>
+        </Button>
       </div>
     </header>
   )
@@ -227,7 +232,7 @@ export default function LandingPage() {
     try {
       await signInWithGoogle()
       navigate('/')
-    } catch (err) {
+    } catch {
       setLoading(false)
     }
   }, [signInWithGoogle, navigate])
@@ -239,7 +244,6 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="relative overflow-hidden pt-24 pb-16 sm:pt-32 sm:pb-24">
-        {/* Candlestick background */}
         <div className="absolute inset-0 opacity-20 dark:opacity-10">
           <CandlestickChart />
         </div>
@@ -260,20 +264,21 @@ export default function LandingPage() {
               The personal finance app that thinks like a portfolio dashboard.
             </p>
             <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <button
+              <Button
                 onClick={handleLogin}
                 disabled={loading}
-                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/30 active:scale-[0.98] disabled:opacity-50 sm:w-auto"
+                size="lg"
+                className="w-full sm:w-auto shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
               >
                 {loading ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <>
                     Get Started Free
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover/button:translate-x-0.5" data-icon="inline-end" />
                   </>
                 )}
-              </button>
+              </Button>
               <a
                 href="#features"
                 className="flex items-center gap-2 rounded-xl border px-8 py-3.5 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground sm:w-auto"
@@ -327,20 +332,22 @@ export default function LandingPage() {
               <p className="mx-auto mt-3 max-w-md text-sm text-primary-foreground/80">
                 Free. No credit card. Your financial clarity is one sign-in away.
               </p>
-              <button
+              <Button
                 onClick={handleLogin}
                 disabled={loading}
-                className="mt-8 inline-flex items-center gap-2 rounded-xl bg-background px-8 py-3.5 text-sm font-semibold text-foreground shadow-lg transition-all hover:shadow-xl hover:bg-background/90 active:scale-[0.98] disabled:opacity-50"
+                variant="secondary"
+                size="lg"
+                className="mt-8 shadow-lg hover:shadow-xl"
               >
                 {loading ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <>
                     Sign in with Google
-                    <ArrowRight className="h-4 w-4" />
+                    <ArrowRight className="h-4 w-4" data-icon="inline-end" />
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

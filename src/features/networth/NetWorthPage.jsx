@@ -2,20 +2,26 @@ import { useState } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { useToastCtx, useConfirmCtx } from '@/app/providers'
+import { useToastCtx } from '@/app/providers'
 import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel, AlertDialogMedia } from '@/components/ui/alert-dialog'
 
 export default function NetWorthPage() {
   const { user } = useAuth()
-  const { data: assets, add: addAsset, remove: removeAsset } = useFirestoreCollection(user?.uid, 'assets')
-  const { data: liabilities, add: addLiability, remove: removeLiability } = useFirestoreCollection(user?.uid, 'liabilities')
+  const { data: assets, loading: assetsLoading, add: addAsset, remove: removeAsset } = useFirestoreCollection(user?.uid, 'assets')
+  const { data: liabilities, loading: liabilitiesLoading, add: addLiability, remove: removeLiability } = useFirestoreCollection(user?.uid, 'liabilities')
   const { toast } = useToastCtx()
-  const { confirm } = useConfirmCtx()
 
   const [assetName, setAssetName] = useState('')
   const [assetAmount, setAssetAmount] = useState('')
   const [liabilityName, setLiabilityName] = useState('')
   const [liabilityAmount, setLiabilityAmount] = useState('')
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deleteType, setDeleteType] = useState(null)
 
   const totalAssets = assets.reduce((s, a) => s + (a.amount || 0), 0)
   const totalLiabilities = liabilities.reduce((s, l) => s + (l.amount || 0), 0)
@@ -47,26 +53,38 @@ export default function NetWorthPage() {
     }
   }
 
-  const handleDeleteAsset = async (a) => {
-    const ok = await confirm(`Delete "${a.name}"?`)
-    if (!ok) return
+  const handleDelete = async () => {
+    if (!deleteTarget) return
     try {
-      await removeAsset(a.id)
-      toast('Asset deleted', { type: 'success' })
+      if (deleteType === 'asset') {
+        await removeAsset(deleteTarget.id)
+      } else {
+        await removeLiability(deleteTarget.id)
+      }
+      setDeleteTarget(null)
+      setDeleteType(null)
+      toast(`${deleteType === 'asset' ? 'Asset' : 'Liability'} deleted`, { type: 'success' })
     } catch {
-      toast('Failed to delete asset', { type: 'error' })
+      toast('Failed to delete', { type: 'error' })
     }
   }
 
-  const handleDeleteLiability = async (l) => {
-    const ok = await confirm(`Delete "${l.name}"?`)
-    if (!ok) return
-    try {
-      await removeLiability(l.id)
-      toast('Liability deleted', { type: 'success' })
-    } catch {
-      toast('Failed to delete liability', { type: 'error' })
-    }
+  const isLoading = assetsLoading || liabilitiesLoading
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="mt-2 h-8 w-40" />
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Skeleton className="h-24 rounded-xl" />
+          <Skeleton className="h-24 rounded-xl" />
+          <Skeleton className="h-24 rounded-xl" />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -77,79 +95,200 @@ export default function NetWorthPage() {
         <p className="mt-1 text-sm text-muted-foreground">Track your assets and liabilities.</p>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <TrendingUp className="h-4 w-4 text-income" /> Total Assets
-          </div>
-          <p className="mt-2 text-2xl font-bold tabular-nums text-income">{formatCurrency(totalAssets)}</p>
-        </div>
-        <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <TrendingDown className="h-4 w-4 text-expense" /> Total Liabilities
-          </div>
-          <p className="mt-2 text-2xl font-bold tabular-nums text-expense">{formatCurrency(totalLiabilities)}</p>
-        </div>
-        <div className="rounded-xl border bg-card p-5 shadow-sm">
-          <div className="text-sm text-muted-foreground">Net Worth</div>
-          <p className={`mt-2 text-2xl font-bold tabular-nums ${netWorth >= 0 ? 'text-income' : 'text-expense'}`}>{formatCurrency(netWorth)}</p>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-income">
+              <TrendingUp className="h-4 w-4" /> Total Assets
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tabular-nums text-income">{formatCurrency(totalAssets)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-expense">
+              <TrendingDown className="h-4 w-4" /> Total Liabilities
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold tabular-nums text-expense">{formatCurrency(totalLiabilities)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Net Worth</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className={`text-2xl font-bold tabular-nums ${netWorth >= 0 ? 'text-income' : 'text-expense'}`}>
+              {formatCurrency(netWorth)}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Assets */}
         <div className="space-y-4">
-          <form onSubmit={handleAddAsset} className="rounded-xl border bg-card p-5 shadow-sm">
-            <h3 className="mb-3 text-sm font-semibold flex items-center gap-2"><TrendingUp className="h-4 w-4 text-income" /> Add Asset</h3>
-            <div className="flex gap-2">
-              <input type="text" placeholder="Name (e.g., Savings, Investment)" value={assetName} onChange={(e) => setAssetName(e.target.value)} className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-              <input type="number" placeholder="Amount" min="0" step="0.01" value={assetAmount} onChange={(e) => setAssetAmount(e.target.value)} className="w-28 rounded-lg border bg-background px-3 py-2 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-ring" />
-              <button type="submit" className="rounded-lg bg-income/10 p-2 text-income hover:bg-income/20 transition-colors"><Plus className="h-4 w-4" /></button>
-            </div>
-          </form>
-          <div className="rounded-xl border bg-card shadow-sm divide-y">
-            {assets.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-muted-foreground">No assets added</div>
-            ) : (
-              assets.map((a) => (
-                <div key={a.id} className="flex items-center justify-between px-4 py-3">
-                  <span className="text-sm font-medium">{a.name}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm tabular-nums text-income">{formatCurrency(a.amount)}</span>
-                    <button onClick={() => handleDeleteAsset(a)} className="rounded p-1 hover:bg-destructive/10 text-destructive" aria-label={`Delete ${a.name}`}><Trash2 className="h-3.5 w-3.5" /></button>
-                  </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-income" /> Add Asset
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAddAsset} className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="Name (e.g., Savings, Investment)"
+                  value={assetName}
+                  onChange={(e) => setAssetName(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  placeholder="Amount"
+                  min="0"
+                  step="0.01"
+                  value={assetAmount}
+                  onChange={(e) => setAssetAmount(e.target.value)}
+                  className="w-28"
+                />
+                <Button type="submit" variant="secondary" size="icon">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Assets</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {assets.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">No assets added</p>
+              ) : (
+                <div className="divide-y">
+                  {assets.map((a) => (
+                    <div key={a.id} className="flex items-center justify-between py-2">
+                      <span className="text-sm font-medium">{a.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm tabular-nums text-income">{formatCurrency(a.amount)}</span>
+                        <AlertDialog
+                          open={deleteTarget?.id === a.id && deleteType === 'asset'}
+                          onOpenChange={(open) => {
+                            if (!open) { setDeleteTarget(null); setDeleteType(null) }
+                          }}
+                        >
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              className="text-destructive"
+                              onClick={() => { setDeleteTarget(a); setDeleteType('asset') }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogMedia><Trash2 className="text-destructive" /></AlertDialogMedia>
+                              <AlertDialogTitle>Delete Asset</AlertDialogTitle>
+                              <AlertDialogDescription>Delete &ldquo;{a.name}&rdquo;?</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => { setDeleteTarget(null); setDeleteType(null) }}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction variant="destructive" onClick={handleDelete}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
-            )}
-          </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Liabilities */}
         <div className="space-y-4">
-          <form onSubmit={handleAddLiability} className="rounded-xl border bg-card p-5 shadow-sm">
-            <h3 className="mb-3 text-sm font-semibold flex items-center gap-2"><TrendingDown className="h-4 w-4 text-expense" /> Add Liability</h3>
-            <div className="flex gap-2">
-              <input type="text" placeholder="Name (e.g., Loan, Credit Card)" value={liabilityName} onChange={(e) => setLiabilityName(e.target.value)} className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-              <input type="number" placeholder="Amount" min="0" step="0.01" value={liabilityAmount} onChange={(e) => setLiabilityAmount(e.target.value)} className="w-28 rounded-lg border bg-background px-3 py-2 text-sm tabular-nums focus:outline-none focus:ring-2 focus:ring-ring" />
-              <button type="submit" className="rounded-lg bg-expense/10 p-2 text-expense hover:bg-expense/20 transition-colors"><Plus className="h-4 w-4" /></button>
-            </div>
-          </form>
-          <div className="rounded-xl border bg-card shadow-sm divide-y">
-            {liabilities.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-muted-foreground">No liabilities added</div>
-            ) : (
-              liabilities.map((l) => (
-                <div key={l.id} className="flex items-center justify-between px-4 py-3">
-                  <span className="text-sm font-medium">{l.name}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm tabular-nums text-expense">{formatCurrency(l.amount)}</span>
-                    <button onClick={() => handleDeleteLiability(l)} className="rounded p-1 hover:bg-destructive/10 text-destructive" aria-label={`Delete ${l.name}`}><Trash2 className="h-3.5 w-3.5" /></button>
-                  </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingDown className="h-4 w-4 text-expense" /> Add Liability
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleAddLiability} className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="Name (e.g., Loan, Credit Card)"
+                  value={liabilityName}
+                  onChange={(e) => setLiabilityName(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  placeholder="Amount"
+                  min="0"
+                  step="0.01"
+                  value={liabilityAmount}
+                  onChange={(e) => setLiabilityAmount(e.target.value)}
+                  className="w-28"
+                />
+                <Button type="submit" variant="secondary" size="icon">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Liabilities</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {liabilities.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">No liabilities added</p>
+              ) : (
+                <div className="divide-y">
+                  {liabilities.map((l) => (
+                    <div key={l.id} className="flex items-center justify-between py-2">
+                      <span className="text-sm font-medium">{l.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm tabular-nums text-expense">{formatCurrency(l.amount)}</span>
+                        <AlertDialog
+                          open={deleteTarget?.id === l.id && deleteType === 'liability'}
+                          onOpenChange={(open) => {
+                            if (!open) { setDeleteTarget(null); setDeleteType(null) }
+                          }}
+                        >
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              className="text-destructive"
+                              onClick={() => { setDeleteTarget(l); setDeleteType('liability') }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogMedia><Trash2 className="text-destructive" /></AlertDialogMedia>
+                              <AlertDialogTitle>Delete Liability</AlertDialogTitle>
+                              <AlertDialogDescription>Delete &ldquo;{l.name}&rdquo;?</AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => { setDeleteTarget(null); setDeleteType(null) }}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction variant="destructive" onClick={handleDelete}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
-            )}
-          </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

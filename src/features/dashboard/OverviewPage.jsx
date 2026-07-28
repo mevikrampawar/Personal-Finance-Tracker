@@ -1,16 +1,19 @@
+import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { formatMonthYear, getTransactionsForMonth } from '@/lib/date'
-import { useState, useMemo } from 'react'
 import { addMonths, subMonths } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, ArrowDownLeft, ArrowUpRight, IndianRupee, TrendingDown, TrendingUp } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, TrendingDown, TrendingUp, IndianRupee } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import CategoryBreakdown from './CategoryBreakdown'
-import BudgetProgress from './BudgetProgress'
-import SpendingInsights from './SpendingInsights'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { CategoryBreakdown } from './CategoryBreakdown'
+import { BudgetProgress } from './BudgetProgress'
+import { SpendingInsights } from './SpendingInsights'
 
-export default function OverviewPage() {
+export function OverviewPage() {
   const { user } = useAuth()
   const { data: transactions, loading } = useFirestoreCollection(user?.uid, 'transactions')
   const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
@@ -22,21 +25,13 @@ export default function OverviewPage() {
   const expenses = useMemo(() => monthTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0), [monthTransactions])
   const balance = income - expenses
 
-  const categoryBudgets = useMemo(() => {
-    const budgets = {}
-    categories.forEach((c) => {
-      if (c.monthlyBudget > 0) budgets[c.name] = c.monthlyBudget
-    })
-    return budgets
-  }, [categories])
-
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 w-48 animate-pulse rounded bg-muted" />
+        <Skeleton className="h-8 w-48" />
         <div className="grid gap-4 sm:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-28 animate-pulse rounded-xl bg-muted" />
+            <Skeleton key={i} className="h-28 rounded-xl" />
           ))}
         </div>
       </div>
@@ -45,80 +40,77 @@ export default function OverviewPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Dashboard</p>
           <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setMonth((m) => subMonths(m, 1))}
-            className="rounded-lg border p-2 hover:bg-accent transition-colors"
-            aria-label="Previous month"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
+          <Button variant="outline" size="icon" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
+            <ChevronLeft />
+          </Button>
           <span className="min-w-[140px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
-          <button
-            onClick={() => setMonth((m) => addMonths(m, 1))}
-            className="rounded-lg border p-2 hover:bg-accent transition-colors"
-            aria-label="Next month"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+          <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
+            <ChevronRight />
+          </Button>
         </div>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <SummaryCard label="Total Income" value={income} icon={TrendingUp} color="text-income" />
-        <SummaryCard label="Total Expenses" value={expenses} icon={TrendingDown} color="text-expense" />
-        <SummaryCard label="Balance" value={balance} icon={IndianRupee} color={balance >= 0 ? 'text-income' : 'text-expense'} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Income</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <span className="flex items-center gap-2 text-2xl font-bold tabular-nums">
+              <TrendingUp className="h-5 w-5 text-income" />
+              {formatCurrency(income)}
+            </span>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Expenses</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <span className="flex items-center gap-2 text-2xl font-bold tabular-nums text-expense">
+              <TrendingDown className="h-5 w-5" />
+              {formatCurrency(expenses)}
+            </span>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Balance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <span className={`flex items-center gap-2 text-2xl font-bold tabular-nums ${balance >= 0 ? '' : 'text-expense'}`}>
+              <IndianRupee className="h-5 w-5" />
+              {formatCurrency(balance)}
+            </span>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid gap-3 sm:grid-cols-3">
-        <QuickAction label="Add Entry" desc="Record money movement" onClick={() => navigate('/app/add')} icon="+" />
-        <QuickAction label="Review" desc="Filter and export" onClick={() => navigate('/app/transactions')} icon="▦" />
-        <QuickAction label="Budgets" desc="Tune category limits" onClick={() => navigate('/app/categories')} icon="◫" />
+      <div className="flex flex-wrap gap-3">
+        <Button onClick={() => navigate('/app/add')}>
+          <Plus data-icon="inline-start" /> Add Entry
+        </Button>
+        <Button variant="outline" onClick={() => navigate('/app/transactions')}>
+          Review
+        </Button>
+        <Button variant="outline" onClick={() => navigate('/app/compare')}>
+          Compare
+        </Button>
       </div>
 
-      {/* Insights */}
-      <SpendingInsights transactions={transactions} month={month} />
+      <SpendingInsights transactions={transactions} month={month} monthTransactions={monthTransactions} />
       <div className="grid gap-4 lg:grid-cols-2">
-        <CategoryBreakdown transactions={monthTransactions} />
-        <BudgetProgress transactions={monthTransactions} budgets={categoryBudgets} />
+        <CategoryBreakdown categories={categories} monthTransactions={monthTransactions} />
+        <BudgetProgress categories={categories} monthTransactions={monthTransactions} />
       </div>
     </div>
   )
 }
 
-function SummaryCard({ label, value, icon: Icon, color }) {
-  return (
-    <div className="rounded-xl border bg-card p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">{label}</p>
-        <Icon className={`h-4 w-4 ${color}`} />
-      </div>
-      <p className="mt-2 text-2xl font-bold tabular-nums">{formatCurrency(value)}</p>
-    </div>
-  )
-}
-
-function QuickAction({ label, desc, onClick, icon }) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-4 rounded-xl border bg-card p-4 text-left shadow-sm transition-all hover:shadow-md hover:border-primary/30"
-    >
-      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-lg text-primary font-bold">
-        {icon}
-      </span>
-      <div>
-        <p className="text-sm font-semibold">{label}</p>
-        <p className="text-xs text-muted-foreground">{desc}</p>
-      </div>
-    </button>
-  )
-}
+export default OverviewPage
