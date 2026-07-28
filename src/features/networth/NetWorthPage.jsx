@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { useToastCtx } from '@/app/providers'
+import { useToastCtx, useConfirmCtx } from '@/app/providers'
 import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
 
 export default function NetWorthPage() {
@@ -10,6 +10,7 @@ export default function NetWorthPage() {
   const { data: assets, add: addAsset, remove: removeAsset } = useFirestoreCollection(user?.uid, 'assets')
   const { data: liabilities, add: addLiability, remove: removeLiability } = useFirestoreCollection(user?.uid, 'liabilities')
   const { toast } = useToastCtx()
+  const { confirm } = useConfirmCtx()
 
   const [assetName, setAssetName] = useState('')
   const [assetAmount, setAssetAmount] = useState('')
@@ -23,17 +24,49 @@ export default function NetWorthPage() {
   const handleAddAsset = async (e) => {
     e.preventDefault()
     if (!assetName.trim() || !assetAmount) return toast('Fill in name and amount', { type: 'warning' })
-    await addAsset({ name: assetName.trim(), amount: parseFloat(assetAmount), type: 'asset' })
-    setAssetName('')
-    setAssetAmount('')
+    try {
+      await addAsset({ name: assetName.trim(), amount: parseFloat(assetAmount), type: 'asset' })
+      setAssetName('')
+      setAssetAmount('')
+      toast('Asset added', { type: 'success' })
+    } catch {
+      toast('Failed to add asset', { type: 'error' })
+    }
   }
 
   const handleAddLiability = async (e) => {
     e.preventDefault()
     if (!liabilityName.trim() || !liabilityAmount) return toast('Fill in name and amount', { type: 'warning' })
-    await addLiability({ name: liabilityName.trim(), amount: parseFloat(liabilityAmount), type: 'liability' })
-    setLiabilityName('')
-    setLiabilityAmount('')
+    try {
+      await addLiability({ name: liabilityName.trim(), amount: parseFloat(liabilityAmount), type: 'liability' })
+      setLiabilityName('')
+      setLiabilityAmount('')
+      toast('Liability added', { type: 'success' })
+    } catch {
+      toast('Failed to add liability', { type: 'error' })
+    }
+  }
+
+  const handleDeleteAsset = async (a) => {
+    const ok = await confirm(`Delete "${a.name}"?`)
+    if (!ok) return
+    try {
+      await removeAsset(a.id)
+      toast('Asset deleted', { type: 'success' })
+    } catch {
+      toast('Failed to delete asset', { type: 'error' })
+    }
+  }
+
+  const handleDeleteLiability = async (l) => {
+    const ok = await confirm(`Delete "${l.name}"?`)
+    if (!ok) return
+    try {
+      await removeLiability(l.id)
+      toast('Liability deleted', { type: 'success' })
+    } catch {
+      toast('Failed to delete liability', { type: 'error' })
+    }
   }
 
   return (
@@ -84,7 +117,7 @@ export default function NetWorthPage() {
                   <span className="text-sm font-medium">{a.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm tabular-nums text-income">{formatCurrency(a.amount)}</span>
-                    <button onClick={() => removeAsset(a.id)} className="rounded p-1 hover:bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => handleDeleteAsset(a)} className="rounded p-1 hover:bg-destructive/10 text-destructive" aria-label={`Delete ${a.name}`}><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 </div>
               ))
@@ -111,7 +144,7 @@ export default function NetWorthPage() {
                   <span className="text-sm font-medium">{l.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm tabular-nums text-expense">{formatCurrency(l.amount)}</span>
-                    <button onClick={() => removeLiability(l.id)} className="rounded p-1 hover:bg-destructive/10 text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => handleDeleteLiability(l)} className="rounded p-1 hover:bg-destructive/10 text-destructive" aria-label={`Delete ${l.name}`}><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
                 </div>
               ))

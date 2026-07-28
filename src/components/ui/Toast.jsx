@@ -19,7 +19,7 @@ export default function ToastContainer({ toasts, onRemove }) {
   if (toasts.length === 0) return null
 
   return (
-    <div className="fixed bottom-20 right-4 z-[100] flex flex-col gap-2 sm:bottom-6 lg:bottom-6">
+    <div className="fixed bottom-20 right-4 z-[100] flex flex-col gap-2 sm:bottom-6 lg:bottom-6" aria-live="polite" role="status">
       {toasts.map((t) => {
         const Icon = ICONS[t.type] || Info
         return (

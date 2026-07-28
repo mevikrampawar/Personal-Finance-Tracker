@@ -1,8 +1,8 @@
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { formatMonthYear, getTransactionsForMonth, getTransactionsForDate } from '@/lib/date'
-import { useState } from 'react'
+import { formatMonthYear, getTransactionsForMonth } from '@/lib/date'
+import { useState, useMemo } from 'react'
 import { addMonths, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, ArrowDownLeft, ArrowUpRight, IndianRupee, TrendingDown, TrendingUp } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -17,15 +17,18 @@ export default function OverviewPage() {
   const [month, setMonth] = useState(new Date())
   const navigate = useNavigate()
 
-  const monthTransactions = getTransactionsForMonth(transactions, month)
-  const income = monthTransactions.filter((t) => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0)
-  const expenses = monthTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0)
+  const monthTransactions = useMemo(() => getTransactionsForMonth(transactions, month), [transactions, month])
+  const income = useMemo(() => monthTransactions.filter((t) => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0), [monthTransactions])
+  const expenses = useMemo(() => monthTransactions.filter((t) => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0), [monthTransactions])
   const balance = income - expenses
 
-  const categoryBudgets = {}
-  categories.forEach((c) => {
-    if (c.monthlyBudget > 0) categoryBudgets[c.name] = c.monthlyBudget
-  })
+  const categoryBudgets = useMemo(() => {
+    const budgets = {}
+    categories.forEach((c) => {
+      if (c.monthlyBudget > 0) budgets[c.name] = c.monthlyBudget
+    })
+    return budgets
+  }, [categories])
 
   if (loading) {
     return (
@@ -76,9 +79,9 @@ export default function OverviewPage() {
 
       {/* Quick Actions */}
       <div className="grid gap-3 sm:grid-cols-3">
-        <QuickAction label="Add Entry" desc="Record money movement" onClick={() => navigate('/add')} icon="+" />
-        <QuickAction label="Review" desc="Filter and export" onClick={() => navigate('/transactions')} icon="▦" />
-        <QuickAction label="Budgets" desc="Tune category limits" onClick={() => navigate('/categories')} icon="◫" />
+        <QuickAction label="Add Entry" desc="Record money movement" onClick={() => navigate('/app/add')} icon="+" />
+        <QuickAction label="Review" desc="Filter and export" onClick={() => navigate('/app/transactions')} icon="▦" />
+        <QuickAction label="Budgets" desc="Tune category limits" onClick={() => navigate('/app/categories')} icon="◫" />
       </div>
 
       {/* Insights */}

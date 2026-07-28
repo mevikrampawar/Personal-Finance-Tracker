@@ -1,3 +1,9 @@
+function sanitizeCSVField(value) {
+  const str = String(value).replaceAll('"', '""')
+  if (/^[=+\-@\t\r]/.test(str)) return `'${str}`
+  return `"${str}"`
+}
+
 export function exportToCSV(transactions, filename) {
   const header = ['Date', 'Description', 'Type', 'Category', 'Amount']
   const rows = transactions.map((t) => {
@@ -6,7 +12,7 @@ export function exportToCSV(transactions, filename) {
     return [dateStr, t.description || '', t.type || '', t.category || '', t.amount || 0]
   })
   const csv = [header, ...rows]
-    .map((row) => row.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(','))
+    .map((row) => row.map(sanitizeCSVField).join(','))
     .join('\n')
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)

@@ -21,15 +21,15 @@ import { useState } from 'react'
 import { cn } from '@/lib/cn'
 
 const NAV_ITEMS = [
-  { path: '/', label: 'Overview', icon: LayoutDashboard },
-  { path: '/add', label: 'Add Transaction', icon: PlusCircle },
-  { path: '/transactions', label: 'Transactions', icon: List },
-  { path: '/categories', label: 'Budgets', icon: Wallet },
-  { path: '/recurring', label: 'Recurring', icon: Repeat },
-  { path: '/goals', label: 'Goals', icon: Target },
-  { path: '/networth', label: 'Net Worth', icon: TrendingUp },
-  { path: '/subscriptions', label: 'Subscriptions', icon: CreditCard },
-  { path: '/compare', label: 'Compare', icon: BarChart3 },
+  { path: '/app', label: 'Overview', icon: LayoutDashboard },
+  { path: '/app/add', label: 'Add Transaction', icon: PlusCircle },
+  { path: '/app/transactions', label: 'Transactions', icon: List },
+  { path: '/app/categories', label: 'Budgets', icon: Wallet },
+  { path: '/app/recurring', label: 'Recurring', icon: Repeat },
+  { path: '/app/goals', label: 'Goals', icon: Target },
+  { path: '/app/networth', label: 'Net Worth', icon: TrendingUp },
+  { path: '/app/subscriptions', label: 'Subscriptions', icon: CreditCard },
+  { path: '/app/compare', label: 'Compare', icon: BarChart3 },
 ]
 
 export default function DashboardLayout() {
@@ -45,8 +45,12 @@ export default function DashboardLayout() {
   }
 
   const handleLogout = async () => {
-    await signOut()
-    navigate('/login')
+    try {
+      await signOut()
+      navigate('/')
+    } catch {
+      navigate('/')
+    }
   }
 
   return (
@@ -132,6 +136,7 @@ export default function DashboardLayout() {
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+              aria-label="Logout"
             >
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Logout</span>

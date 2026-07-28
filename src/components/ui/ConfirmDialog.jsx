@@ -1,30 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { X, AlertTriangle } from 'lucide-react'
 
-export function useConfirm() {
-  const [state, setState] = useState({ open: false, message: '', resolve: null })
-
-  const confirm = (message) => {
-    return new Promise((resolve) => {
-      setState({ open: true, message, resolve })
-    })
-  }
-
-  const handleConfirm = () => {
-    state.resolve?.(true)
-    setState({ open: false, message: '', resolve: null })
-  }
-
-  const handleCancel = () => {
-    state.resolve?.(false)
-    setState({ open: false, message: '', resolve: null })
-  }
-
-  return { confirm, state, handleConfirm, handleCancel }
-}
-
 export default function ConfirmDialog({ open, message, onConfirm, onCancel }) {
+  const confirmRef = useRef(null)
   const cancelRef = useRef(null)
+  const dialogRef = useRef(null)
 
   useEffect(() => {
     if (open) cancelRef.current?.focus()
@@ -34,6 +14,19 @@ export default function ConfirmDialog({ open, message, onConfirm, onCancel }) {
     if (!open) return
     const handler = (e) => {
       if (e.key === 'Escape') onCancel()
+      if (e.key === 'Tab') {
+        const focusable = dialogRef.current?.querySelectorAll('button')
+        if (!focusable || focusable.length === 0) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
@@ -42,9 +35,9 @@ export default function ConfirmDialog({ open, message, onConfirm, onCancel }) {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center">
+    <div className="fixed inset-0 z-[90] flex items-center justify-center" role="dialog" aria-modal="true" aria-label="Confirm action">
       <div className="fixed inset-0 bg-black/50" onClick={onCancel} />
-      <div className="relative z-10 w-full max-w-md rounded-2xl border bg-card p-6 shadow-xl mx-4">
+      <div ref={dialogRef} className="relative z-10 w-full max-w-md rounded-2xl border bg-card p-6 shadow-xl mx-4">
         <button
           onClick={onCancel}
           className="absolute right-4 top-4 rounded-lg p-1 hover:bg-accent transition-colors"
@@ -69,6 +62,7 @@ export default function ConfirmDialog({ open, message, onConfirm, onCancel }) {
             Cancel
           </button>
           <button
+            ref={confirmRef}
             onClick={onConfirm}
             className="rounded-lg bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-colors"
           >

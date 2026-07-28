@@ -56,12 +56,17 @@ export default function TransactionFormPage() {
       createdAt: transactionDate,
     }
 
-    if (isEditing) {
-      await update(editId, payload)
-    } else {
-      await add(payload)
+    try {
+      if (isEditing) {
+        await update(editId, payload)
+      } else {
+        await add(payload)
+      }
+      toast(isEditing ? 'Transaction updated' : 'Transaction added', { type: 'success' })
+      navigate('/app/transactions')
+    } catch (err) {
+      toast('Failed to save transaction. Please try again.', { type: 'error' })
     }
-    navigate('/transactions')
   }
 
   return (
@@ -166,7 +171,7 @@ export default function TransactionFormPage() {
           {isEditing && (
             <button
               type="button"
-              onClick={() => navigate('/transactions')}
+              onClick={() => navigate('/app/transactions')}
               className="flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium hover:bg-accent transition-colors"
             >
               <X className="h-4 w-4" />

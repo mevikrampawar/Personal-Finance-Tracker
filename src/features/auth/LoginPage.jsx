@@ -13,7 +13,7 @@ export default function LoginPage() {
     setError('')
     try {
       await signInWithGoogle()
-      navigate('/')
+      navigate('/app')
     } catch (err) {
       if (err.code === 'auth/popup-closed-by-user') {
         setError('Sign-in popup was closed')

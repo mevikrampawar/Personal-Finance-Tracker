@@ -27,17 +27,22 @@ export default function RecurringPage() {
     if (!amt || amt <= 0) return toast('Enter a valid amount', { type: 'warning' })
     if (type === 'expense' && !category) return toast('Select a category for expenses', { type: 'warning' })
 
-    await add({
-      description: description.trim(),
-      amount: amt,
-      type,
-      category: type === 'expense' ? category : '',
-      dayOfMonth: Math.min(Math.max(Number(dayOfMonth), 1), 31),
-    })
-    setDescription('')
-    setAmount('')
-    setCategory('')
-    setDayOfMonth('1')
+    try {
+      await add({
+        description: description.trim(),
+        amount: amt,
+        type,
+        category: type === 'expense' ? category : '',
+        dayOfMonth: Math.min(Math.max(Number(dayOfMonth), 1), 31),
+      })
+      setDescription('')
+      setAmount('')
+      setCategory('')
+      setDayOfMonth('1')
+      toast('Recurring transaction added', { type: 'success' })
+    } catch {
+      toast('Failed to add recurring transaction', { type: 'error' })
+    }
   }
 
   const handleApply = async () => {
@@ -45,6 +50,7 @@ export default function RecurringPage() {
     const now = new Date()
     const periodKey = formatYearMonth(now)
     let count = 0
+    let errors = 0
 
     for (const r of recurring) {
       const alreadyExists = transactions.some(
@@ -52,28 +58,43 @@ export default function RecurringPage() {
       )
       if (alreadyExists) continue
 
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
-      const txDate = new Date(now.getFullYear(), now.getMonth(), Math.min(r.dayOfMonth || 1, daysInMonth), 12, 0, 0, 0)
+      try {
+        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+        const txDate = new Date(now.getFullYear(), now.getMonth(), Math.min(r.dayOfMonth || 1, daysInMonth), 12, 0, 0, 0)
 
-      await addTransaction({
-        description: r.description,
-        type: r.type,
-        category: r.type === 'expense' ? r.category : '',
-        amount: r.amount,
-        createdAt: txDate,
-        recurringId: r.id,
-        recurringPeriod: periodKey,
-      })
-      count++
+        await addTransaction({
+          description: r.description,
+          type: r.type,
+          category: r.type === 'expense' ? r.category : '',
+          amount: r.amount,
+          createdAt: txDate,
+          recurringId: r.id,
+          recurringPeriod: periodKey,
+        })
+        count++
+      } catch {
+        errors++
+      }
     }
 
-    toast(count > 0 ? `Applied ${count} recurring transaction(s)` : 'Recurring transactions already exist for this month', { type: count > 0 ? 'success' : 'info' })
+    if (errors > 0) {
+      toast(`Applied ${count} transactions, ${errors} failed`, { type: 'warning' })
+    } else if (count > 0) {
+      toast(`Applied ${count} recurring transaction(s)`, { type: 'success' })
+    } else {
+      toast('Recurring transactions already exist for this month', { type: 'info' })
+    }
   }
 
   const handleDelete = async (id) => {
     const ok = await confirm('Delete this recurring transaction template?')
     if (!ok) return
-    await remove(id)
+    try {
+      await remove(id)
+      toast('Recurring transaction deleted', { type: 'success' })
+    } catch {
+      toast('Failed to delete recurring transaction', { type: 'error' })
+    }
   }
 
   return (

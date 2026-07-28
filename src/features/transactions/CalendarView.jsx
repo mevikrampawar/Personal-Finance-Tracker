@@ -3,7 +3,7 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { getTransactionsForDate, toLocalDate, formatFullDate, formatShortDate, formatInputDate } from '@/lib/date'
-import { useConfirmCtx } from '@/app/providers'
+import { useConfirmCtx, useToastCtx } from '@/app/providers'
 import { addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, getDaysInMonth, isSameDay, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -14,6 +14,7 @@ export default function CalendarView() {
   const { user } = useAuth()
   const { data: transactions, remove } = useFirestoreCollection(user?.uid, 'transactions')
   const { confirm } = useConfirmCtx()
+  const { toast } = useToastCtx()
   const [month, setMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
   const navigate = useNavigate()
@@ -26,22 +27,30 @@ export default function CalendarView() {
 
   const calendarDays = useMemo(() => {
     const days = []
-    // Previous month trailing days
     const prevMonthDays = getDaysInMonth(new Date(year, monthIdx - 1))
     for (let i = startDay - 1; i >= 0; i--) {
       days.push({ day: prevMonthDays - i, currentMonth: false, date: new Date(year, monthIdx - 1, prevMonthDays - i) })
     }
-    // Current month days
     for (let d = 1; d <= daysInMonth; d++) {
       days.push({ day: d, currentMonth: true, date: new Date(year, monthIdx, d) })
     }
-    // Next month leading days
     const remaining = 42 - days.length
     for (let d = 1; d <= remaining; d++) {
       days.push({ day: d, currentMonth: false, date: new Date(year, monthIdx + 1, d) })
     }
     return days
   }, [year, monthIdx, daysInMonth, startDay])
+
+  const txCountByDate = useMemo(() => {
+    const map = {}
+    transactions.forEach((t) => {
+      const d = toLocalDate(t.createdAt)
+      if (!d) return
+      const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+      map[key] = (map[key] || 0) + 1
+    })
+    return map
+  }, [transactions])
 
   const selectedDayTransactions = useMemo(
     () => getTransactionsForDate(transactions, selectedDate).sort((a, b) => {
@@ -55,7 +64,12 @@ export default function CalendarView() {
   const handleDelete = async (id) => {
     const ok = await confirm('Delete this transaction?')
     if (!ok) return
-    await remove(id)
+    try {
+      await remove(id)
+      toast('Transaction deleted', { type: 'success' })
+    } catch {
+      toast('Failed to delete transaction', { type: 'error' })
+    }
   }
 
   return (
@@ -84,7 +98,8 @@ export default function CalendarView() {
             <div key={d} className="py-2 text-center text-xs font-medium text-muted-foreground">{d}</div>
           ))}
           {calendarDays.map((day, i) => {
-            const dayTxCount = getTransactionsForDate(transactions, day.date).length
+            const dateKey = `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`
+            const dayTxCount = txCountByDate[dateKey] || 0
             const isSelected = isSameDay(day.date, selectedDate)
             const today = isToday(day.date)
             return (
@@ -138,7 +153,7 @@ export default function CalendarView() {
                     {formatCurrency(t.amount || 0)}
                   </span>
                   <div className="flex gap-1">
-                    <button onClick={() => navigate(`/add?edit=${t.id}`)} className="rounded p-1 hover:bg-accent transition-colors" aria-label="Edit">
+                    <button onClick={() => navigate(`/app/add?edit=${t.id}`)} className="rounded p-1 hover:bg-accent transition-colors" aria-label="Edit">
                       <Edit className="h-3 w-3" />
                     </button>
                     <button onClick={() => handleDelete(t.id)} className="rounded p-1 hover:bg-destructive/10 text-destructive transition-colors" aria-label="Delete">

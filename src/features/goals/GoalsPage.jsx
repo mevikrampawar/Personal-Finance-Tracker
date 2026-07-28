@@ -21,15 +21,20 @@ export default function GoalsPage() {
     if (!name.trim() || !targetAmount) return toast('Please fill in name and target amount', { type: 'warning' })
     const amt = parseFloat(targetAmount)
     if (!amt || amt <= 0) return toast('Enter a valid target amount', { type: 'warning' })
-    await add({
-      name: name.trim(),
-      targetAmount: amt,
-      targetDate: targetDate || null,
-      currentAmount: 0,
-    })
-    setName('')
-    setTargetAmount('')
-    setTargetDate('')
+    try {
+      await add({
+        name: name.trim(),
+        targetAmount: amt,
+        targetDate: targetDate || null,
+        currentAmount: 0,
+      })
+      setName('')
+      setTargetAmount('')
+      setTargetDate('')
+      toast('Goal created', { type: 'success' })
+    } catch {
+      toast('Failed to create goal', { type: 'error' })
+    }
   }
 
   const handleContribute = async (goal) => {
@@ -37,18 +42,28 @@ export default function GoalsPage() {
     if (!amt || amt <= 0) return
     const newAmount = (goal.currentAmount || 0) + amt
     const pct = Math.min((newAmount / goal.targetAmount) * 100, 100)
-    await update(goal.id, { currentAmount: newAmount })
-    setContribution((prev) => ({ ...prev, [goal.id]: '' }))
-    if (pct >= 100) {
-      setShowCelebrate(goal.id)
-      setTimeout(() => setShowCelebrate(null), 3000)
+    try {
+      await update(goal.id, { currentAmount: newAmount })
+      setContribution((prev) => ({ ...prev, [goal.id]: '' }))
+      if (pct >= 100) {
+        setShowCelebrate(goal.id)
+        setTimeout(() => setShowCelebrate(null), 3000)
+      }
+      toast('Contribution added', { type: 'success' })
+    } catch {
+      toast('Failed to add contribution', { type: 'error' })
     }
   }
 
   const handleDelete = async (id) => {
     const ok = await confirm('Delete this goal?')
     if (!ok) return
-    await remove(id)
+    try {
+      await remove(id)
+      toast('Goal deleted', { type: 'success' })
+    } catch {
+      toast('Failed to delete goal', { type: 'error' })
+    }
   }
 
   return (

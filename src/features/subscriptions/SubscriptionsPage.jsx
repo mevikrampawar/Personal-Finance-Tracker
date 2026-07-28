@@ -25,21 +25,31 @@ export default function SubscriptionsPage() {
   const handleAdd = async (e) => {
     e.preventDefault()
     if (!name.trim() || !amount) return toast('Fill in name and amount', { type: 'warning' })
-    await add({
-      name: name.trim(),
-      amount: parseFloat(amount),
-      frequency,
-      nextDate: nextDate || null,
-    })
-    setName('')
-    setAmount('')
-    setNextDate('')
+    try {
+      await add({
+        name: name.trim(),
+        amount: parseFloat(amount),
+        frequency,
+        nextDate: nextDate || null,
+      })
+      setName('')
+      setAmount('')
+      setNextDate('')
+      toast('Subscription added', { type: 'success' })
+    } catch {
+      toast('Failed to add subscription', { type: 'error' })
+    }
   }
 
   const handleDelete = async (id) => {
     const ok = await confirm('Delete this subscription?')
     if (!ok) return
-    await remove(id)
+    try {
+      await remove(id)
+      toast('Subscription deleted', { type: 'success' })
+    } catch {
+      toast('Failed to delete subscription', { type: 'error' })
+    }
   }
 
   return (

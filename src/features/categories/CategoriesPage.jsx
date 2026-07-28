@@ -25,14 +25,24 @@ export default function CategoriesPage() {
     const name = newName.trim()
     if (!name) return toast('Please enter a category name', { type: 'warning' })
     if (categories.some((c) => c.name === name)) return toast('Category already exists', { type: 'warning' })
-    await add({ name, monthlyBudget: 0 })
-    setNewName('')
+    try {
+      await add({ name, monthlyBudget: 0 })
+      setNewName('')
+      toast('Category added', { type: 'success' })
+    } catch {
+      toast('Failed to add category', { type: 'error' })
+    }
   }
 
   const handleDelete = async (cat) => {
     const ok = await confirm(`Delete the "${cat.name}" category? Existing transactions will keep their saved category name.`)
     if (!ok) return
-    await remove(cat.id)
+    try {
+      await remove(cat.id)
+      toast('Category deleted', { type: 'success' })
+    } catch {
+      toast('Failed to delete category', { type: 'error' })
+    }
   }
 
   const handleBudgetChange = (catId, value) => {
@@ -40,13 +50,17 @@ export default function CategoriesPage() {
   }
 
   const handleSaveBudgets = async () => {
-    const updates = categories.map((cat) => {
-      const val = Number(budgetEdits[cat.id] ?? cat.monthlyBudget ?? 0)
-      return update(cat.id, { monthlyBudget: val > 0 ? val : 0 })
-    })
-    await Promise.all(updates)
-    setBudgetEdits({})
-    toast('Budgets saved', { type: 'success' })
+    try {
+      const updates = categories.map((cat) => {
+        const val = Number(budgetEdits[cat.id] ?? cat.monthlyBudget ?? 0)
+        return update(cat.id, { monthlyBudget: val > 0 ? val : 0 })
+      })
+      await Promise.all(updates)
+      setBudgetEdits({})
+      toast('Budgets saved', { type: 'success' })
+    } catch {
+      toast('Failed to save budgets', { type: 'error' })
+    }
   }
 
   return (

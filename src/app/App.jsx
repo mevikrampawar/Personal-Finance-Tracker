@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from '@/features/auth/AuthProvider'
 import LoginPage from '@/features/auth/LoginPage'
 import DashboardLayout from '@/app/layouts/DashboardLayout'
 
+const LandingPage = lazy(() => import('@/features/landing/LandingPage'))
 const OverviewPage = lazy(() => import('@/features/dashboard/OverviewPage'))
 const TransactionsPage = lazy(() => import('@/features/transactions/TransactionsPage'))
 const TransactionFormPage = lazy(() => import('@/features/transactions/TransactionFormPage'))
@@ -31,14 +32,14 @@ function ProtectedRoute({ children }) {
       </div>
     )
   }
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) return <Navigate to="/" replace />
   return children
 }
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return null
-  if (user) return <Navigate to="/" replace />
+  if (user) return <Navigate to="/app" replace />
   return children
 }
 
@@ -49,6 +50,14 @@ export default function App() {
         <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route
+              path="/"
+              element={
+                <PublicRoute>
+                  <LandingPage />
+                </PublicRoute>
+              }
+            />
+            <Route
               path="/login"
               element={
                 <PublicRoute>
@@ -57,7 +66,7 @@ export default function App() {
               }
             />
             <Route
-              path="/"
+              path="/app"
               element={
                 <ProtectedRoute>
                   <DashboardLayout />

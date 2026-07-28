@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { getTransactionsForMonth, toLocalDate, formatShortDate, formatYearMonth, formatInputDate } from '@/lib/date'
 import { exportToCSV } from '@/lib/csv'
-import { useConfirmCtx } from '@/app/providers'
+import { useConfirmCtx, useToastCtx } from '@/app/providers'
 import { addMonths, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -14,6 +14,7 @@ export default function TransactionsPage() {
   const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions')
   const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
   const { confirm } = useConfirmCtx()
+  const { toast } = useToastCtx()
   const [month, setMonth] = useState(new Date())
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -24,8 +25,8 @@ export default function TransactionsPage() {
   const [toDate, setToDate] = useState('')
   const navigate = useNavigate()
 
-  const monthTransactions = getTransactionsForMonth(transactions, month)
-  const filtered = monthTransactions.filter((t) => {
+  const monthTransactions = useMemo(() => getTransactionsForMonth(transactions, month), [transactions, month])
+  const filtered = useMemo(() => monthTransactions.filter((t) => {
     const desc = (t.description || '').toLowerCase()
     const cat = (t.category || '').toLowerCase()
     const s = search.toLowerCase()
@@ -39,15 +40,15 @@ export default function TransactionsPage() {
     if (fromDate && d && d < new Date(`${fromDate}T00:00:00`)) return false
     if (toDate && d && d > new Date(`${toDate}T23:59:59`)) return false
     return true
-  })
+  }), [monthTransactions, search, typeFilter, categoryFilter, minAmount, maxAmount, fromDate, toDate])
 
-  const sorted = [...filtered].sort((a, b) => {
+  const sorted = useMemo(() => [...filtered].sort((a, b) => {
     const da = toLocalDate(a.createdAt)
     const db = toLocalDate(b.createdAt)
     return (db?.getTime() || 0) - (da?.getTime() || 0)
-  })
+  }), [filtered])
 
-  const categoryNames = [...new Set(monthTransactions.map((t) => t.category).filter(Boolean))]
+  const categoryNames = useMemo(() => [...new Set(monthTransactions.map((t) => t.category).filter(Boolean))], [monthTransactions])
 
   const handleExport = () => {
     exportToCSV(sorted, `finance-transactions-${formatYearMonth(month)}.csv`)
@@ -56,7 +57,12 @@ export default function TransactionsPage() {
   const handleDelete = async (id) => {
     const ok = await confirm('Delete this transaction? This action cannot be undone.')
     if (!ok) return
-    await remove(id)
+    try {
+      await remove(id)
+      toast('Transaction deleted', { type: 'success' })
+    } catch {
+      toast('Failed to delete transaction', { type: 'error' })
+    }
   }
 
   const clearFilters = () => {
@@ -200,7 +206,7 @@ export default function TransactionsPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={() => navigate(`/add?edit=${t.id}`)} className="rounded p-1.5 hover:bg-accent transition-colors" aria-label="Edit">
+                          <button onClick={() => navigate(`/app/add?edit=${t.id}`)} className="rounded p-1.5 hover:bg-accent transition-colors" aria-label="Edit">
                             <Edit className="h-3.5 w-3.5" />
                           </button>
                           <button onClick={() => handleDelete(t.id)} className="rounded p-1.5 hover:bg-destructive/10 text-destructive transition-colors" aria-label="Delete">
