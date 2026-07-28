@@ -21,6 +21,9 @@ desktop.ini
 DATABASE_SCHEMA.md
 *.log
 
+# Agent artifacts
+.superpowers/
+
 # IDE
 .vscode/
 .idea/

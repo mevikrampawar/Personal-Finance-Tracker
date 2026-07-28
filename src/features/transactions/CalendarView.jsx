@@ -2,8 +2,8 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { getTransactionsForDate, getTransactionDate, toLocalDate, formatFullDate, formatShortDate } from '@/lib/date'
-import { addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, getDaysInMonth, isSameDay, isToday } from 'date-fns'
+import { getTransactionsForDate, getTransactionDate, formatFullDate, formatMonthYear } from '@/lib/date'
+import { addMonths, subMonths, getDay, getDaysInMonth, isSameDay, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -90,7 +90,7 @@ export default function CalendarView() {
         <Button variant="outline" size="icon" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="min-w-[140px] text-center text-sm font-medium">{formatShortDate(month)}</span>
+        <span className="min-w-[140px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
         <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -153,8 +153,8 @@ export default function CalendarView() {
                   <div>
                     <p className="text-sm font-medium">{t.description}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <Badge variant={t.type === 'income' ? 'success' : 'danger'} className="gap-1 text-[10px]">
-                        {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />} {t.type}
+                      <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="gap-1 text-[10px]">
+                        {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                       </Badge>
                       {t.category && (
                         <span className="text-xs text-muted-foreground">{t.category}</span>

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { getTransactionsForMonth, getTransactionDate, toLocalDate, formatShortDate, formatYearMonth } from '@/lib/date'
+import { getTransactionsForMonth, getTransactionDate, formatMonthYear, formatShortDate, formatYearMonth } from '@/lib/date'
 import { exportToCSV } from '@/lib/csv'
 import { addMonths, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
@@ -19,7 +19,6 @@ import { toast } from 'sonner'
 export default function TransactionsPage() {
   const { user } = useAuth()
   const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions', 500)
-  const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
   const [month, setMonth] = useState(new Date())
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -115,7 +114,7 @@ export default function TransactionsPage() {
           <Button variant="outline" size="icon" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="min-w-[140px] text-center text-sm font-medium">{formatShortDate(month)}</span>
+          <span className="min-w-[140px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
           <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -214,8 +213,8 @@ export default function TransactionsPage() {
                       <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">{d ? formatShortDate(d) : '-'}</td>
                       <td className="px-4 py-3 font-medium">{t.description}</td>
                       <td className="px-4 py-3">
-                        <Badge variant={t.type === 'income' ? 'success' : 'danger'} className="gap-1">
-                          {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />} {t.type}
+                        <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="gap-1">
+                          {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                         </Badge>
                       </td>
                       <td className="px-4 py-3">

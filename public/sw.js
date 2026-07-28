@@ -1,9 +1,12 @@
 const CACHE_NAME = 'finance-tracker-v1'
+
+const BASE = self.location.pathname.replace(/\/sw\.js$/, '')
+
 const APP_SHELL = [
-  '/',
-  '/index.html',
-  '/favicon.svg',
-  '/manifest.json',
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/favicon.svg',
+  BASE + '/manifest.json',
 ]
 
 self.addEventListener('install', (e) => {
