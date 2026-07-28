@@ -118,10 +118,6 @@ function createdAtUnchanged() {
   return request.resource.data.createdAt == resource.data.createdAt;
 }
 
-function createdAtNotSet() {
-  return !('createdAt' in request.resource.data);
-}
-
 // Do not allow extra fields beyond the defined schema
 function hasOnlyAllowedFields(fields) {
   return request.resource.data.keys().hasOnly(fields);
@@ -138,13 +134,16 @@ function isValidTransaction(data) {
          isValidType() &&
          isValidOptionalString('category', 50) &&
          isValidOptionalString('recurringId', 50) &&
-         isValidOptionalString('recurringPeriod', 20);
+         isValidOptionalString('recurringPeriod', 20) &&
+         data.createdAt is timestamp &&
+         (!('transactionDate' in data) || data.transactionDate is timestamp);
 }
 
 function isValidCategory(data) {
   return hasOnlyAllowedFields(['name', 'monthlyBudget', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 50) &&
-         isNonNegativeNumber(data.monthlyBudget);
+         isNonNegativeNumber(data.monthlyBudget) &&
+         data.createdAt is timestamp;
 }
 
 function isValidRecurringTransaction(data) {
@@ -153,7 +152,8 @@ function isValidRecurringTransaction(data) {
          isPositiveNumber(data.amount) &&
          isValidType() &&
          isValidOptionalString('category', 50) &&
-         isNumberInRange(data.dayOfMonth, 1, 28);
+         isNumberInRange(data.dayOfMonth, 1, 28) &&
+         data.createdAt is timestamp;
 }
 
 function isValidGoal(data) {
@@ -161,19 +161,22 @@ function isValidGoal(data) {
          isValidString(data.name, 1, 100) &&
          isPositiveNumber(data.targetAmount) &&
          isNonNegativeNumber(data.currentAmount) &&
-         (!('targetDate' in data) || data.targetDate is timestamp);
+         (!('targetDate' in data) || data.targetDate is timestamp) &&
+         data.createdAt is timestamp;
 }
 
 function isValidAsset(data) {
   return hasOnlyAllowedFields(['name', 'amount', 'createdAt']) &&
          isValidString(data.name, 1, 100) &&
-         isPositiveNumber(data.amount);
+         isPositiveNumber(data.amount) &&
+         data.createdAt is timestamp;
 }
 
 function isValidLiability(data) {
   return hasOnlyAllowedFields(['name', 'amount', 'createdAt']) &&
          isValidString(data.name, 1, 100) &&
-         isPositiveNumber(data.amount);
+         isPositiveNumber(data.amount) &&
+         data.createdAt is timestamp;
 }
 
 function isValidSubscription(data) {
@@ -181,7 +184,8 @@ function isValidSubscription(data) {
          isValidString(data.name, 1, 100) &&
          isPositiveNumber(data.amount) &&
          isValidFrequency() &&
-         (!('nextDate' in data) || data.nextDate is timestamp);
+         (!('nextDate' in data) || data.nextDate is timestamp) &&
+         data.createdAt is timestamp;
 }
 
 // ===============================================================
@@ -201,8 +205,7 @@ service cloud.firestore {
       match /transactions/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidTransaction(request.resource.data) &&
-          createdAtNotSet();
+          isValidTransaction(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidTransaction(request.resource.data) &&
@@ -214,8 +217,7 @@ service cloud.firestore {
       match /categories/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidCategory(request.resource.data) &&
-          createdAtNotSet();
+          isValidCategory(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidCategory(request.resource.data) &&
@@ -227,8 +229,7 @@ service cloud.firestore {
       match /recurringTransactions/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidRecurringTransaction(request.resource.data) &&
-          createdAtNotSet();
+          isValidRecurringTransaction(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidRecurringTransaction(request.resource.data) &&
@@ -240,8 +241,7 @@ service cloud.firestore {
       match /goals/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidGoal(request.resource.data) &&
-          createdAtNotSet();
+          isValidGoal(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidGoal(request.resource.data) &&
@@ -253,8 +253,7 @@ service cloud.firestore {
       match /assets/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidAsset(request.resource.data) &&
-          createdAtNotSet();
+          isValidAsset(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidAsset(request.resource.data) &&
@@ -266,8 +265,7 @@ service cloud.firestore {
       match /liabilities/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidLiability(request.resource.data) &&
-          createdAtNotSet();
+          isValidLiability(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidLiability(request.resource.data) &&
@@ -279,8 +277,7 @@ service cloud.firestore {
       match /subscriptions/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidSubscription(request.resource.data) &&
-          createdAtNotSet();
+          isValidSubscription(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidSubscription(request.resource.data) &&
