@@ -275,7 +275,7 @@ export default function LandingPage() {
                 ) : (
                   <>
                     Get Started Free
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover/button:translate-x-0.5" data-icon="inline-end" />
+                    <ArrowRight className="h-4 w-4" data-icon="inline-end" />
                   </>
                 )}
               </Button>

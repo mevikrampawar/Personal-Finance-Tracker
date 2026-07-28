@@ -16,8 +16,10 @@ import {
   Moon,
   Menu,
   ChevronDown,
+  Calendar,
 } from 'lucide-react'
 import { useState } from 'react'
+import { useConfirmCtx } from '@/app/providers'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -41,6 +43,7 @@ const NAV_ITEMS = [
   { path: '/app/networth', label: 'Net Worth', icon: TrendingUp },
   { path: '/app/subscriptions', label: 'Subscriptions', icon: CreditCard },
   { path: '/app/compare', label: 'Compare', icon: BarChart3 },
+  { path: '/app/calendar', label: 'Calendar', icon: Calendar },
 ]
 
 export default function DashboardLayout() {
@@ -55,7 +58,11 @@ export default function DashboardLayout() {
     setSidebarOpen(false)
   }
 
+  const { confirm } = useConfirmCtx()
+
   const handleLogout = async () => {
+    const ok = await confirm('Are you sure you want to log out?')
+    if (!ok) return
     try {
       await signOut()
       navigate('/')

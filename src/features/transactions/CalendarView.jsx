@@ -4,7 +4,7 @@ import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { getTransactionsForDate, getTransactionDate, toLocalDate, formatFullDate, formatShortDate } from '@/lib/date'
 import { addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, getDaysInMonth, isSameDay, isToday } from 'date-fns'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -94,6 +94,9 @@ export default function CalendarView() {
         <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
           <ChevronRight className="h-4 w-4" />
         </Button>
+        <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())}>
+          Today
+        </Button>
       </div>
 
       <Card>
@@ -151,7 +154,7 @@ export default function CalendarView() {
                     <p className="text-sm font-medium">{t.description}</p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <Badge variant={t.type === 'income' ? 'success' : 'danger'} className="gap-1 text-[10px]">
-                        {t.type === 'income' ? '📈' : '📉'} {t.type}
+                        {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />} {t.type}
                       </Badge>
                       {t.category && (
                         <span className="text-xs text-muted-foreground">{t.category}</span>

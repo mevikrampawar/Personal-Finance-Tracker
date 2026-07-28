@@ -23,20 +23,42 @@ self.addEventListener('activate', (e) => {
 })
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return
-  if (e.request.url.includes('firestore.googleapis.com')) return
-  if (e.request.url.includes('firebaseio.com')) return
+  const { request } = e
+  if (request.method !== 'GET') return
 
-  e.respondWith(
-    caches.match(e.request).then((cached) => {
-      const fetched = fetch(e.request).then((response) => {
-        if (response && response.status === 200) {
-          const clone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone))
-        }
+  const url = new URL(request.url)
+  if (url.hostname.includes('firestore.googleapis.com')) return
+  if (url.hostname.includes('firebaseio.com')) return
+
+  // Navigation requests — network first, cache on success
+  if (request.mode === 'navigate') {
+    e.respondWith(
+      fetch(request).then((response) => {
+        const clone = response.clone()
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
         return response
-      }).catch(() => cached)
-      return cached || fetched
-    }),
-  )
+      }).catch(() => caches.match(request)),
+    )
+    return
+  }
+
+  // Same-origin assets — stale-while-revalidate
+  if (url.origin === self.location.origin) {
+    e.respondWith(
+      caches.match(request).then((cached) => {
+        const fetchPromise = fetch(request).then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
+          }
+          return response
+        }).catch(() => cached)
+        return cached || fetchPromise
+      }),
+    )
+    return
+  }
+
+  // Everything else — network only
+  e.respondWith(fetch(request).catch(() => caches.match(request)))
 })

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { useToastCtx, useConfirmCtx } from '@/app/providers'
+import { useToastCtx } from '@/app/providers'
 import { Plus, Trash2, Target, PartyPopper } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -16,7 +16,6 @@ export default function GoalsPage() {
   const { user } = useAuth()
   const { data: goals, loading, add, update, remove } = useFirestoreCollection(user?.uid, 'goals')
   const { toast } = useToastCtx()
-  const { confirm } = useConfirmCtx()
   const [name, setName] = useState('')
   const [targetAmount, setTargetAmount] = useState('')
   const [targetDate, setTargetDate] = useState('')

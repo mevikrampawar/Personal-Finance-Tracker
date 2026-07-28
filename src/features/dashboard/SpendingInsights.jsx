@@ -112,7 +112,7 @@ export function SpendingInsights({ transactions, month, monthTransactions }) {
           {insights.map((insight, i) => {
             const Icon = insight.icon
             return (
-              <div key={i} className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
+              <div key={insight.text} className="flex items-start gap-3 rounded-lg bg-muted/30 p-3">
                 <Badge variant={badgeVariant(insight.type)} className="mt-0.5 shrink-0">
                   <Icon />
                 </Badge>

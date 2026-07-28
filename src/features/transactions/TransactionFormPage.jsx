@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { toast } from 'sonner'
+import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowDownLeft, ArrowUpRight, Save, X } from 'lucide-react'
 
 export default function TransactionFormPage() {
@@ -25,6 +26,7 @@ export default function TransactionFormPage() {
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(formatInputDate(new Date()))
   const [submitting, setSubmitting] = useState(false)
+  const [editLoading, setEditLoading] = useState(!!editId)
 
   const isEditing = !!editId
 
@@ -32,6 +34,7 @@ export default function TransactionFormPage() {
     if (editId) {
       const t = transactions.find((x) => x.id === editId)
       if (t) {
+        setEditLoading(false)
         setDescription(t.description || '')
         setType(t.type || 'expense')
         setCategory(t.category || '')
@@ -46,6 +49,24 @@ export default function TransactionFormPage() {
   const sanitizeAmount = (val) => {
     const n = Number(val)
     return { valid: !Number.isNaN(n) && isFinite(n) && n > 0, value: n }
+  }
+
+  if (editLoading) {
+    return (
+      <div className="mx-auto max-w-2xl space-y-6">
+        <div>
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="mt-2 h-8 w-40" />
+        </div>
+        <Card>
+          <CardContent className="space-y-5 pt-6">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   const handleSubmit = async (e) => {

@@ -3,7 +3,7 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { formatYearMonth } from '@/lib/date'
-import { useToastCtx, useConfirmCtx } from '@/app/providers'
+import { useToastCtx } from '@/app/providers'
 import { Plus, Trash2, Play } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -18,7 +18,6 @@ export default function RecurringPage() {
   const { data: transactions, add: addTransaction } = useFirestoreCollection(user?.uid, 'transactions')
   const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
   const { toast } = useToastCtx()
-  const { confirm } = useConfirmCtx()
 
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')

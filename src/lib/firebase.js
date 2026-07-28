@@ -20,6 +20,6 @@ export const db = getFirestore(app)
 
 try {
   getAnalytics(app)
-} catch {
-  // Analytics not available in all environments
+} catch (e) {
+  console.warn('Analytics init failed:', e)
 }

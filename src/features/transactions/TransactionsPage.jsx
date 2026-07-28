@@ -5,7 +5,7 @@ import { formatCurrency } from '@/lib/currency'
 import { getTransactionsForMonth, getTransactionDate, toLocalDate, formatShortDate, formatYearMonth } from '@/lib/date'
 import { exportToCSV } from '@/lib/csv'
 import { addMonths, subMonths } from 'date-fns'
-import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -119,6 +119,9 @@ export default function TransactionsPage() {
           <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight className="h-4 w-4" />
           </Button>
+          <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())}>
+            Today
+          </Button>
         </div>
       </div>
 
@@ -212,7 +215,7 @@ export default function TransactionsPage() {
                       <td className="px-4 py-3 font-medium">{t.description}</td>
                       <td className="px-4 py-3">
                         <Badge variant={t.type === 'income' ? 'success' : 'danger'} className="gap-1">
-                          {t.type === 'income' ? '📈' : '📉'} {t.type}
+                          {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />} {t.type}
                         </Badge>
                       </td>
                       <td className="px-4 py-3">

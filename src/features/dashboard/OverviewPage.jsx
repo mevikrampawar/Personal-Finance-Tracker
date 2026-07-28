@@ -53,6 +53,9 @@ export function OverviewPage() {
           <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight />
           </Button>
+          <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())}>
+            Today
+          </Button>
         </div>
       </div>
 

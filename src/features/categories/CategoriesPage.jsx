@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { useToastCtx, useConfirmCtx } from '@/app/providers'
+import { useToastCtx } from '@/app/providers'
 import { Plus, Trash2, Save } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -15,7 +15,6 @@ export default function CategoriesPage() {
   const { data: categories, loading, add, update, remove } = useFirestoreCollection(user?.uid, 'categories')
   const { data: transactions } = useFirestoreCollection(user?.uid, 'transactions')
   const { toast } = useToastCtx()
-  const { confirm } = useConfirmCtx()
   const [newName, setNewName] = useState('')
   const [budgetEdits, setBudgetEdits] = useState({})
   const [deleteTarget, setDeleteTarget] = useState(null)

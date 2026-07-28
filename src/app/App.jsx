@@ -14,6 +14,7 @@ const GoalsPage = lazy(() => import('@/features/goals/GoalsPage'))
 const NetWorthPage = lazy(() => import('@/features/networth/NetWorthPage'))
 const SubscriptionsPage = lazy(() => import('@/features/subscriptions/SubscriptionsPage'))
 const MonthlyComparisonPage = lazy(() => import('@/features/dashboard/MonthlyComparisonPage'))
+const CalendarView = lazy(() => import('@/features/transactions/CalendarView'))
 
 function PageLoader() {
   return (
@@ -82,6 +83,7 @@ export default function App() {
               <Route path="networth" element={<NetWorthPage />} />
               <Route path="subscriptions" element={<SubscriptionsPage />} />
               <Route path="compare" element={<MonthlyComparisonPage />} />
+              <Route path="calendar" element={<CalendarView />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
