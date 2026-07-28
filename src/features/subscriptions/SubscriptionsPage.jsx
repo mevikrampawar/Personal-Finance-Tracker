@@ -27,13 +27,20 @@ export default function SubscriptionsPage() {
     return s + amt
   }, 0)
 
+  const sanitizeAmount = (val) => {
+    const n = Number(val)
+    return { valid: !Number.isNaN(n) && isFinite(n) && n > 0, value: n }
+  }
+
   const handleAdd = async (e) => {
     e.preventDefault()
     if (!name.trim() || !amount) return toast('Fill in name and amount', { type: 'warning' })
+    const { valid, value: amt } = sanitizeAmount(amount)
+    if (!valid) return toast('Enter a valid amount', { type: 'warning' })
     try {
       await add({
         name: name.trim(),
-        amount: parseFloat(amount),
+        amount: amt,
         frequency,
       })
       setName('')

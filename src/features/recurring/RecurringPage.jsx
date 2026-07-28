@@ -27,11 +27,16 @@ export default function RecurringPage() {
   const [dayOfMonth, setDayOfMonth] = useState('1')
   const [deleteTarget, setDeleteTarget] = useState(null)
 
+  const sanitizeAmount = (val) => {
+    const n = Number(val)
+    return { valid: !Number.isNaN(n) && isFinite(n) && n > 0, value: n }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!description.trim() || !amount || !dayOfMonth) return toast('Please complete the form', { type: 'warning' })
-    const amt = parseFloat(amount)
-    if (!amt || amt <= 0) return toast('Enter a valid amount', { type: 'warning' })
+    const { valid, value: amt } = sanitizeAmount(amount)
+    if (!valid) return toast('Enter a valid amount', { type: 'warning' })
     if (type === 'expense' && !category) return toast('Select a category for expenses', { type: 'warning' })
 
     try {

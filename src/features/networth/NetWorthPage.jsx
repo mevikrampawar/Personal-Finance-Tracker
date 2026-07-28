@@ -27,11 +27,18 @@ export default function NetWorthPage() {
   const totalLiabilities = liabilities.reduce((s, l) => s + (l.amount || 0), 0)
   const netWorth = totalAssets - totalLiabilities
 
+  const sanitizeAmount = (val) => {
+    const n = Number(val)
+    return { valid: !Number.isNaN(n) && isFinite(n) && n > 0, value: n }
+  }
+
   const handleAddAsset = async (e) => {
     e.preventDefault()
     if (!assetName.trim() || !assetAmount) return toast('Fill in name and amount', { type: 'warning' })
+    const { valid, value: amt } = sanitizeAmount(assetAmount)
+    if (!valid) return toast('Enter a valid amount', { type: 'warning' })
     try {
-      await addAsset({ name: assetName.trim(), amount: parseFloat(assetAmount), type: 'asset' })
+      await addAsset({ name: assetName.trim(), amount: amt, type: 'asset' })
       setAssetName('')
       setAssetAmount('')
       toast('Asset added', { type: 'success' })
@@ -43,8 +50,10 @@ export default function NetWorthPage() {
   const handleAddLiability = async (e) => {
     e.preventDefault()
     if (!liabilityName.trim() || !liabilityAmount) return toast('Fill in name and amount', { type: 'warning' })
+    const { valid, value: amt } = sanitizeAmount(liabilityAmount)
+    if (!valid) return toast('Enter a valid amount', { type: 'warning' })
     try {
-      await addLiability({ name: liabilityName.trim(), amount: parseFloat(liabilityAmount), type: 'liability' })
+      await addLiability({ name: liabilityName.trim(), amount: amt, type: 'liability' })
       setLiabilityName('')
       setLiabilityAmount('')
       toast('Liability added', { type: 'success' })

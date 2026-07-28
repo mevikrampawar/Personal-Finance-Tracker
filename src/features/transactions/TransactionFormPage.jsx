@@ -43,12 +43,17 @@ export default function TransactionFormPage() {
     }
   }, [editId, transactions])
 
+  const sanitizeAmount = (val) => {
+    const n = Number(val)
+    return { valid: !Number.isNaN(n) && isFinite(n) && n > 0, value: n }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!description.trim()) return toast.warning('Please enter a description')
     if (type === 'expense' && !category) return toast.warning('Please select a category for expenses')
-    const amt = parseFloat(amount)
-    if (!amt || amt <= 0) return toast.warning('Please enter a valid amount')
+    const { valid, value: amt } = sanitizeAmount(amount)
+    if (!valid) return toast.warning('Please enter a valid amount')
     if (!date) return toast.warning('Please select a date')
 
     const [y, m, d] = date.split('-')

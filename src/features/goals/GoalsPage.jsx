@@ -24,11 +24,16 @@ export default function GoalsPage() {
   const [showCelebrate, setShowCelebrate] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
 
+  const sanitizeAmount = (val) => {
+    const n = Number(val)
+    return { valid: !Number.isNaN(n) && isFinite(n) && n > 0, value: n }
+  }
+
   const handleAdd = async (e) => {
     e.preventDefault()
     if (!name.trim() || !targetAmount) return toast('Please fill in name and target amount', { type: 'warning' })
-    const amt = parseFloat(targetAmount)
-    if (!amt || amt <= 0) return toast('Enter a valid target amount', { type: 'warning' })
+    const { valid, value: amt } = sanitizeAmount(targetAmount)
+    if (!valid) return toast('Enter a valid target amount', { type: 'warning' })
     try {
       await add({
         name: name.trim(),
@@ -46,8 +51,8 @@ export default function GoalsPage() {
   }
 
   const handleContribute = async (goal) => {
-    const amt = Number(contributions[goal.id] || 0)
-    if (!amt || amt <= 0) return toast('Enter a valid contribution amount', { type: 'warning' })
+    const { valid, value: amt } = sanitizeAmount(contributions[goal.id])
+    if (!valid) return toast('Enter a valid contribution amount', { type: 'warning' })
     const newAmount = (goal.currentAmount || 0) + amt
     const pct = Math.min((newAmount / goal.targetAmount) * 100, 100)
     try {
