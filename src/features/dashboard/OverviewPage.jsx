@@ -55,17 +55,17 @@ export function OverviewPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col items-center gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Dashboard</p>
           <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
         </div>
-        <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
+        <div className="flex items-center gap-0">
+          <Button variant="ghost" size="icon" className="min-touch" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <MonthPicker value={month} onChange={setMonth} />
-          <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
+          <Button variant="ghost" size="icon" className="min-touch" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>

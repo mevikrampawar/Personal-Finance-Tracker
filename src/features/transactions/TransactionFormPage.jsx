@@ -4,6 +4,7 @@ import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatInputDate } from '@/lib/date'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
@@ -186,13 +187,7 @@ export default function TransactionFormPage() {
               </div>
               <div className="space-y-2">
                 <label htmlFor="date" className="text-sm font-medium">Date</label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
+                <DatePicker value={date} onChange={setDate} />
               </div>
             </div>
           </CardContent>

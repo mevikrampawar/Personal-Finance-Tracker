@@ -9,6 +9,7 @@ import { subMonths, addMonths } from 'date-fns'
 import { MonthPicker } from '@/components/ui/month-picker'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
@@ -202,18 +203,8 @@ export default function TransactionsPage() {
                 />
               </div>
               <div className="flex gap-2">
-                <Input
-                  type="date"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  className="h-10"
-                />
-                <Input
-                  type="date"
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                  className="h-10"
-                />
+                <DatePicker value={fromDate} onChange={setFromDate} placeholder="From date" />
+                <DatePicker value={toDate} onChange={setToDate} placeholder="To date" />
               </div>
             </div>
             <div className="mt-2 flex items-center gap-2">

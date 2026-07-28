@@ -5,6 +5,7 @@ import { formatCurrency } from '@/lib/currency'
 import { useToastCtx } from '@/app/providers'
 import { Plus, Trash2, Target, PartyPopper } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
@@ -130,12 +131,9 @@ export default function GoalsPage() {
               onChange={(e) => setTargetAmount(e.target.value)}
               className="sm:w-36"
             />
-            <Input
-              type="date"
-              value={targetDate}
-              onChange={(e) => setTargetDate(e.target.value)}
-              className="sm:w-40"
-            />
+            <div className="sm:w-40">
+              <DatePicker value={targetDate} onChange={setTargetDate} placeholder="Target date" />
+            </div>
             <Button type="submit" className="w-full sm:w-auto">
               <Plus className="h-4 w-4" /> Create
             </Button>
