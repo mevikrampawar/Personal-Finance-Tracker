@@ -3,11 +3,12 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { formatYearMonth } from '@/lib/date'
-import { useToastCtx } from '@/app/providers'
-import { Plus, Trash2, Play } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+import { Plus, Trash2, Play, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel, AlertDialogMedia } from '@/components/ui/alert-dialog'
@@ -33,10 +34,10 @@ export default function RecurringPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!description.trim() || !amount || !dayOfMonth) return toast('Please complete the form', { type: 'warning' })
+    if (!description.trim() || !amount || !dayOfMonth) return toast.warning('Please complete the form')
     const { valid, value: amt } = sanitizeAmount(amount)
-    if (!valid) return toast('Enter a valid amount', { type: 'warning' })
-    if (type === 'expense' && !category) return toast('Select a category for expenses', { type: 'warning' })
+    if (!valid) return toast.warning('Enter a valid amount')
+    if (type === 'expense' && !category) return toast.warning('Select a category for expenses')
 
     try {
       await add({
@@ -50,14 +51,14 @@ export default function RecurringPage() {
       setAmount('')
       setCategory('')
       setDayOfMonth('1')
-      toast('Recurring transaction added', { type: 'success' })
+      toast.success('Recurring transaction added')
     } catch {
-      toast('Failed to add recurring transaction', { type: 'error' })
+      toast.error('Failed to add recurring transaction')
     }
   }
 
   const handleApply = async () => {
-    if (recurring.length === 0) return toast('No recurring transactions to apply', { type: 'warning' })
+    if (recurring.length === 0) return toast.warning('No recurring transactions to apply')
     const now = new Date()
     const periodKey = formatYearMonth(now)
     let count = 0
@@ -89,11 +90,11 @@ export default function RecurringPage() {
     }
 
     if (errors > 0) {
-      toast(`Applied ${count} transactions, ${errors} failed`, { type: 'warning' })
+      toast.warning(`Applied ${count} transactions, ${errors} failed`)
     } else if (count > 0) {
-      toast(`Applied ${count} recurring transaction(s)`, { type: 'success' })
+      toast.success(`Applied ${count} recurring transaction(s)`)
     } else {
-      toast('Recurring transactions already exist for this month', { type: 'info' })
+      toast.info('Recurring transactions already exist for this month')
     }
   }
 
@@ -102,16 +103,16 @@ export default function RecurringPage() {
     try {
       await remove(deleteTarget.id)
       setDeleteTarget(null)
-      toast('Recurring transaction deleted', { type: 'success' })
+      toast.success('Recurring transaction deleted')
     } catch {
-      toast('Failed to delete recurring transaction', { type: 'error' })
+      toast.error('Failed to delete recurring transaction')
     }
   }
 
   if (loading) {
     return (
       <div className="space-y-6">
-        <div>
+        <div className="flex flex-col items-center sm:items-start">
           <Skeleton className="h-4 w-20" />
           <Skeleton className="mt-2 h-8 w-40" />
         </div>
@@ -128,7 +129,7 @@ export default function RecurringPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
         <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Automation</p>
         <h2 className="text-2xl font-bold tracking-tight">Recurring</h2>
         <p className="mt-1 text-sm text-muted-foreground">Set up monthly recurring entries and apply them.</p>
@@ -139,68 +140,93 @@ export default function RecurringPage() {
           <CardTitle>Add Recurring Transaction</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form id="recurring-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                type="text"
-                placeholder="e.g., Salary, Rent"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                required
-              />
-                        <Input
-                          type="number"
-                          inputMode="decimal"
-                          placeholder="Amount"
-                          step="0.01"
-                          min="0"
-                          value={amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                          required
-                        />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Description</label>
+                <Input
+                  type="text"
+                  placeholder="e.g., Salary, Rent"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Amount</label>
+                <Input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                  className="tabular-nums"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  required
+                />
+              </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
-              <div>
-                <Select value={type} onValueChange={setType}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Type</label>
+                <ToggleGroup
+                  type="single"
+                  value={type}
+                  onValueChange={(val) => {
+                    if (val) {
+                      setType(val)
+                      if (val === 'income') setCategory('')
+                    }
+                  }}
+                  className="w-full"
+                >
+                  <ToggleGroupItem value="expense" className="flex-1 data-pressed:border-expense data-pressed:bg-expense/10 data-pressed:text-expense">
+                    <ArrowDownLeft className="h-4 w-4" /> Expense
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="income" className="flex-1 data-pressed:border-income data-pressed:bg-income/10 data-pressed:text-income">
+                    <ArrowUpRight className="h-4 w-4" /> Income
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+              <div className={cn('space-y-2', type !== 'expense' && 'invisible')}>
+                <label className="text-sm font-medium">Category</label>
+                <Select value={category} onValueChange={setCategory} disabled={type !== 'expense'}>
+                  <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="expense">Expense</SelectItem>
-                    <SelectItem value="income">Income</SelectItem>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
-              {type === 'expense' && (
-                <div>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
-                    <SelectContent>
-                      {categories.map((c) => (
-                        <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              <Input
-                type="number"
-                placeholder="Day of month (1-28)"
-                min="1"
-                max="28"
-                value={dayOfMonth}
-                onChange={(e) => setDayOfMonth(e.target.value)}
-                required
-              />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Day of Month</label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="1-28"
+                  min="1"
+                  max="28"
+                  value={dayOfMonth}
+                  onChange={(e) => setDayOfMonth(e.target.value)}
+                  required
+                />
+              </div>
             </div>
-            <Button type="submit" className="w-full sm:w-auto">
-              <Plus className="h-4 w-4" /> Add Recurring Transaction
-            </Button>
           </form>
         </CardContent>
+        <CardFooter className="flex-col gap-2 sm:flex-row">
+          <Button type="submit" form="recurring-form" className="w-full sm:w-auto">
+            <Plus className="h-4 w-4" /> Add Recurring Transaction
+          </Button>
+          {recurring.length > 0 && (
+            <Button variant="outline" onClick={handleApply} className="w-full sm:w-auto">
+              <Play className="h-4 w-4" /> Apply for Current Month
+            </Button>
+          )}
+        </CardFooter>
       </Card>
-
-      <Button variant="outline" onClick={handleApply}>
-        <Play className="h-4 w-4" /> Apply Recurring for Current Month
-      </Button>
 
       <Card>
         <CardHeader>
@@ -208,7 +234,10 @@ export default function RecurringPage() {
         </CardHeader>
         <CardContent>
           {recurring.length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">No recurring transactions yet</p>
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <Play className="h-8 w-8 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">No recurring transactions yet</p>
+            </div>
           ) : (
             <div className="divide-y">
               {recurring.map((r) => (

@@ -98,7 +98,7 @@ export default function NetWorthPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
         <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Wealth</p>
         <h2 className="text-2xl font-bold tracking-tight">Net Worth</h2>
         <p className="mt-1 text-sm text-muted-foreground">Track your assets and liabilities.</p>
@@ -176,7 +176,10 @@ export default function NetWorthPage() {
             </CardHeader>
             <CardContent>
               {assets.length === 0 ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">No assets added</p>
+                <div className="flex flex-col items-center gap-2 py-8 text-center">
+                  <TrendingUp className="h-8 w-8 text-muted-foreground/50" />
+                  <p className="text-sm text-muted-foreground">No assets added yet</p>
+                </div>
               ) : (
                 <div className="divide-y">
                   {assets.map((a) => (
@@ -259,7 +262,10 @@ export default function NetWorthPage() {
             </CardHeader>
             <CardContent>
               {liabilities.length === 0 ? (
-                <p className="py-4 text-center text-sm text-muted-foreground">No liabilities added</p>
+                <div className="flex flex-col items-center gap-2 py-8 text-center">
+                  <TrendingDown className="h-8 w-8 text-muted-foreground/50" />
+                  <p className="text-sm text-muted-foreground">No liabilities added yet</p>
+                </div>
               ) : (
                 <div className="divide-y">
                   {liabilities.map((l) => (

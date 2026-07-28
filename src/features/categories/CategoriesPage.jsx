@@ -4,7 +4,7 @@ import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { useToastCtx } from '@/app/providers'
 import { Plus, Trash2, Save } from 'lucide-react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -88,10 +88,10 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
         <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Planning</p>
         <h2 className="text-2xl font-bold tracking-tight">Budgets</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Manage categories and monthly spending limits.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Set monthly budgets for each category.</p>
       </div>
 
       <Card>
@@ -175,11 +175,11 @@ export default function CategoriesPage() {
           )}
         </CardContent>
         {categories.length > 0 && (
-          <div className="border-t px-4 py-3">
+          <CardFooter>
             <Button onClick={handleSaveBudgets}>
               <Save className="h-4 w-4" /> Save Budgets
             </Button>
-          </div>
+          </CardFooter>
         )}
       </Card>
     </div>

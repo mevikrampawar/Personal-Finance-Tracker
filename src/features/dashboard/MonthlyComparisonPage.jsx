@@ -4,7 +4,7 @@ import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { formatMonthYear, getTransactionsForMonth } from '@/lib/date'
 import { subMonths } from 'date-fns'
-import { ArrowUp, ArrowDown, Minus } from 'lucide-react'
+import { ArrowUp, ArrowDown, ArrowUpDown, Minus } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -127,7 +127,7 @@ export function MonthlyComparisonPage() {
 
   return (
     <div className="space-y-5 sm:space-y-8">
-      <div>
+      <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Analytics
         </p>
@@ -242,9 +242,10 @@ export function MonthlyComparisonPage() {
       {allCategories.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-10 text-center">
-            <p className="text-sm text-muted-foreground">
-              Add some expenses to see category comparison.
-            </p>
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <ArrowUpDown className="h-8 w-8 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">Select two months with data to compare</p>
+            </div>
           </CardContent>
         </Card>
       )}

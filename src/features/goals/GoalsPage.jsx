@@ -102,7 +102,7 @@ export default function GoalsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
         <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Planning</p>
         <h2 className="text-2xl font-bold tracking-tight">Savings Goals</h2>
         <p className="mt-1 text-sm text-muted-foreground">Track progress toward your financial targets.</p>

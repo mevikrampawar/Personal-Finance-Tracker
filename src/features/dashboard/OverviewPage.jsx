@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CategoryBreakdown } from './CategoryBreakdown'
 import { BudgetProgress } from './BudgetProgress'
@@ -93,19 +94,18 @@ export function OverviewPage() {
           </div>
           {income > 0 && (
             <div className="mt-4 w-full max-w-xs">
-              <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-                <span>Income vs Expenses</span>
-                <span>{Math.round(spendPct)}% spent</span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className={cn(
-                    'h-full rounded-full transition-all',
-                    spendPct > 100 ? 'bg-destructive' : spendPct > 80 ? 'bg-amber-500' : 'bg-income'
-                  )}
-                  style={{ width: `${Math.min(spendPct, 100)}%` }}
-                />
-              </div>
+              <Progress
+                value={Math.min(spendPct, 100)}
+                className={cn(
+                  'w-full',
+                  spendPct > 100 ? '[&_[data-slot=progress-indicator]]:bg-destructive' : spendPct > 80 ? '[&_[data-slot=progress-indicator]]:bg-amber-500' : '[&_[data-slot=progress-indicator]]:bg-income'
+                )}
+              >
+                <div className="flex w-full justify-between text-xs text-muted-foreground">
+                  <span>Income vs Expenses</span>
+                  <span>{Math.round(spendPct)}% spent</span>
+                </div>
+              </Progress>
             </div>
           )}
         </CardContent>

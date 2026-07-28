@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { useToastCtx } from '@/app/providers'
+import { toast } from 'sonner'
 import { Plus, Trash2, CreditCard } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,6 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 export default function SubscriptionsPage() {
   const { user } = useAuth()
   const { data: subscriptions, loading, add, remove } = useFirestoreCollection(user?.uid, 'subscriptions')
-  const { toast } = useToastCtx()
   const [name, setName] = useState('')
   const [amount, setAmount] = useState('')
   const [frequency, setFrequency] = useState('monthly')
@@ -34,9 +33,9 @@ export default function SubscriptionsPage() {
 
   const handleAdd = async (e) => {
     e.preventDefault()
-    if (!name.trim() || !amount) return toast('Fill in name and amount', { type: 'warning' })
+    if (!name.trim() || !amount) return toast.warning('Fill in name and amount')
     const { valid, value: amt } = sanitizeAmount(amount)
-    if (!valid) return toast('Enter a valid amount', { type: 'warning' })
+    if (!valid) return toast.warning('Enter a valid amount')
     try {
       await add({
         name: name.trim(),
@@ -46,9 +45,9 @@ export default function SubscriptionsPage() {
       setName('')
       setAmount('')
       setFrequency('monthly')
-      toast('Subscription added', { type: 'success' })
+      toast.success('Subscription added')
     } catch {
-      toast('Failed to add subscription', { type: 'error' })
+      toast.error('Failed to add subscription')
     }
   }
 
@@ -57,9 +56,9 @@ export default function SubscriptionsPage() {
     try {
       await remove(deleteTarget.id)
       setDeleteTarget(null)
-      toast('Subscription deleted', { type: 'success' })
+      toast.success('Subscription deleted')
     } catch {
-      toast('Failed to delete subscription', { type: 'error' })
+      toast.error('Failed to delete subscription')
     }
   }
 
@@ -83,7 +82,7 @@ export default function SubscriptionsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
+      <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
         <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Bills & Subscriptions</p>
         <h2 className="text-2xl font-bold tracking-tight">Subscriptions</h2>
         <p className="mt-1 text-sm text-muted-foreground">Track recurring bills and subscription costs.</p>
@@ -143,9 +142,9 @@ export default function SubscriptionsPage() {
         </CardHeader>
         <CardContent>
           {subscriptions.length === 0 ? (
-            <div className="py-8 text-center">
-              <CreditCard className="mx-auto h-10 w-10 text-muted-foreground/50" />
-              <p className="mt-3 text-sm text-muted-foreground">No subscriptions tracked yet</p>
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <CreditCard className="h-8 w-8 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">No subscriptions added yet</p>
             </div>
           ) : (
             <div className="divide-y">

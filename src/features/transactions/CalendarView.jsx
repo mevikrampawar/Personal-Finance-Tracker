@@ -3,13 +3,15 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { getTransactionsForDate, getTransactionDate, formatFullDate } from '@/lib/date'
-import { getDay, getDaysInMonth, isSameDay, isToday } from 'date-fns'
-import { Calendar as CalendarIcon, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
+import { getDay, getDaysInMonth, isSameDay, isToday, subMonths, addMonths } from 'date-fns'
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
 import { MonthPicker } from '@/components/ui/month-picker'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 
@@ -17,7 +19,7 @@ const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function CalendarView() {
   const { user } = useAuth()
-  const { data: transactions, remove } = useFirestoreCollection(user?.uid, 'transactions')
+  const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions', 500)
   const [month, setMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -79,15 +81,49 @@ export default function CalendarView() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="mt-2 h-8 w-48" />
+        </div>
+        <Card>
+          <CardContent className="p-4">
+            <Skeleton className="h-64 w-full" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-5 w-40" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="mt-2 h-12 w-full" />
+            <Skeleton className="mt-2 h-12 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Calendar</p>
-        <h2 className="text-2xl font-bold tracking-tight">Transactions</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Browse transactions by date.</p>
+      <div className="flex flex-col items-center gap-2 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Calendar</p>
+          <h2 className="text-2xl font-bold tracking-tight">Transactions</h2>
+        </div>
+        <div className="flex items-center gap-0">
+          <Button variant="ghost" size="icon" className="min-touch" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <MonthPicker value={month} onChange={setMonth} />
+          <Button variant="ghost" size="icon" className="min-touch" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-
-      <MonthPicker value={month} onChange={setMonth} />
 
       <Card>
         <CardContent className="p-4">
@@ -135,38 +171,88 @@ export default function CalendarView() {
         </CardHeader>
         <CardContent className="p-0">
           {selectedDayTransactions.length === 0 ? (
-            <div className="px-4 py-8 text-center text-sm text-muted-foreground">No transactions on this date</div>
-          ) : (
-            <div className="divide-y">
-              {selectedDayTransactions.map((t) => (
-                <div key={t.id} className="flex items-center justify-between px-4 py-3 hoverable:hover:bg-muted/30 transition-colors">
-                  <div>
-                    <p className="text-sm font-medium">{t.description}</p>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="gap-1 text-[10px]">
-                        {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                      </Badge>
-                      {t.category && (
-                        <span className="text-xs text-muted-foreground">{t.category}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm tabular-nums font-medium ${t.type === 'income' ? 'text-income' : 'text-expense'}`}>
-                      {formatCurrency(t.amount || 0)}
-                    </span>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="min-touch" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
-                        <Edit className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="min-touch text-destructive" onClick={() => setDeleteTarget(t.id)} aria-label="Delete">
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <CalendarIcon className="h-8 w-8 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">No transactions on this date</p>
             </div>
+          ) : (
+            <>
+              {/* Mobile: card per transaction */}
+              <div className="space-y-2 p-3 sm:hidden">
+                {selectedDayTransactions.map((t) => (
+                  <Card key={t.id}>
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{t.description}</p>
+                          <div className="mt-1 flex items-center gap-2">
+                            <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="gap-1 text-[10px]">
+                              {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                              {t.type}
+                            </Badge>
+                            {t.category && (
+                              <span className="text-xs text-muted-foreground">{t.category}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="ml-3 flex items-center gap-1">
+                          <span className={`text-sm tabular-nums font-medium ${t.type === 'income' ? 'text-income' : 'text-expense'}`}>
+                            {formatCurrency(t.amount || 0)}
+                          </span>
+                          <Button variant="ghost" size="icon" className="min-touch" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
+                            <Edit className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="min-touch text-destructive" onClick={() => setDeleteTarget(t.id)} aria-label="Delete">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {/* Desktop: table */}
+              <div className="hidden sm:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {selectedDayTransactions.map((t) => (
+                      <TableRow key={t.id}>
+                        <TableCell className="font-medium">{t.description}</TableCell>
+                        <TableCell>
+                          <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="gap-1 text-[10px]">
+                            {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {t.type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{t.category || '-'}</TableCell>
+                        <TableCell className={`text-right tabular-nums font-medium ${t.type === 'income' ? 'text-income' : 'text-expense'}`}>
+                          {formatCurrency(t.amount || 0)}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="min-touch" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
+                              <Edit className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="min-touch text-destructive" onClick={() => setDeleteTarget(t.id)} aria-label="Delete">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
