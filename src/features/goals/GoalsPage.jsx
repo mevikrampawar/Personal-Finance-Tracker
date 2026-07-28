@@ -37,7 +37,7 @@ export default function GoalsPage() {
       await add({
         name: name.trim(),
         targetAmount: amt,
-        targetDate: targetDate || null,
+        ...(targetDate ? { targetDate: new Date(targetDate) } : {}),
         currentAmount: 0,
       })
       setName('')
@@ -122,6 +122,7 @@ export default function GoalsPage() {
             />
             <Input
               type="number"
+              inputMode="decimal"
               placeholder="Target amount"
               min="0"
               step="0.01"
@@ -183,6 +184,7 @@ export default function GoalsPage() {
                     <div className="flex gap-2">
                       <Input
                         type="number"
+                        inputMode="decimal"
                         placeholder="Add contribution"
                         min="0"
                         step="0.01"
@@ -199,7 +201,7 @@ export default function GoalsPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="text-destructive"
+                          className="min-touch text-destructive"
                           onClick={() => setDeleteTarget(goal)}
                         >
                           <Trash2 className="h-3.5 w-3.5" />

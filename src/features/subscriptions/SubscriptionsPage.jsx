@@ -114,6 +114,7 @@ export default function SubscriptionsPage() {
             />
             <Input
               type="number"
+              inputMode="decimal"
               placeholder="Amount"
               min="0"
               step="0.01"
@@ -160,14 +161,14 @@ export default function SubscriptionsPage() {
                     </div>
                     <AlertDialog open={deleteTarget?.id === sub.id} onOpenChange={(open) => !open && setDeleteTarget(null)}>
                       <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive"
-                          onClick={() => setDeleteTarget(sub)}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="min-touch text-destructive"
+                        onClick={() => setDeleteTarget(sub)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>

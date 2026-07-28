@@ -111,11 +111,11 @@ export default function TransactionsPage() {
           <h2 className="text-2xl font-bold tracking-tight">Transactions</h2>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
+          <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="min-w-[140px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
-          <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
+          <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())}>
@@ -160,12 +160,14 @@ export default function TransactionsPage() {
             <div className="grid grid-cols-2 gap-2">
               <Input
                 type="number"
+                inputMode="decimal"
                 placeholder="Min"
                 value={minAmount}
                 onChange={(e) => setMinAmount(e.target.value)}
               />
               <Input
                 type="number"
+                inputMode="decimal"
                 placeholder="Max"
                 value={maxAmount}
                 onChange={(e) => setMaxAmount(e.target.value)}
@@ -185,7 +187,59 @@ export default function TransactionsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* Mobile card list */}
+      <div className="space-y-2 sm:hidden">
+        {sorted.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center text-sm text-muted-foreground">
+              No transactions found
+            </CardContent>
+          </Card>
+        ) : (
+          sorted.map((t) => {
+            const d = getTransactionDate(t)
+            return (
+              <Card key={t.id} className="overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <span className="text-xs text-muted-foreground">{d ? formatShortDate(d) : '-'}</span>
+                    <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="gap-1 text-[10px]">
+                      {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                      {t.type}
+                    </Badge>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-sm font-medium">{t.description}</span>
+                    <span className={`text-sm tabular-nums font-semibold ${t.type === 'income' ? 'text-income' : 'text-expense'}`}>
+                      {formatCurrency(t.amount || 0)}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div>
+                      {t.category ? (
+                        <Badge variant="outline" className="text-[10px]">{t.category}</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">-</span>
+                      )}
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" className="min-touch" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="min-touch text-destructive" onClick={() => setDeleteTarget(t.id)} aria-label="Delete">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })
+        )}
+      </div>
+
+      {/* Desktop table */}
+      <Card className="hidden sm:block">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -209,7 +263,7 @@ export default function TransactionsPage() {
                 sorted.map((t) => {
                   const d = getTransactionDate(t)
                   return (
-                    <tr key={t.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <tr key={t.id} className="border-b last:border-0 hoverable:hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">{d ? formatShortDate(d) : '-'}</td>
                       <td className="px-4 py-3 font-medium">{t.description}</td>
                       <td className="px-4 py-3">
@@ -225,10 +279,10 @@ export default function TransactionsPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon-sm" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
+                          <Button variant="ghost" size="icon" className="min-touch" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
                             <Edit className="h-3.5 w-3.5" />
                           </Button>
-                          <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(t.id)} aria-label="Delete" className="text-destructive hover:text-destructive">
+                          <Button variant="ghost" size="icon" className="min-touch text-destructive" onClick={() => setDeleteTarget(t.id)} aria-label="Delete">
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>

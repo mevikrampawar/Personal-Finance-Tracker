@@ -147,7 +147,7 @@ function isValidCategory(data) {
 }
 
 function isValidRecurringTransaction(data) {
-  return hasOnlyAllowedFields(['description', 'amount', 'type', 'category', 'dayOfMonth', 'createdAt']) &&
+  return hasOnlyAllowedFields(['description', 'amount', 'type', 'category', 'dayOfMonth', 'createdAt', 'updatedAt']) &&
          isValidString(data.description, 1, 200) &&
          isPositiveNumber(data.amount) &&
          isValidType() &&
@@ -157,7 +157,7 @@ function isValidRecurringTransaction(data) {
 }
 
 function isValidGoal(data) {
-  return hasOnlyAllowedFields(['name', 'targetAmount', 'targetDate', 'currentAmount', 'createdAt']) &&
+  return hasOnlyAllowedFields(['name', 'targetAmount', 'targetDate', 'currentAmount', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 100) &&
          isPositiveNumber(data.targetAmount) &&
          isNonNegativeNumber(data.currentAmount) &&
@@ -166,21 +166,21 @@ function isValidGoal(data) {
 }
 
 function isValidAsset(data) {
-  return hasOnlyAllowedFields(['name', 'amount', 'createdAt']) &&
+  return hasOnlyAllowedFields(['name', 'amount', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 100) &&
          isPositiveNumber(data.amount) &&
          data.createdAt is timestamp;
 }
 
 function isValidLiability(data) {
-  return hasOnlyAllowedFields(['name', 'amount', 'createdAt']) &&
+  return hasOnlyAllowedFields(['name', 'amount', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 100) &&
          isPositiveNumber(data.amount) &&
          data.createdAt is timestamp;
 }
 
 function isValidSubscription(data) {
-  return hasOnlyAllowedFields(['name', 'amount', 'frequency', 'nextDate', 'createdAt']) &&
+  return hasOnlyAllowedFields(['name', 'amount', 'frequency', 'nextDate', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 100) &&
          isPositiveNumber(data.amount) &&
          isValidFrequency() &&

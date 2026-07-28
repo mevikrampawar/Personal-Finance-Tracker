@@ -119,3 +119,45 @@ All routes are lazy-loaded with `React.lazy()` for code splitting.
 - **Icons**: lucide (`lucide-react`)
 - **Font**: Geist Variable (via `@fontsource-variable/geist`)
 - **Animation**: `tw-animate-css` for Tailwind v4 animations
+
+## Responsive Design Specification (Mobile-First)
+
+### Touch Targets
+- Every interactive element must have minimum **44×44px** touch target
+- Use `min-touch` class (`min-h-[44px] min-w-[44px]`) on icon buttons
+- Month nav buttons, edit/delete actions, theme/logout toggles, list item delete buttons — all must comply
+- Never use `size="icon-xs"` or `size="icon-sm"` — use `size="icon"` with `min-touch` instead
+
+### Hover Effects
+- All `hover:` pseudo-classes must be protected with `hoverable:hover:` custom variant
+- The `hoverable` variant wraps `@media (hover: hover) and (pointer: fine)` — hover effects only fire on devices that support sustained hover
+- The button component (`button.jsx`) has all built-in `hover:` references already converted
+- For other inline `hover:` classes (table rows, cards), always prefix with `hoverable:hover:`
+- Add `active:scale-[0.97]` or `active:bg-*` as mobile feedback mechanism where appropriate
+
+### Safe Areas
+- **Bottom**: `.safe-bottom` class on bottom nav — uses `env(safe-area-inset-bottom)`
+- **Top**: `.safe-top` class on mobile header — uses `env(safe-area-inset-top)`
+- Always apply both to elements pinned to screen edges on mobile (`lg:hidden`)
+
+### Tap Highlight
+- Browser default `-webkit-tap-highlight-color` is suppressed globally (`transparent`)
+- Do not re-enable tap highlights on interactive elements
+
+### Bottom Navigation
+- Limited to **5 primary items**: Home, Transactions, Add (FAB), Budgets, More
+- Add transaction is a **centered FAB button** (circular, primary color, elevated with shadow)
+- "More" opens the Sheet sidebar with all navigation items
+- Each item minimum **56px height** (h-14) or **48px** (h-12)
+- Remaining routes (Recurring, Goals, Net Worth, Subscriptions, Compare, Calendar) live in the Sheet sidebar
+
+### Input Modes
+- All currency/number amount inputs must use both `type="number"` AND `inputMode="decimal"`
+- This triggers the numeric keyboard with decimal point on mobile while keeping number validation
+
+### Toast Notifications
+- Use `position="bottom-center"` for the Sonner `<Toaster>` — works well on all screen sizes
+
+### Desktop Responsiveness
+- Use `xl:` and `2xl:` breakpoints for wide screens > 1280px where layout feels sparse
+- Already uses `max-w-6xl` content boundary — good for readability on large screens

@@ -17,6 +17,7 @@ import {
   Menu,
   ChevronDown,
   Calendar,
+  MoreHorizontal,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useConfirmCtx } from '@/app/providers'
@@ -33,7 +34,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 
-const NAV_ITEMS = [
+const FULL_NAV_ITEMS = [
   { path: '/app', label: 'Overview', icon: LayoutDashboard },
   { path: '/app/add', label: 'Add Transaction', icon: PlusCircle },
   { path: '/app/transactions', label: 'Transactions', icon: List },
@@ -44,6 +45,14 @@ const NAV_ITEMS = [
   { path: '/app/subscriptions', label: 'Subscriptions', icon: CreditCard },
   { path: '/app/compare', label: 'Compare', icon: BarChart3 },
   { path: '/app/calendar', label: 'Calendar', icon: Calendar },
+]
+
+const BOTTOM_NAV = [
+  { path: '/app', label: 'Home', icon: LayoutDashboard },
+  { path: '/app/transactions', label: 'Transactions', icon: List },
+  null,
+  { path: '/app/categories', label: 'Budgets', icon: Wallet },
+  { path: '#more', label: 'More', icon: MoreHorizontal },
 ]
 
 export default function DashboardLayout() {
@@ -91,11 +100,11 @@ export default function DashboardLayout() {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          {NAV_ITEMS.map((item) => (
+          {FULL_NAV_ITEMS.map((item) => (
             <Button
               key={item.path}
               variant={isActive(item.path) ? 'secondary' : 'ghost'}
-              className="w-full justify-start"
+              className="w-full justify-start h-11"
               onClick={() => navigate(item.path)}
             >
               <item.icon className="h-4 w-4 shrink-0" />
@@ -139,10 +148,10 @@ export default function DashboardLayout() {
       {/* Main area */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Mobile topbar */}
-        <header className="flex h-14 items-center gap-3 border-b bg-card px-4 lg:hidden">
+        <header className="flex h-14 items-center gap-3 border-b bg-card px-4 lg:hidden safe-top">
           <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Open sidebar">
+              <Button variant="ghost" size="icon" className="min-touch" aria-label="Open sidebar">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -156,11 +165,11 @@ export default function DashboardLayout() {
                 </div>
               </SheetHeader>
               <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-                {NAV_ITEMS.map((item) => (
+                {FULL_NAV_ITEMS.map((item) => (
                   <Button
                     key={item.path}
                     variant={isActive(item.path) ? 'secondary' : 'ghost'}
-                    className="w-full justify-start"
+                    className="w-full justify-start h-11"
                     onClick={() => handleNav(item.path)}
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
@@ -202,10 +211,10 @@ export default function DashboardLayout() {
           </div>
 
           <div className="ml-auto flex gap-1">
-            <Button variant="ghost" size="icon-sm" onClick={toggleTheme} aria-label="Toggle theme">
+            <Button variant="ghost" size="icon" className="min-touch" onClick={toggleTheme} aria-label="Toggle theme">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            <Button variant="ghost" size="icon-sm" onClick={handleLogout} aria-label="Logout">
+            <Button variant="ghost" size="icon" className="min-touch" onClick={handleLogout} aria-label="Logout">
               <LogOut className="h-4 w-4 text-destructive" />
             </Button>
           </div>
@@ -218,22 +227,53 @@ export default function DashboardLayout() {
           </div>
         </main>
 
-        {/* Mobile bottom nav */}
-        <nav className="flex overflow-x-auto border-t bg-card lg:hidden safe-bottom">
-          {NAV_ITEMS.map((item) => (
-            <Button
-              key={item.path}
-              variant="ghost"
-              onClick={() => navigate(item.path)}
-              className={cn(
-                'flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-2 h-auto text-[10px] font-medium rounded-none',
-                isActive(item.path) ? 'text-primary' : 'text-muted-foreground',
-              )}
-            >
-              <item.icon className="h-5 w-5 shrink-0" />
-              <span className="truncate">{item.label}</span>
-            </Button>
-          ))}
+        {/* Mobile bottom nav — redesigned with 5 items + FAB Add */}
+        <nav className="flex items-center justify-around border-t bg-card lg:hidden safe-bottom" style={{ minHeight: 'calc(max(56px, env(safe-area-inset-bottom)))' }}>
+          {BOTTOM_NAV.map((item, i) => {
+            if (item === null) {
+              return (
+                <Button
+                  key="add"
+                  variant="default"
+                  onClick={() => navigate('/app/add')}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full p-0 shadow-lg shadow-primary/30 -mt-4"
+                  aria-label="Add transaction"
+                >
+                  <PlusCircle className="h-6 w-6" />
+                </Button>
+              )
+            }
+            if (item.path === '#more') {
+              return (
+                <Button
+                  key="more"
+                  variant="ghost"
+                  onClick={() => setSidebarOpen(true)}
+                  className={cn(
+                    'flex min-w-0 flex-1 flex-col items-center gap-0.5 h-14 rounded-none text-[10px] font-medium',
+                    'text-muted-foreground',
+                  )}
+                >
+                  <item.icon className="h-5 w-5 shrink-0" />
+                  <span className="leading-tight">{item.label}</span>
+                </Button>
+              )
+            }
+            return (
+              <Button
+                key={item.path}
+                variant="ghost"
+                onClick={() => navigate(item.path)}
+                className={cn(
+                  'flex min-w-0 flex-1 flex-col items-center gap-0.5 h-14 rounded-none text-[10px] font-medium',
+                  isActive(item.path) ? 'text-primary' : 'text-muted-foreground',
+                )}
+              >
+                <item.icon className="h-5 w-5 shrink-0" />
+                <span className="leading-tight">{item.label}</span>
+              </Button>
+            )
+          })}
         </nav>
       </div>
     </div>

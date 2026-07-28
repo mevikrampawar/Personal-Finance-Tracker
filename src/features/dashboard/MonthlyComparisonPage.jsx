@@ -63,20 +63,20 @@ export function MonthlyComparisonPage() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Card className="flex items-center gap-2 p-3">
-          <Button variant="outline" size="icon" onClick={() => setLeftMonth((m) => subMonths(m, 1))} aria-label="Previous month">
+          <Button variant="outline" size="icon" className="min-touch" onClick={() => setLeftMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft />
           </Button>
           <span className="flex-1 text-center text-sm font-medium">{formatMonthYear(leftMonth)}</span>
-          <Button variant="outline" size="icon" onClick={() => setLeftMonth((m) => addMonths(m, 1))} aria-label="Next month">
+          <Button variant="outline" size="icon" className="min-touch" onClick={() => setLeftMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight />
           </Button>
         </Card>
         <Card className="flex items-center gap-2 p-3">
-          <Button variant="outline" size="icon" onClick={() => setRightMonth((m) => subMonths(m, 1))} aria-label="Previous month">
+          <Button variant="outline" size="icon" className="min-touch" onClick={() => setRightMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft />
           </Button>
           <span className="flex-1 text-center text-sm font-medium">{formatMonthYear(rightMonth)}</span>
-          <Button variant="outline" size="icon" onClick={() => setRightMonth((m) => addMonths(m, 1))} aria-label="Next month">
+          <Button variant="outline" size="icon" className="min-touch" onClick={() => setRightMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight />
           </Button>
         </Card>
@@ -125,37 +125,69 @@ export function MonthlyComparisonPage() {
       </div>
 
       {allCategories.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Category Comparison</CardTitle>
-          </CardHeader>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">{formatMonthYear(leftMonth)}</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">{formatMonthYear(rightMonth)}</th>
-                  <th className="px-4 py-3 text-right font-medium text-muted-foreground">Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allCategories.map((cat) => {
-                  const left = stats.left.categories[cat] || 0
-                  const right = stats.right.categories[cat] || 0
-                  return (
-                    <tr key={cat} className="border-b last:border-0 transition-colors hover:bg-muted/30">
-                      <td className="px-4 py-3 font-medium">{cat}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(left)}</td>
-                      <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(right)}</td>
-                      <td className="px-4 py-3 text-right"><ChangeIndicator prev={left} curr={right} /></td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+        <>
+          {/* Mobile category comparison cards */}
+          <div className="space-y-2 sm:hidden">
+            {allCategories.map((cat) => {
+              const left = stats.left.categories[cat] || 0
+              const right = stats.right.categories[cat] || 0
+              return (
+                <Card key={cat}>
+                  <CardContent className="p-4">
+                    <p className="text-sm font-medium">{cat}</p>
+                    <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <p className="text-muted-foreground">{formatMonthYear(leftMonth)}</p>
+                        <p className="mt-0.5 tabular-nums font-medium">{formatCurrency(left)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">{formatMonthYear(rightMonth)}</p>
+                        <p className="mt-0.5 tabular-nums font-medium">{formatCurrency(right)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-muted-foreground">Change</p>
+                        <p className="mt-0.5"><ChangeIndicator prev={left} curr={right} /></p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
-        </Card>
+
+          {/* Desktop category comparison table */}
+          <Card className="hidden sm:block">
+            <CardHeader>
+              <CardTitle>Category Comparison</CardTitle>
+            </CardHeader>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
+                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">{formatMonthYear(leftMonth)}</th>
+                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">{formatMonthYear(rightMonth)}</th>
+                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {allCategories.map((cat) => {
+                    const left = stats.left.categories[cat] || 0
+                    const right = stats.right.categories[cat] || 0
+                    return (
+                      <tr key={cat} className="border-b last:border-0 transition-colors hoverable:hover:bg-muted/30">
+                        <td className="px-4 py-3 font-medium">{cat}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(left)}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{formatCurrency(right)}</td>
+                        <td className="px-4 py-3 text-right"><ChangeIndicator prev={left} curr={right} /></td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
       )}
     </div>
   )

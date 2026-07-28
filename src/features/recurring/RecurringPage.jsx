@@ -44,7 +44,7 @@ export default function RecurringPage() {
         amount: amt,
         type,
         category: type === 'expense' ? category : '',
-        dayOfMonth: Math.min(Math.max(Number(dayOfMonth), 1), 31),
+        dayOfMonth: Math.min(Math.max(Number(dayOfMonth), 1), 28),
       })
       setDescription('')
       setAmount('')
@@ -148,15 +148,16 @@ export default function RecurringPage() {
                 onChange={(e) => setDescription(e.target.value)}
                 required
               />
-              <Input
-                type="number"
-                placeholder="Amount"
-                step="0.01"
-                min="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                required
-              />
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          placeholder="Amount"
+                          step="0.01"
+                          min="0"
+                          value={amount}
+                          onChange={(e) => setAmount(e.target.value)}
+                          required
+                        />
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
@@ -223,7 +224,7 @@ export default function RecurringPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-destructive"
+                        className="min-touch text-destructive"
                         onClick={() => setDeleteTarget(r)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />

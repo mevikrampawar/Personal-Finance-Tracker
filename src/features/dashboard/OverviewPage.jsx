@@ -46,11 +46,11 @@ export function OverviewPage() {
           <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <Button variant="outline" size="icon" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
+          <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft />
           </Button>
           <span className="min-w-[140px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
-          <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
+          <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight />
           </Button>
           <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())}>

@@ -38,7 +38,7 @@ export default function NetWorthPage() {
     const { valid, value: amt } = sanitizeAmount(assetAmount)
     if (!valid) return toast('Enter a valid amount', { type: 'warning' })
     try {
-      await addAsset({ name: assetName.trim(), amount: amt, type: 'asset' })
+      await addAsset({ name: assetName.trim(), amount: amt })
       setAssetName('')
       setAssetAmount('')
       toast('Asset added', { type: 'success' })
@@ -53,7 +53,7 @@ export default function NetWorthPage() {
     const { valid, value: amt } = sanitizeAmount(liabilityAmount)
     if (!valid) return toast('Enter a valid amount', { type: 'warning' })
     try {
-      await addLiability({ name: liabilityName.trim(), amount: amt, type: 'liability' })
+      await addLiability({ name: liabilityName.trim(), amount: amt })
       setLiabilityName('')
       setLiabilityAmount('')
       toast('Liability added', { type: 'success' })
@@ -156,6 +156,7 @@ export default function NetWorthPage() {
                 />
                 <Input
                   type="number"
+                  inputMode="decimal"
                   placeholder="Amount"
                   min="0"
                   step="0.01"
@@ -192,8 +193,8 @@ export default function NetWorthPage() {
                           <AlertDialogTrigger asChild>
                             <Button
                               variant="ghost"
-                              size="icon-xs"
-                              className="text-destructive"
+                              size="icon"
+                              className="min-touch text-destructive"
                               onClick={() => { setDeleteTarget(a); setDeleteType('asset') }}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -238,6 +239,7 @@ export default function NetWorthPage() {
                 />
                 <Input
                   type="number"
+                  inputMode="decimal"
                   placeholder="Amount"
                   min="0"
                   step="0.01"
@@ -274,8 +276,8 @@ export default function NetWorthPage() {
                           <AlertDialogTrigger asChild>
                             <Button
                               variant="ghost"
-                              size="icon-xs"
-                              className="text-destructive"
+                              size="icon"
+                              className="min-touch text-destructive"
                               onClick={() => { setDeleteTarget(l); setDeleteType('liability') }}
                             >
                               <Trash2 className="h-3.5 w-3.5" />

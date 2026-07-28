@@ -132,21 +132,22 @@ export default function CategoriesPage() {
                       <p className="text-xs text-muted-foreground tabular-nums">Spent: {formatCurrency(spent)}</p>
                     </div>
                     <div className="flex items-center gap-2 self-end sm:self-auto">
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={budgetEdits[cat.id] ?? cat.monthlyBudget ?? ''}
-                        onChange={(e) => handleBudgetChange(cat.id, e.target.value)}
-                        placeholder="Budget"
-                        className="w-28 text-right"
-                      />
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          step="0.01"
+                          value={budgetEdits[cat.id] ?? cat.monthlyBudget ?? ''}
+                          onChange={(e) => handleBudgetChange(cat.id, e.target.value)}
+                          placeholder="Budget"
+                          className="w-28 text-right"
+                        />
                       <AlertDialog open={deleteTarget?.id === cat.id} onOpenChange={(open) => !open && setDeleteTarget(null)}>
                         <AlertDialogTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="text-destructive"
+                            className="min-touch text-destructive"
                             onClick={() => setDeleteTarget(cat)}
                           >
                             <Trash2 className="h-3.5 w-3.5" />

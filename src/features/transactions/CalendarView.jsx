@@ -117,7 +117,7 @@ export default function CalendarView() {
                   onClick={() => setSelectedDate(day.date)}
                   className={`relative flex flex-col items-center rounded-lg py-2 text-sm transition-colors ${
                     !day.currentMonth ? 'text-muted-foreground/40' : 'text-foreground'
-                  } ${isSelected ? 'bg-primary text-primary-foreground font-semibold' : today ? 'bg-accent font-medium' : 'hover:bg-muted/50'}`}
+                  } ${isSelected ? 'bg-primary text-primary-foreground font-semibold' : today ? 'bg-accent font-medium' : 'hoverable:hover:bg-muted/50'}`}
                 >
                   {day.day}
                   {counts && (
@@ -149,7 +149,7 @@ export default function CalendarView() {
           ) : (
             <div className="divide-y">
               {selectedDayTransactions.map((t) => (
-                <div key={t.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors">
+                <div key={t.id} className="flex items-center justify-between px-4 py-3 hoverable:hover:bg-muted/30 transition-colors">
                   <div>
                     <p className="text-sm font-medium">{t.description}</p>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -166,11 +166,11 @@ export default function CalendarView() {
                       {formatCurrency(t.amount || 0)}
                     </span>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon-sm" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
-                        <Edit className="h-3 w-3" />
+                      <Button variant="ghost" size="icon" className="min-touch" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
+                        <Edit className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon-sm" onClick={() => setDeleteTarget(t.id)} aria-label="Delete" className="text-destructive hover:text-destructive">
-                        <Trash2 className="h-3 w-3" />
+                      <Button variant="ghost" size="icon" className="min-touch text-destructive" onClick={() => setDeleteTarget(t.id)} aria-label="Delete">
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>

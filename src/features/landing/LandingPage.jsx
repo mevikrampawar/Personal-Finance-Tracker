@@ -143,7 +143,7 @@ function CandlestickChart() {
 
 function FeatureCard({ icon: Icon, title, desc, color }) {
   return (
-    <div className="group rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1">
+    <div className="group rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300 hoverable:hover:shadow-lg hoverable:hover:border-primary/30 hoverable:hover:-translate-y-1 active:scale-[0.98]">
       <div className={`mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl ${color}`}>
         <Icon className="h-6 w-6" />
       </div>
@@ -281,7 +281,7 @@ export default function LandingPage() {
               </Button>
               <a
                 href="#features"
-                className="flex items-center gap-2 rounded-xl border px-8 py-3.5 text-sm font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground sm:w-auto"
+                className="flex items-center gap-2 rounded-xl border px-8 py-3.5 text-sm font-medium text-muted-foreground transition-all hoverable:hover:bg-accent hoverable:hover:text-foreground active:bg-accent active:text-foreground sm:w-auto"
               >
                 See Features
                 <ChevronRight className="h-4 w-4" />

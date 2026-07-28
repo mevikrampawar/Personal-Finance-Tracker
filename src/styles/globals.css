@@ -4,6 +4,8 @@
 @import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant hoverable (@media (hover: hover) and (pointer: fine));
+@custom-variant touchable (@media (hover: none) and (pointer: coarse));
 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -140,6 +142,7 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
     @apply bg-background text-foreground;
   }
   * {
@@ -159,6 +162,13 @@
   }
   .safe-bottom {
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  .safe-top {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+  .min-touch {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
