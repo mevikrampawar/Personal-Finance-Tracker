@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
+import { collection, query, orderBy, limit, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 
-export function useFirestoreCollection(uid, collectionName) {
+export function useFirestoreCollection(uid, collectionName, limitParam = 1000) {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -17,7 +17,7 @@ export function useFirestoreCollection(uid, collectionName) {
 
     setLoading(true)
     const ref = collection(db, 'users', uid, collectionName)
-    const q = query(ref, orderBy('createdAt', 'desc'))
+    const q = query(ref, orderBy('createdAt', 'desc'), limit(limitParam))
 
     unsubRef.current = onSnapshot(
       q,
@@ -33,7 +33,7 @@ export function useFirestoreCollection(uid, collectionName) {
     )
 
     return () => unsubRef.current?.()
-  }, [uid, collectionName])
+  }, [uid, collectionName, limitParam])
 
   const add = useCallback(
     async (payload) => {

@@ -18,7 +18,7 @@ import { toast } from 'sonner'
 
 export default function TransactionsPage() {
   const { user } = useAuth()
-  const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions')
+  const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions', 500)
   const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
   const [month, setMonth] = useState(new Date())
   const [search, setSearch] = useState('')
