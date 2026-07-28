@@ -33,11 +33,18 @@ export function formatYearMonth(date) {
   return format(date, 'yyyy-MM')
 }
 
+export function getTransactionDate(t) {
+  if (!t) return null
+  const source = t.transactionDate || t.createdAt
+  if (!source) return null
+  return source.toDate ? source.toDate() : new Date(source)
+}
+
 export function getTransactionsForMonth(transactions, month) {
   if (!Array.isArray(transactions) || !month) return []
   return transactions.filter((t) => {
-    if (!t.createdAt) return false
-    const d = t.createdAt?.toDate ? t.createdAt.toDate() : new Date(t.createdAt)
+    const d = getTransactionDate(t)
+    if (!d) return false
     return isSameMonth(d, month)
   })
 }
@@ -45,8 +52,8 @@ export function getTransactionsForMonth(transactions, month) {
 export function getTransactionsForDate(transactions, date) {
   if (!Array.isArray(transactions) || !date) return []
   return transactions.filter((t) => {
-    if (!t.createdAt) return false
-    const d = t.createdAt?.toDate ? t.createdAt.toDate() : new Date(t.createdAt)
+    const d = getTransactionDate(t)
+    if (!d) return false
     return isSameDay(d, date)
   })
 }

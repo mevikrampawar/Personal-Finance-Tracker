@@ -157,6 +157,9 @@
   .animate-ticker {
     animation: ticker 30s linear infinite;
   }
+  .safe-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
 }
 
 @keyframes ticker {

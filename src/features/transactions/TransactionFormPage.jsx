@@ -36,7 +36,8 @@ export default function TransactionFormPage() {
         setType(t.type || 'expense')
         setCategory(t.category || '')
         setAmount(String(t.amount || ''))
-        const d = t.createdAt?.toDate ? t.createdAt.toDate() : new Date(t.createdAt)
+        const dateField = t.transactionDate || t.createdAt
+        const d = dateField?.toDate ? dateField.toDate() : new Date(dateField)
         setDate(formatInputDate(d))
       }
     }
@@ -58,7 +59,7 @@ export default function TransactionFormPage() {
       type,
       category: type === 'expense' ? category : '',
       amount: amt,
-      createdAt: transactionDate,
+      transactionDate,
     }
 
     setSubmitting(true)

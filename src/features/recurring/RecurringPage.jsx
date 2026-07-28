@@ -74,7 +74,7 @@ export default function RecurringPage() {
           type: r.type,
           category: r.type === 'expense' ? r.category : '',
           amount: r.amount,
-          createdAt: txDate,
+          transactionDate: txDate,
           recurringId: r.id,
           recurringPeriod: periodKey,
         })
@@ -186,7 +186,7 @@ export default function RecurringPage() {
                 required
               />
             </div>
-            <Button type="submit">
+            <Button type="submit" className="w-full sm:w-auto">
               <Plus className="h-4 w-4" /> Add Recurring Transaction
             </Button>
           </form>

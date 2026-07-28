@@ -7,7 +7,8 @@ function sanitizeCSVField(value) {
 export function exportToCSV(transactions, filename) {
   const header = ['Date', 'Description', 'Type', 'Category', 'Amount']
   const rows = transactions.map((t) => {
-    const d = t.createdAt?.toDate ? t.createdAt.toDate() : new Date(t.createdAt)
+    const dateSource = t.transactionDate || t.createdAt
+    const d = dateSource?.toDate ? dateSource.toDate() : new Date(dateSource)
     const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     return [dateStr, t.description || '', t.type || '', t.category || '', t.amount || 0]
   })

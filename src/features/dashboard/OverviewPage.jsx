@@ -40,12 +40,12 @@ export function OverviewPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-medium uppercase text-muted-foreground tracking-wide">Dashboard</p>
           <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <Button variant="outline" size="icon" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft />
           </Button>

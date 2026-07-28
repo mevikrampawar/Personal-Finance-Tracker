@@ -39,7 +39,8 @@ export function useFirestoreCollection(uid, collectionName) {
     async (payload) => {
       if (!uid) throw new Error('Not authenticated')
       const ref = collection(db, 'users', uid, collectionName)
-      return addDoc(ref, { ...payload, createdAt: new Date(), updatedAt: new Date() })
+      const { createdAt: _, ...rest } = payload
+      return addDoc(ref, { ...rest, createdAt: new Date(), updatedAt: new Date() })
     },
     [uid, collectionName],
   )
@@ -48,7 +49,8 @@ export function useFirestoreCollection(uid, collectionName) {
     async (id, payload) => {
       if (!uid) throw new Error('Not authenticated')
       const ref = doc(db, 'users', uid, collectionName, id)
-      return updateDoc(ref, { ...payload, updatedAt: new Date() })
+      const { createdAt: _, ...rest } = payload
+      return updateDoc(ref, { ...rest, updatedAt: new Date() })
     },
     [uid, collectionName],
   )

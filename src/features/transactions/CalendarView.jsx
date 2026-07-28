@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { getTransactionsForDate, toLocalDate, formatFullDate, formatShortDate } from '@/lib/date'
+import { getTransactionsForDate, getTransactionDate, toLocalDate, formatFullDate, formatShortDate } from '@/lib/date'
 import { addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, getDaysInMonth, isSameDay, isToday } from 'date-fns'
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -47,7 +47,7 @@ export default function CalendarView() {
   const txCountByDate = useMemo(() => {
     const map = {}
     transactions.forEach((t) => {
-      const d = toLocalDate(t.createdAt)
+      const d = getTransactionDate(t)
       if (!d) return
       const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
       if (!map[key]) map[key] = { income: 0, expense: 0 }
@@ -59,8 +59,8 @@ export default function CalendarView() {
 
   const selectedDayTransactions = useMemo(
     () => getTransactionsForDate(transactions, selectedDate).sort((a, b) => {
-      const da = toLocalDate(a.createdAt)
-      const db = toLocalDate(b.createdAt)
+      const da = getTransactionDate(a)
+      const db = getTransactionDate(b)
       return (db?.getTime() || 0) - (da?.getTime() || 0)
     }),
     [transactions, selectedDate],

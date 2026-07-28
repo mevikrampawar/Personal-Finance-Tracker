@@ -108,12 +108,13 @@ export default function GoalsPage() {
           <CardTitle>Create Goal</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleAdd} className="flex gap-2">
+          <form onSubmit={handleAdd} className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Input
               type="text"
               placeholder="Goal name (e.g., Emergency Fund)"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="sm:flex-1"
             />
             <Input
               type="number"
@@ -122,14 +123,15 @@ export default function GoalsPage() {
               step="0.01"
               value={targetAmount}
               onChange={(e) => setTargetAmount(e.target.value)}
+              className="sm:w-36"
             />
             <Input
               type="date"
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
-              className="w-40"
+              className="sm:w-40"
             />
-            <Button type="submit">
+            <Button type="submit" className="w-full sm:w-auto">
               <Plus className="h-4 w-4" /> Create
             </Button>
           </form>

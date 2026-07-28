@@ -97,12 +97,13 @@ export default function SubscriptionsPage() {
           <CardTitle>Add Subscription</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleAdd} className="flex gap-2">
+          <form onSubmit={handleAdd} className="flex flex-col gap-2 sm:flex-row">
             <Input
               type="text"
               placeholder="Name (e.g., Netflix, Spotify)"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="sm:flex-1"
             />
             <Input
               type="number"
@@ -111,17 +112,17 @@ export default function SubscriptionsPage() {
               step="0.01"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="w-28"
+              className="sm:w-28"
             />
             <Select value={frequency} onValueChange={setFrequency}>
-              <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-32"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="monthly">Monthly</SelectItem>
                 <SelectItem value="yearly">Yearly</SelectItem>
                 <SelectItem value="weekly">Weekly</SelectItem>
               </SelectContent>
             </Select>
-            <Button type="submit">
+            <Button type="submit" className="w-full sm:w-auto">
               <Plus className="h-4 w-4" /> Add
             </Button>
           </form>

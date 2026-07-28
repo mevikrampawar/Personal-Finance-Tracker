@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { getTransactionsForMonth, toLocalDate, formatShortDate, formatYearMonth } from '@/lib/date'
+import { getTransactionsForMonth, getTransactionDate, toLocalDate, formatShortDate, formatYearMonth } from '@/lib/date'
 import { exportToCSV } from '@/lib/csv'
 import { addMonths, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2 } from 'lucide-react'
@@ -42,15 +42,15 @@ export default function TransactionsPage() {
     const amt = Number(t.amount || 0)
     if (minAmount && amt < Number(minAmount)) return false
     if (maxAmount && amt > Number(maxAmount)) return false
-    const d = toLocalDate(t.createdAt)
+    const d = getTransactionDate(t)
     if (fromDate && d && d < new Date(`${fromDate}T00:00:00`)) return false
     if (toDate && d && d > new Date(`${toDate}T23:59:59`)) return false
     return true
   }), [monthTransactions, search, typeFilter, categoryFilter, minAmount, maxAmount, fromDate, toDate])
 
   const sorted = useMemo(() => [...filtered].sort((a, b) => {
-    const da = toLocalDate(a.createdAt)
-    const db = toLocalDate(b.createdAt)
+    const da = getTransactionDate(a)
+    const db = getTransactionDate(b)
     return (db?.getTime() || 0) - (da?.getTime() || 0)
   }), [filtered])
 
@@ -155,7 +155,7 @@ export default function TransactionsPage() {
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Input
                 type="number"
                 placeholder="Min"
@@ -172,11 +172,11 @@ export default function TransactionsPage() {
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             {hasFilters && (
-              <Button variant="outline" size="xs" onClick={clearFilters}>
+              <Button variant="outline" size="sm" onClick={clearFilters}>
                 <X className="h-3 w-3" /> Clear
               </Button>
             )}
-            <Button variant="outline" size="xs" onClick={handleExport} className="ml-auto">
+            <Button variant="outline" size="sm" onClick={handleExport} className="ml-auto">
               <Download className="h-3 w-3" /> Export CSV
             </Button>
           </div>
@@ -205,7 +205,7 @@ export default function TransactionsPage() {
                 </tr>
               ) : (
                 sorted.map((t) => {
-                  const d = toLocalDate(t.createdAt)
+                  const d = getTransactionDate(t)
                   return (
                     <tr key={t.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">{d ? formatShortDate(d) : '-'}</td>

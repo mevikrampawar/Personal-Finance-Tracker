@@ -137,12 +137,13 @@ export default function NetWorthPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleAddAsset} className="flex gap-2">
+              <form onSubmit={handleAddAsset} className="flex flex-col gap-2 sm:flex-row">
                 <Input
                   type="text"
                   placeholder="Name (e.g., Savings, Investment)"
                   value={assetName}
                   onChange={(e) => setAssetName(e.target.value)}
+                  className="sm:flex-1"
                 />
                 <Input
                   type="number"
@@ -151,10 +152,10 @@ export default function NetWorthPage() {
                   step="0.01"
                   value={assetAmount}
                   onChange={(e) => setAssetAmount(e.target.value)}
-                  className="w-28"
+                  className="sm:w-28"
                 />
-                <Button type="submit" variant="secondary" size="icon">
-                  <Plus className="h-4 w-4" />
+                <Button type="submit" variant="secondary" className="w-full sm:w-auto">
+                  <Plus className="h-4 w-4" /> Add
                 </Button>
               </form>
             </CardContent>
@@ -218,12 +219,13 @@ export default function NetWorthPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleAddLiability} className="flex gap-2">
+              <form onSubmit={handleAddLiability} className="flex flex-col gap-2 sm:flex-row">
                 <Input
                   type="text"
                   placeholder="Name (e.g., Loan, Credit Card)"
                   value={liabilityName}
                   onChange={(e) => setLiabilityName(e.target.value)}
+                  className="sm:flex-1"
                 />
                 <Input
                   type="number"
@@ -232,10 +234,10 @@ export default function NetWorthPage() {
                   step="0.01"
                   value={liabilityAmount}
                   onChange={(e) => setLiabilityAmount(e.target.value)}
-                  className="w-28"
+                  className="sm:w-28"
                 />
-                <Button type="submit" variant="secondary" size="icon">
-                  <Plus className="h-4 w-4" />
+                <Button type="submit" variant="secondary" className="w-full sm:w-auto">
+                  <Plus className="h-4 w-4" /> Add
                 </Button>
               </form>
             </CardContent>

@@ -212,19 +212,19 @@ export default function DashboardLayout() {
         </main>
 
         {/* Mobile bottom nav */}
-        <nav className="flex border-t bg-card lg:hidden">
-          {NAV_ITEMS.slice(0, 5).map((item) => (
+        <nav className="flex overflow-x-auto border-t bg-card lg:hidden safe-bottom">
+          {NAV_ITEMS.map((item) => (
             <Button
               key={item.path}
               variant="ghost"
               onClick={() => navigate(item.path)}
               className={cn(
-                'flex flex-1 flex-col items-center gap-0.5 py-2 h-auto text-[10px] font-medium rounded-none',
+                'flex min-w-0 flex-1 flex-col items-center gap-0.5 px-1 py-2 h-auto text-[10px] font-medium rounded-none',
                 isActive(item.path) ? 'text-primary' : 'text-muted-foreground',
               )}
             >
-              <item.icon className="h-5 w-5" />
-              {item.label}
+              <item.icon className="h-5 w-5 shrink-0" />
+              <span className="truncate">{item.label}</span>
             </Button>
           ))}
         </nav>

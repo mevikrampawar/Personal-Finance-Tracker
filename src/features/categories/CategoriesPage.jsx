@@ -127,12 +127,12 @@ export default function CategoriesPage() {
               {categories.map((cat) => {
                 const spent = spentByCategory[cat.name] || 0
                 return (
-                  <div key={cat.id} className="flex items-center gap-4 py-3">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{cat.name}</p>
+                  <div key={cat.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{cat.name}</p>
                       <p className="text-xs text-muted-foreground tabular-nums">Spent: {formatCurrency(spent)}</p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 self-end sm:self-auto">
                       <Input
                         type="number"
                         min="0"
