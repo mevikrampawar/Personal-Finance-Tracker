@@ -1,0 +1,40 @@
+{
+  "name": "personal-finance-tracker",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mevikrampawar/Personal-Finance-Tracker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mevikrampawar/Personal-Finance-Tracker/issues"
+  },
+  "homepage": "https://github.com/mevikrampawar/Personal-Finance-Tracker#readme",
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "firebase": "^12.16.0",
+    "framer-motion": "^12.42.2",
+    "lucide-react": "^1.27.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.1",
+    "recharts": "^3.10.1",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.23",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.1.5"
+  }
+}

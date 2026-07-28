@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-background: #fafafa;
+  --color-foreground: #0a0a0a;
+  --color-card: #ffffff;
+  --color-card-foreground: #0a0a0a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #0a0a0a;
+  --color-primary: #10b981;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f3f4f6;
+  --color-secondary-foreground: #171717;
+  --color-muted: #f3f4f6;
+  --color-muted-foreground: #6b7280;
+  --color-accent: #f3f4f6;
+  --color-accent-foreground: #171717;
+  --color-destructive: #f43f5e;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e5e7eb;
+  --color-input: #e5e7eb;
+  --color-ring: #10b981;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-income: #10b981;
+  --color-expense: #f43f5e;
+  --color-balance: #6366f1;
+  --radius: 0.625rem;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+.dark {
+  --color-background: #0a0a0a;
+  --color-foreground: #fafafa;
+  --color-card: #171717;
+  --color-card-foreground: #fafafa;
+  --color-popover: #171717;
+  --color-popover-foreground: #fafafa;
+  --color-primary: #34d399;
+  --color-primary-foreground: #0a0a0a;
+  --color-secondary: #262626;
+  --color-secondary-foreground: #fafafa;
+  --color-muted: #262626;
+  --color-muted-foreground: #a3a3a3;
+  --color-accent: #262626;
+  --color-accent-foreground: #fafafa;
+  --color-destructive: #fb7185;
+  --color-destructive-foreground: #0a0a0a;
+  --color-border: #262626;
+  --color-input: #262626;
+  --color-ring: #34d399;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-income: #34d399;
+  --color-expense: #fb7185;
+  --color-balance: #818cf8;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}

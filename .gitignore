@@ -1,3 +1,10 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Old config
 old-config/
 
 # OS generated files
@@ -9,4 +16,11 @@ old-config/
 ehthumbs.db
 Thumbs.db
 desktop.ini
+
+# Project files
 DATABASE_SCHEMA.md
+*.log
+
+# IDE
+.vscode/
+.idea/
