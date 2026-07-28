@@ -2,9 +2,10 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { formatMonthYear, getTransactionsForMonth, getTransactionDate } from '@/lib/date'
-import { addMonths, subMonths } from 'date-fns'
+import { getTransactionsForMonth, getTransactionDate } from '@/lib/date'
 import { ChevronLeft, ChevronRight, Plus, TrendingDown, TrendingUp, IndianRupee, List, ArrowRight } from 'lucide-react'
+import { subMonths, addMonths } from 'date-fns'
+import { MonthPicker } from '@/components/ui/month-picker'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -59,16 +60,13 @@ export function OverviewPage() {
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Dashboard</p>
           <h2 className="text-2xl font-bold tracking-tight">Overview</h2>
         </div>
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-1">
           <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
-            <ChevronLeft />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="min-w-[140px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
+          <MonthPicker value={month} onChange={setMonth} />
           <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
-            <ChevronRight />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())}>
-            Today
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -188,7 +186,7 @@ export function OverviewPage() {
 
       <SpendingInsights transactions={transactions} month={month} monthTransactions={monthTransactions} />
 
-      <div className="flex flex-wrap gap-3">
+      <div className="hidden lg:flex lg:flex-wrap lg:gap-3">
         <Button onClick={() => navigate('/app/add')}>
           <Plus data-icon="inline-start" /> Add Entry
         </Button>

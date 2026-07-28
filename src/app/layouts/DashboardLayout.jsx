@@ -268,10 +268,13 @@ export default function DashboardLayout() {
                 variant="ghost"
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  'flex min-w-0 flex-1 flex-col items-center gap-0.5 h-14 rounded-none text-[10px] font-medium',
+                  'relative flex min-w-0 flex-1 flex-col items-center gap-0.5 h-14 rounded-none text-[10px] font-medium active:scale-[0.97]',
                   isActive(item.path) ? 'text-primary' : 'text-muted-foreground',
                 )}
               >
+                {isActive(item.path) && (
+                  <span className="absolute top-0 left-1/4 right-1/4 h-0.5 rounded-full bg-primary" />
+                )}
                 <item.icon className="h-5 w-5 shrink-0" />
                 <span className="leading-tight">{item.label}</span>
               </Button>

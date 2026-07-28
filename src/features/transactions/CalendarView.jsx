@@ -2,9 +2,10 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { getTransactionsForDate, getTransactionDate, formatFullDate, formatMonthYear } from '@/lib/date'
-import { addMonths, subMonths, getDay, getDaysInMonth, isSameDay, isToday } from 'date-fns'
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
+import { getTransactionsForDate, getTransactionDate, formatFullDate } from '@/lib/date'
+import { getDay, getDaysInMonth, isSameDay, isToday } from 'date-fns'
+import { Calendar as CalendarIcon, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
+import { MonthPicker } from '@/components/ui/month-picker'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -86,18 +87,7 @@ export default function CalendarView() {
         <p className="mt-1 text-sm text-muted-foreground">Browse transactions by date.</p>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <span className="min-w-[140px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
-        <Button variant="outline" size="icon" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())}>
-          Today
-        </Button>
-      </div>
+      <MonthPicker value={month} onChange={setMonth} />
 
       <Card>
         <CardContent className="p-4">
@@ -111,9 +101,9 @@ export default function CalendarView() {
               const isSelected = isSameDay(day.date, selectedDate)
               const today = isToday(day.date)
               return (
-                <button
+                <Button
                   key={i}
-                  type="button"
+                  variant="ghost"
                   onClick={() => setSelectedDate(day.date)}
                   className={`relative flex flex-col items-center rounded-lg py-2 text-sm transition-colors ${
                     !day.currentMonth ? 'text-muted-foreground/40' : 'text-foreground'
@@ -130,7 +120,7 @@ export default function CalendarView() {
                       )}
                     </div>
                   )}
-                </button>
+                </Button>
               )
             })}
           </div>

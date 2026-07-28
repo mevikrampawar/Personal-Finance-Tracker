@@ -3,11 +3,12 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { formatMonthYear, getTransactionsForMonth } from '@/lib/date'
-import { addMonths, subMonths } from 'date-fns'
-import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { subMonths } from 'date-fns'
+import { ArrowUp, ArrowDown, Minus } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { MonthPicker } from '@/components/ui/month-picker'
 import { cn } from '@/lib/utils'
 
 function pctChange(prev, curr) {
@@ -65,52 +66,39 @@ function MiniBar({ left, right, colorClass = 'bg-primary' }) {
   )
 }
 
-function isSameMonth(a, b) {
-  return a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear()
-}
-
-function MonthSelector({ value, onChange, label }) {
-  const isCurrent = isSameMonth(value, new Date())
-  return (
-    <Card
-      className={cn(
-        'flex items-center gap-1 p-2 sm:gap-2 sm:p-3',
-        isCurrent && 'ring-1 ring-income/20 bg-income/[0.02]'
-      )}
-    >
-      <Button
-        variant="ghost"
-        size="icon"
-        className="min-touch active:scale-[0.97]"
-        onClick={() => onChange(subMonths(value, 1))}
-        aria-label="Previous month"
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-      <div className="flex-1 text-center">
-        <p className="text-xs font-medium leading-tight sm:text-sm">{formatMonthYear(value)}</p>
-        {isCurrent && (
-          <p className="text-[10px] font-medium text-income/70 sm:text-xs">{label}</p>
-        )}
-      </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="min-touch active:scale-[0.97]"
-        onClick={() => onChange(addMonths(value, 1))}
-        aria-label="Next month"
-      >
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-    </Card>
-  )
-}
-
 export function MonthlyComparisonPage() {
   const { user } = useAuth()
   const { data: transactions, loading } = useFirestoreCollection(user?.uid, 'transactions')
   const [leftMonth, setLeftMonth] = useState(subMonths(new Date(), 1))
   const [rightMonth, setRightMonth] = useState(new Date())
+
+  const leftTx = useMemo(() => getTransactionsForMonth(transactions, leftMonth), [transactions, leftMonth])
+  const rightTx = useMemo(() => getTransactionsForMonth(transactions, rightMonth), [transactions, rightMonth])
+
+  const stats = useMemo(() => {
+    const calc = (txs) => {
+      const income = txs.filter((t) => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0)
+      const expenses = txs.filter((t) => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0)
+      const categories = {}
+      txs.filter((t) => t.type === 'expense').forEach((t) => {
+        const cat = t.category || 'Uncategorized'
+        categories[cat] = (categories[cat] || 0) + (t.amount || 0)
+      })
+      return { income, expenses, balance: income - expenses, categories }
+    }
+    return { left: calc(leftTx), right: calc(rightTx) }
+  }, [leftTx, rightTx])
+
+  const allCategories = [...new Set([
+    ...Object.keys(stats.left.categories),
+    ...Object.keys(stats.right.categories),
+  ])].sort()
+
+  const summaryItems = [
+    { key: 'income', label: 'Income', gradient: 'from-income/10', barColor: 'bg-income', leftVal: stats.left.income, rightVal: stats.right.income },
+    { key: 'expenses', label: 'Expenses', gradient: 'from-expense/10', barColor: 'bg-expense', leftVal: stats.left.expenses, rightVal: stats.right.expenses },
+    { key: 'balance', label: 'Balance', gradient: stats.right.balance >= 0 ? 'from-income/10' : 'from-expense/10', barColor: stats.right.balance >= 0 ? 'bg-income' : 'bg-expense', leftVal: stats.left.balance, rightVal: stats.right.balance },
+  ]
 
   if (loading) {
     return (
@@ -137,55 +125,6 @@ export function MonthlyComparisonPage() {
     )
   }
 
-  const leftTx = useMemo(() => getTransactionsForMonth(transactions, leftMonth), [transactions, leftMonth])
-  const rightTx = useMemo(() => getTransactionsForMonth(transactions, rightMonth), [transactions, rightMonth])
-
-  const stats = useMemo(() => {
-    const calc = (txs) => {
-      const income = txs.filter((t) => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0)
-      const expenses = txs.filter((t) => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0)
-      const categories = {}
-      txs.filter((t) => t.type === 'expense').forEach((t) => {
-        const cat = t.category || 'Uncategorized'
-        categories[cat] = (categories[cat] || 0) + (t.amount || 0)
-      })
-      return { income, expenses, balance: income - expenses, categories }
-    }
-    return { left: calc(leftTx), right: calc(rightTx) }
-  }, [leftTx, rightTx])
-
-  const allCategories = [...new Set([
-    ...Object.keys(stats.left.categories),
-    ...Object.keys(stats.right.categories),
-  ])].sort()
-
-  const summaryItems = [
-    {
-      key: 'income',
-      label: 'Income',
-      gradient: 'from-income/10',
-      barColor: 'bg-income',
-      leftVal: stats.left.income,
-      rightVal: stats.right.income,
-    },
-    {
-      key: 'expenses',
-      label: 'Expenses',
-      gradient: 'from-expense/10',
-      barColor: 'bg-expense',
-      leftVal: stats.left.expenses,
-      rightVal: stats.right.expenses,
-    },
-    {
-      key: 'balance',
-      label: 'Balance',
-      gradient: stats.right.balance >= 0 ? 'from-income/10' : 'from-expense/10',
-      barColor: stats.right.balance >= 0 ? 'bg-income' : 'bg-expense',
-      leftVal: stats.left.balance,
-      rightVal: stats.right.balance,
-    },
-  ]
-
   return (
     <div className="space-y-5 sm:space-y-8">
       <div>
@@ -198,19 +137,19 @@ export function MonthlyComparisonPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:gap-4">
-        <MonthSelector value={leftMonth} onChange={setLeftMonth} label="Current" />
-        <MonthSelector value={rightMonth} onChange={setRightMonth} label="Current" />
+      <div className="flex items-center justify-center gap-3 sm:gap-4">
+        <MonthPicker value={leftMonth} onChange={setLeftMonth} />
+        <MonthPicker value={rightMonth} onChange={setRightMonth} />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
         {summaryItems.map(({ key, label, gradient, barColor, leftVal, rightVal }) => (
           <Card key={key} className={cn('bg-gradient-to-r to-transparent', gradient)}>
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="flex flex-col items-center p-4 text-center sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:text-sm sm:font-medium sm:normal-case sm:tracking-normal">
                 {label}
               </p>
-              <div className="mt-2 flex items-baseline justify-between gap-2 sm:mt-3 sm:flex-col sm:gap-1">
+              <div className="mt-2 flex flex-col items-center gap-0 sm:mt-3">
                 <span className="text-sm tabular-nums text-muted-foreground sm:text-base">
                   {formatCurrency(leftVal)}
                 </span>
@@ -218,10 +157,10 @@ export function MonthlyComparisonPage() {
                   {formatCurrency(rightVal)}
                 </span>
               </div>
-              <div className="mt-1 flex items-center justify-end sm:mt-2 sm:justify-start">
+              <div className="mt-1 flex items-center justify-center sm:mt-2">
                 <ChangeIndicator prev={leftVal} curr={rightVal} />
               </div>
-              <div className="mt-2 sm:mt-3">
+              <div className="mt-2 w-full sm:mt-3">
                 <MiniBar left={leftVal} right={rightVal} colorClass={barColor} />
               </div>
             </CardContent>
@@ -241,9 +180,9 @@ export function MonthlyComparisonPage() {
               const right = stats.right.categories[cat] || 0
               return (
                 <Card key={cat}>
-                  <CardContent className="p-3">
-                    <p className="text-sm font-medium leading-tight">{cat}</p>
-                    <div className="mt-2 flex items-baseline justify-between gap-2">
+                  <CardContent className="flex flex-col items-center p-3 text-center">
+                    <p className="text-sm font-medium">{cat}</p>
+                    <div className="mt-2 flex flex-col items-center gap-0">
                       <span className="text-xs tabular-nums text-muted-foreground">
                         {formatCurrency(left)}
                       </span>
@@ -251,7 +190,7 @@ export function MonthlyComparisonPage() {
                         {formatCurrency(right)}
                       </span>
                     </div>
-                    <div className="mt-1 flex items-center justify-between gap-2">
+                    <div className="mt-1 flex items-center justify-center gap-3">
                       <span className="text-[10px] text-muted-foreground">
                         {formatMonthYear(leftMonth)}
                       </span>
@@ -259,7 +198,7 @@ export function MonthlyComparisonPage() {
                         {formatMonthYear(rightMonth)}
                       </span>
                     </div>
-                    <div className="mt-1.5 flex items-center gap-2">
+                    <div className="mt-1.5 flex w-full items-center gap-2">
                       <div className="flex-1">
                         <MiniBar left={left} right={right} colorClass="bg-expense" />
                       </div>
@@ -272,49 +211,30 @@ export function MonthlyComparisonPage() {
           </div>
 
           <Card className="hidden sm:block">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="px-4 py-3 text-left font-medium text-muted-foreground">
-                      Category
-                    </th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                      {formatMonthYear(leftMonth)}
-                    </th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                      {formatMonthYear(rightMonth)}
-                    </th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                      Change
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {allCategories.map((cat) => {
-                    const left = stats.left.categories[cat] || 0
-                    const right = stats.right.categories[cat] || 0
-                    return (
-                      <tr
-                        key={cat}
-                        className="border-b last:border-0 transition-colors hoverable:hover:bg-muted/30"
-                      >
-                        <td className="px-4 py-3 font-medium">{cat}</td>
-                        <td className="px-4 py-3 text-right tabular-nums">
-                          {formatCurrency(left)}
-                        </td>
-                        <td className="px-4 py-3 text-right tabular-nums">
-                          {formatCurrency(right)}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <ChangeIndicator prev={left} curr={right} />
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="text-left">Category</TableHead>
+                  <TableHead className="text-right">{formatMonthYear(leftMonth)}</TableHead>
+                  <TableHead className="text-right">{formatMonthYear(rightMonth)}</TableHead>
+                  <TableHead className="text-right">Change</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allCategories.map((cat) => {
+                  const left = stats.left.categories[cat] || 0
+                  const right = stats.right.categories[cat] || 0
+                  return (
+                    <TableRow key={cat}>
+                      <TableCell className="font-medium">{cat}</TableCell>
+                      <TableCell className="text-right tabular-nums">{formatCurrency(left)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{formatCurrency(right)}</TableCell>
+                      <TableCell className="text-right"><ChangeIndicator prev={left} curr={right} /></TableCell>
+                    </TableRow>
+                  )
+                })}
+              </TableBody>
+            </Table>
           </Card>
         </div>
       )}

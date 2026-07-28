@@ -2,16 +2,18 @@ import { useState, useMemo } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { getTransactionsForMonth, getTransactionDate, formatMonthYear, formatShortDate, formatYearMonth } from '@/lib/date'
+import { getTransactionsForMonth, getTransactionDate, formatShortDate, formatYearMonth } from '@/lib/date'
 import { exportToCSV } from '@/lib/csv'
-import { addMonths, subMonths } from 'date-fns'
 import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2, TrendingUp, TrendingDown, SlidersHorizontal } from 'lucide-react'
+import { subMonths, addMonths } from 'date-fns'
+import { MonthPicker } from '@/components/ui/month-picker'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
@@ -118,12 +120,9 @@ export default function TransactionsPage() {
           <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => subMonths(m, 1))} aria-label="Previous month">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="min-w-[120px] text-center text-sm font-medium">{formatMonthYear(month)}</span>
+          <MonthPicker value={month} onChange={setMonth} />
           <Button variant="outline" size="icon" className="min-touch" onClick={() => setMonth((m) => addMonths(m, 1))} aria-label="Next month">
             <ChevronRight className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setMonth(new Date())} className="hidden sm:flex">
-            Today
           </Button>
         </div>
       </div>
@@ -296,61 +295,57 @@ export default function TransactionsPage() {
 
       {/* Desktop table */}
       <Card className="hidden sm:block">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/50">
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Date</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Description</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Category</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Amount</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                    No transactions found
-                  </td>
-                </tr>
-              ) : (
-                sorted.map((t) => {
-                  const d = getTransactionDate(t)
-                  return (
-                    <tr key={t.id} className="border-b last:border-0 hoverable:hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">{d ? formatShortDate(d) : '-'}</td>
-                      <td className="px-4 py-3 font-medium">{t.description}</td>
-                      <td className="px-4 py-3">
-                        <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="gap-1">
-                          {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        {t.category ? <Badge variant="outline">{t.category}</Badge> : <span className="text-muted-foreground">-</span>}
-                      </td>
-                      <td className={`px-4 py-3 text-right tabular-nums font-medium ${t.type === 'income' ? 'text-income' : 'text-expense'}`}>
-                        {formatCurrency(t.amount || 0)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="min-touch" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
-                            <Edit className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="min-touch text-destructive" onClick={() => setDeleteTarget(t.id)} aria-label="Delete">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/50">
+              <TableHead>Date</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sorted.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">No transactions found</TableCell>
+              </TableRow>
+            ) : (
+              sorted.map((t) => {
+                const d = getTransactionDate(t)
+                return (
+                  <TableRow key={t.id}>
+                    <TableCell className="whitespace-nowrap text-muted-foreground">{d ? formatShortDate(d) : '-'}</TableCell>
+                    <TableCell className="font-medium">{t.description}</TableCell>
+                    <TableCell>
+                      <Badge variant={t.type === 'income' ? 'secondary' : 'destructive'} className="gap-1">
+                        {t.type === 'income' ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {t.category ? <Badge variant="outline">{t.category}</Badge> : <span className="text-muted-foreground">-</span>}
+                    </TableCell>
+                    <TableCell className={`text-right tabular-nums font-medium ${t.type === 'income' ? 'text-income' : 'text-expense'}`}>
+                      {formatCurrency(t.amount || 0)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="icon" className="min-touch" onClick={() => navigate(`/app/add?edit=${t.id}`)} aria-label="Edit">
+                          <Edit className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="min-touch text-destructive" onClick={() => setDeleteTarget(t.id)} aria-label="Delete">
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                   )
                 })
               )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+            </TableBody>
+          </Table>
+        </Card>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}>
         <AlertDialogContent>
