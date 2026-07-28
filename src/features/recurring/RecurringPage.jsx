@@ -12,13 +12,13 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel, AlertDialogMedia } from '@/components/ui/alert-dialog'
+import { toast } from 'sonner'
 
 export default function RecurringPage() {
   const { user } = useAuth()
   const { data: recurring, loading, add, remove } = useFirestoreCollection(user?.uid, 'recurringTransactions')
   const { data: transactions, add: addTransaction } = useFirestoreCollection(user?.uid, 'transactions')
   const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
-  const { toast } = useToastCtx()
 
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')

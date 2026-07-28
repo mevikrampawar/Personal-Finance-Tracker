@@ -122,7 +122,7 @@ export default function SubscriptionsPage() {
               className="sm:w-28"
             />
             <Select value={frequency} onValueChange={setFrequency}>
-              <SelectTrigger className="w-full sm:w-32"><SelectValue /></SelectTrigger>
+              <SelectTrigger size="sm" className="w-full sm:w-32"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="monthly">Monthly</SelectItem>
                 <SelectItem value="yearly">Yearly</SelectItem>

@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { useToastCtx } from '@/app/providers'
+import { toLocalDate, formatShortDate } from '@/lib/date'
+import { toast } from 'sonner'
 import { Plus, Trash2, Target, PartyPopper } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -16,7 +17,6 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 export default function GoalsPage() {
   const { user } = useAuth()
   const { data: goals, loading, add, update, remove } = useFirestoreCollection(user?.uid, 'goals')
-  const { toast } = useToastCtx()
   const [name, setName] = useState('')
   const [targetAmount, setTargetAmount] = useState('')
   const [targetDate, setTargetDate] = useState('')
@@ -31,9 +31,9 @@ export default function GoalsPage() {
 
   const handleAdd = async (e) => {
     e.preventDefault()
-    if (!name.trim() || !targetAmount) return toast('Please fill in name and target amount', { type: 'warning' })
+    if (!name.trim() || !targetAmount) return toast.warning('Please fill in name and target amount')
     const { valid, value: amt } = sanitizeAmount(targetAmount)
-    if (!valid) return toast('Enter a valid target amount', { type: 'warning' })
+    if (!valid) return toast.warning('Enter a valid target amount')
     try {
       await add({
         name: name.trim(),
@@ -44,9 +44,9 @@ export default function GoalsPage() {
       setName('')
       setTargetAmount('')
       setTargetDate('')
-      toast('Goal created', { type: 'success' })
+      toast.success('Goal created')
     } catch {
-      toast('Failed to create goal', { type: 'error' })
+      toast.error('Failed to create goal')
     }
   }
 
@@ -160,7 +160,7 @@ export default function GoalsPage() {
                     <div>
                       <CardTitle>{goal.name}</CardTitle>
                       {goal.targetDate && (
-                        <p className="text-xs text-muted-foreground">Target: {goal.targetDate}</p>
+                        <p className="text-xs text-muted-foreground">Target: {formatShortDate(toLocalDate(goal.targetDate))}</p>
                       )}
                     </div>
                     {isComplete && <Badge variant="default">Completed</Badge>}

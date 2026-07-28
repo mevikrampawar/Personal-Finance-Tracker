@@ -136,10 +136,7 @@ export default function TransactionFormPage() {
                   type="single"
                   value={type}
                   onValueChange={(val) => {
-                    if (val) {
-                      setType(val)
-                      if (val === 'income') setCategory('')
-                    }
+                    if (val) setType(val)
                   }}
                   className="w-full"
                 >

@@ -138,8 +138,8 @@ export function MonthlyComparisonPage() {
       </div>
 
       <div className="flex items-center justify-center gap-3 sm:gap-4">
-        <MonthPicker value={leftMonth} onChange={setLeftMonth} />
-        <MonthPicker value={rightMonth} onChange={setRightMonth} />
+        <MonthPicker monthOnly value={leftMonth} onChange={setLeftMonth} />
+        <MonthPicker monthOnly value={rightMonth} onChange={setRightMonth} />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">

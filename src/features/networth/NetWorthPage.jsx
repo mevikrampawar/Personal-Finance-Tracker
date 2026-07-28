@@ -104,7 +104,27 @@ export default function NetWorthPage() {
         <p className="mt-1 text-sm text-muted-foreground">Track your assets and liabilities.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      {/* Net Worth hero card */}
+      <Card className={`border-2 ${netWorth >= 0 ? 'border-income/30 bg-gradient-to-br from-income/10 to-income/5' : 'border-expense/30 bg-gradient-to-br from-expense/10 to-expense/5'}`}>
+        <CardContent className="flex flex-col items-center py-8 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Net Worth</p>
+          <p className={`mt-1 text-4xl font-bold tabular-nums tracking-tight ${netWorth >= 0 ? 'text-income' : 'text-expense'}`}>
+            {formatCurrency(netWorth)}
+          </p>
+          <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <TrendingUp className="h-4 w-4 text-income" /> {assets.length} asset{assets.length !== 1 ? 's' : ''}
+            </span>
+            <span>|</span>
+            <span className="flex items-center gap-1">
+              <TrendingDown className="h-4 w-4 text-expense" /> {liabilities.length} liabilit{liabilities.length !== 1 ? 'ies' : 'y'}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Assets & Liabilities summary row */}
+      <div className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-income">
@@ -123,16 +143,6 @@ export default function NetWorthPage() {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold tabular-nums text-expense">{formatCurrency(totalLiabilities)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Net Worth</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className={`text-2xl font-bold tabular-nums ${netWorth >= 0 ? 'text-income' : 'text-expense'}`}>
-              {formatCurrency(netWorth)}
-            </p>
           </CardContent>
         </Card>
       </div>

@@ -178,9 +178,9 @@ export default function DashboardLayout() {
                 ))}
               </nav>
               <Separator />
-              <div className="p-3 space-y-2">
-                <div className="flex items-center gap-3 rounded-lg px-3 py-2">
-                  <Avatar size="sm">
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <Avatar>
                     {user?.photoURL ? <AvatarImage src={user.photoURL} /> : null}
                     <AvatarFallback>{(user?.displayName || user?.email || 'U')[0].toUpperCase()}</AvatarFallback>
                   </Avatar>
@@ -189,12 +189,12 @@ export default function DashboardLayout() {
                     <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                   </div>
                 </div>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" onClick={toggleTheme} className="flex-1">
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" onClick={toggleTheme} className="h-11">
                     {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                    {theme === 'dark' ? 'Light' : 'Dark'}
+                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleLogout} className="flex-1 text-destructive">
+                  <Button variant="outline" onClick={handleLogout} className="h-11 text-destructive border-destructive/30 hover:bg-destructive/10">
                     <LogOut className="h-4 w-4" />
                     Logout
                   </Button>
