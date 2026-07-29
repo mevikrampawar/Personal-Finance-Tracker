@@ -11,7 +11,6 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
 import { ArrowDownLeft, ArrowUpRight, Save, X } from 'lucide-react'
 
 export default function TransactionFormPage() {
@@ -151,11 +150,14 @@ export default function TransactionFormPage() {
               </div>
             </div>
 
-            <div className={cn('space-y-2', type !== 'expense' && 'opacity-40 pointer-events-none')}>
-              <label htmlFor="category" className="text-sm font-medium">Category</label>
+            <div className="space-y-2">
+              <label htmlFor="category" className="text-sm font-medium">
+                Category
+                {type !== 'expense' && <span className="ml-2 inline-flex items-center rounded-full border border-muted-foreground/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">expenses only</span>}
+              </label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={type === 'expense' ? 'Select Category' : 'Only for expenses'} />
+                  <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (

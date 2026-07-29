@@ -157,7 +157,7 @@ function isValidRecurringTransaction(data) {
 }
 
 function isValidGoal(data) {
-  return hasOnlyAllowedFields(['name', 'targetAmount', 'targetDate', 'currentAmount', 'createdAt', 'updatedAt']) &&
+  return hasOnlyAllowedFields(['name', 'targetAmount', 'targetDate', 'currentAmount', 'contributions', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 100) &&
          isPositiveNumber(data.targetAmount) &&
          isNonNegativeNumber(data.currentAmount) &&
