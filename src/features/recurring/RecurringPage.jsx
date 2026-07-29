@@ -31,8 +31,7 @@ export default function RecurringPage() {
     return { valid: !Number.isNaN(n) && isFinite(n) && n > 0, value: n }
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const saveRecurring = async () => {
     if (!description.trim() || !amount || !dayOfMonth) return toast.warning('Please complete the form')
     const { valid, value: amt } = sanitizeAmount(amount)
     if (!valid) return toast.warning('Enter a valid amount')
@@ -51,9 +50,15 @@ export default function RecurringPage() {
       setCategory('')
       setDayOfMonth('1')
       toast.success('Recurring transaction added')
-    } catch {
+    } catch (err) {
+      console.error('Failed to add recurring transaction:', err)
       toast.error('Failed to add recurring transaction')
     }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    saveRecurring()
   }
 
   const handleApply = async () => {
@@ -219,7 +224,7 @@ export default function RecurringPage() {
           </form>
         </CardContent>
         <CardFooter className="flex-col gap-2 sm:flex-row">
-          <Button type="submit" form="recurring-form" className="w-full sm:w-auto">
+          <Button type="button" disabled={false} onClick={saveRecurring} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" /> Add Recurring Transaction
           </Button>
           {recurring.length > 0 && (

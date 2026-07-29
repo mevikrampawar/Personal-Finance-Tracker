@@ -158,17 +158,18 @@ export default function GoalsPage() {
             const isComplete = pct >= 100
             return (
               <Card key={goal.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle>{goal.name}</CardTitle>
-                      {goal.targetDate && (
-                        <p className="text-xs text-muted-foreground">Target: {formatShortDate(toLocalDate(goal.targetDate))}</p>
-                      )}
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="min-w-0">
+                        <CardTitle>{goal.name}</CardTitle>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          Target: {formatCurrency(goal.targetAmount)}
+                          {goal.targetDate && <> · {formatShortDate(toLocalDate(goal.targetDate))}</>}
+                        </p>
+                      </div>
+                      {isComplete && <Badge variant="default" className="shrink-0 ml-2">Completed</Badge>}
                     </div>
-                    {isComplete && <Badge variant="default">Completed</Badge>}
-                  </div>
-                </CardHeader>
+                  </CardHeader>
                 <CardContent className="space-y-4">
                   <Progress value={pct}>
                     <ProgressLabel>{Math.round(pct)}%</ProgressLabel>

@@ -70,8 +70,7 @@ export default function TransactionFormPage() {
     )
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const saveTransaction = async () => {
     if (!description.trim()) return toast.warning('Please enter a description')
     if (type === 'expense' && !category) return toast.warning('Please select a category for expenses')
     const { valid, value: amt } = sanitizeAmount(amount)
@@ -99,11 +98,17 @@ export default function TransactionFormPage() {
         toast.success('Transaction added')
       }
       navigate('/app/transactions')
-    } catch {
+    } catch (err) {
+      console.error('Failed to save transaction:', err)
       toast.error('Failed to save transaction. Please try again.')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    saveTransaction()
   }
 
   return (
@@ -193,7 +198,7 @@ export default function TransactionFormPage() {
             </div>
           </CardContent>
           <CardFooter className="flex gap-3">
-            <Button type="submit" disabled={submitting}>
+            <Button type="button" disabled={submitting} onClick={saveTransaction}>
               <Save className="h-4 w-4" />
               {isEditing ? 'Update Transaction' : 'Add Transaction'}
             </Button>
