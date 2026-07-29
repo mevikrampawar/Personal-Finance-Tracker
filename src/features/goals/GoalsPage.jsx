@@ -41,7 +41,6 @@ export default function GoalsPage() {
         targetAmount: amt,
         ...(targetDate ? { targetDate: new Date(targetDate) } : {}),
         currentAmount: 0,
-        contributions: [],
       })
       setName('')
       setTargetAmount('')

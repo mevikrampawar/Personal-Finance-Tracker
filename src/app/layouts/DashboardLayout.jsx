@@ -15,7 +15,6 @@ import {
   Sun,
   Moon,
   Menu,
-  ChevronDown,
   Calendar,
   MoreHorizontal,
 } from 'lucide-react'
@@ -26,12 +25,13 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu'
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 
 const FULL_NAV_ITEMS = [
@@ -115,34 +115,48 @@ export default function DashboardLayout() {
 
         <Separator />
 
-        <div className="p-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start gap-3 h-auto py-2.5 px-3 rounded-xl hoverable:hover:bg-muted/50 active:scale-[0.98] transition-all">
+        <div className="p-4 space-y-1">
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 hoverable:hover:bg-muted/50 active:scale-[0.98] transition-all text-left cursor-pointer">
                 <Avatar size="sm">
                   {user?.photoURL ? <AvatarImage src={user.photoURL} /> : null}
                   <AvatarFallback className="text-xs">{(user?.displayName || user?.email || 'U')[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0 text-left">
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate leading-tight">{user?.displayName || 'User'}</p>
                   <p className="text-xs text-muted-foreground truncate leading-tight">{user?.email}</p>
                 </div>
-                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 data-open:rotate-180" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 p-1.5" sideOffset={8}>
-              <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Account</div>
-              <DropdownMenuItem onClick={toggleTheme} className="gap-3 py-2.5 rounded-lg">
-                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="my-1" />
-              <DropdownMenuItem onClick={handleLogout} className="gap-3 py-2.5 rounded-lg text-destructive focus:text-destructive">
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Account Details</DialogTitle>
+              </DialogHeader>
+              <div className="flex items-center gap-4 py-4">
+                <Avatar className="h-14 w-14">
+                  {user?.photoURL ? <AvatarImage src={user.photoURL} /> : null}
+                  <AvatarFallback className="text-lg">{(user?.displayName || user?.email || 'U')[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="space-y-1">
+                  <p className="font-semibold text-base">{user?.displayName || 'User'}</p>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground/60">Signed in via Google</p>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <div className="pt-2 space-y-1">
+            <Button variant="ghost" className="w-full justify-start gap-3 h-11 rounded-xl" onClick={toggleTheme}>
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </Button>
+            <Button variant="ghost" className="w-full justify-start gap-3 h-11 rounded-xl text-destructive hover:bg-destructive/10" onClick={handleLogout}>
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
       </aside>
 
@@ -180,16 +194,36 @@ export default function DashboardLayout() {
               </nav>
               <Separator />
               <div className="p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    {user?.photoURL ? <AvatarImage src={user.photoURL} /> : null}
-                    <AvatarFallback>{(user?.displayName || user?.email || 'U')[0].toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{user?.displayName || 'User'}</p>
-                    <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-                  </div>
-                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <button className="flex w-full items-center gap-3 cursor-pointer">
+                      <Avatar>
+                        {user?.photoURL ? <AvatarImage src={user.photoURL} /> : null}
+                        <AvatarFallback>{(user?.displayName || user?.email || 'U')[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-sm font-medium truncate">{user?.displayName || 'User'}</p>
+                        <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                      </div>
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-sm">
+                    <DialogHeader>
+                      <DialogTitle>Account Details</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex items-center gap-4 py-4">
+                      <Avatar className="h-14 w-14">
+                        {user?.photoURL ? <AvatarImage src={user.photoURL} /> : null}
+                        <AvatarFallback className="text-lg">{(user?.displayName || user?.email || 'U')[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="space-y-1">
+                        <p className="font-semibold text-base">{user?.displayName || 'User'}</p>
+                        <p className="text-sm text-muted-foreground">{user?.email}</p>
+                        <p className="text-xs text-muted-foreground/60">Signed in via Google</p>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 <div className="grid grid-cols-2 gap-2">
                   <Button variant="outline" onClick={toggleTheme} className="h-11">
                     {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -197,7 +231,7 @@ export default function DashboardLayout() {
                   </Button>
                   <Button variant="outline" onClick={handleLogout} className="h-11 text-destructive border-destructive/30 hover:bg-destructive/10">
                     <LogOut className="h-4 w-4" />
-                    Logout
+                    Sign Out
                   </Button>
                 </div>
               </div>

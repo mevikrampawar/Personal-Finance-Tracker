@@ -151,11 +151,11 @@ export default function TransactionFormPage() {
               </div>
             </div>
 
-            <div className={cn('space-y-2', type !== 'expense' && 'invisible pointer-events-none')}>
+            <div className={cn('space-y-2', type !== 'expense' && 'opacity-40 pointer-events-none')}>
               <label htmlFor="category" className="text-sm font-medium">Category</label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Category" />
+                  <SelectValue placeholder={type === 'expense' ? 'Select Category' : 'Only for expenses'} />
                 </SelectTrigger>
                 <SelectContent>
                   {categories.map((c) => (
@@ -163,6 +163,9 @@ export default function TransactionFormPage() {
                   ))}
                 </SelectContent>
               </Select>
+              {type !== 'expense' && (
+                <p className="text-xs text-muted-foreground">Categories apply only to expenses</p>
+              )}
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
