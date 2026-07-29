@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { useToastCtx } from '@/app/providers'
+import { toast } from 'sonner'
 import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,8 +14,6 @@ export default function NetWorthPage() {
   const { user } = useAuth()
   const { data: assets, loading: assetsLoading, add: addAsset, remove: removeAsset } = useFirestoreCollection(user?.uid, 'assets')
   const { data: liabilities, loading: liabilitiesLoading, add: addLiability, remove: removeLiability } = useFirestoreCollection(user?.uid, 'liabilities')
-  const { toast } = useToastCtx()
-
   const [assetName, setAssetName] = useState('')
   const [assetAmount, setAssetAmount] = useState('')
   const [liabilityName, setLiabilityName] = useState('')
@@ -34,31 +32,31 @@ export default function NetWorthPage() {
 
   const handleAddAsset = async (e) => {
     e.preventDefault()
-    if (!assetName.trim() || !assetAmount) return toast('Fill in name and amount', { type: 'warning' })
+    if (!assetName.trim() || !assetAmount) return toast.warning('Fill in name and amount')
     const { valid, value: amt } = sanitizeAmount(assetAmount)
-    if (!valid) return toast('Enter a valid amount', { type: 'warning' })
+    if (!valid) return toast.warning('Enter a valid amount')
     try {
       await addAsset({ name: assetName.trim(), amount: amt })
       setAssetName('')
       setAssetAmount('')
-      toast('Asset added', { type: 'success' })
+      toast.success('Asset added')
     } catch {
-      toast('Failed to add asset', { type: 'error' })
+      toast.error('Failed to add asset')
     }
   }
 
   const handleAddLiability = async (e) => {
     e.preventDefault()
-    if (!liabilityName.trim() || !liabilityAmount) return toast('Fill in name and amount', { type: 'warning' })
+    if (!liabilityName.trim() || !liabilityAmount) return toast.warning('Fill in name and amount')
     const { valid, value: amt } = sanitizeAmount(liabilityAmount)
-    if (!valid) return toast('Enter a valid amount', { type: 'warning' })
+    if (!valid) return toast.warning('Enter a valid amount')
     try {
       await addLiability({ name: liabilityName.trim(), amount: amt })
       setLiabilityName('')
       setLiabilityAmount('')
-      toast('Liability added', { type: 'success' })
+      toast.success('Liability added')
     } catch {
-      toast('Failed to add liability', { type: 'error' })
+      toast.error('Failed to add liability')
     }
   }
 
@@ -72,9 +70,9 @@ export default function NetWorthPage() {
       }
       setDeleteTarget(null)
       setDeleteType(null)
-      toast(`${deleteType === 'asset' ? 'Asset' : 'Liability'} deleted`, { type: 'success' })
+      toast.success(`${deleteType === 'asset' ? 'Asset' : 'Liability'} deleted`)
     } catch {
-      toast('Failed to delete', { type: 'error' })
+      toast.error('Failed to delete')
     }
   }
 

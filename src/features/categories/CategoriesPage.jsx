@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
-import { useToastCtx } from '@/app/providers'
+import { toast } from 'sonner'
 import { Plus, Trash2, Save } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,7 +14,6 @@ export default function CategoriesPage() {
   const { user } = useAuth()
   const { data: categories, loading, add, update, remove } = useFirestoreCollection(user?.uid, 'categories')
   const { data: transactions } = useFirestoreCollection(user?.uid, 'transactions')
-  const { toast } = useToastCtx()
   const [newName, setNewName] = useState('')
   const [budgetEdits, setBudgetEdits] = useState({})
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -28,14 +27,14 @@ export default function CategoriesPage() {
 
   const handleAdd = async () => {
     const name = newName.trim()
-    if (!name) return toast('Please enter a category name', { type: 'warning' })
-    if (categories.some((c) => c.name === name)) return toast('Category already exists', { type: 'warning' })
+    if (!name) return toast.warning('Please enter a category name')
+    if (categories.some((c) => c.name === name)) return toast.warning('Category already exists')
     try {
       await add({ name, monthlyBudget: 0 })
       setNewName('')
-      toast('Category added', { type: 'success' })
+      toast.success('Category added')
     } catch {
-      toast('Failed to add category', { type: 'error' })
+      toast.error('Failed to add category')
     }
   }
 
@@ -44,9 +43,9 @@ export default function CategoriesPage() {
     try {
       await remove(deleteTarget.id)
       setDeleteTarget(null)
-      toast('Category deleted', { type: 'success' })
+      toast.success('Category deleted')
     } catch {
-      toast('Failed to delete category', { type: 'error' })
+      toast.error('Failed to delete category')
     }
   }
 
@@ -62,9 +61,9 @@ export default function CategoriesPage() {
       })
       await Promise.all(updates)
       setBudgetEdits({})
-      toast('Budgets saved', { type: 'success' })
+      toast.success('Budgets saved')
     } catch {
-      toast('Failed to save budgets', { type: 'error' })
+      toast.error('Failed to save budgets')
     }
   }
 
