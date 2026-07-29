@@ -115,30 +115,31 @@ export default function DashboardLayout() {
 
         <Separator />
 
-        <div className="p-3">
+        <div className="p-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start gap-3 h-auto py-2">
+              <Button variant="ghost" className="w-full justify-start gap-3 h-auto py-2.5 px-3 rounded-xl hoverable:hover:bg-muted/50 active:scale-[0.98] transition-all">
                 <Avatar size="sm">
                   {user?.photoURL ? <AvatarImage src={user.photoURL} /> : null}
-                  <AvatarFallback>{(user?.displayName || user?.email || 'U')[0].toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className="text-xs">{(user?.displayName || user?.email || 'U')[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-sm font-medium truncate leading-tight">{user?.displayName || 'User'}</p>
-                  <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                  <p className="text-xs text-muted-foreground truncate leading-tight">{user?.email}</p>
                 </div>
-                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 data-open:rotate-180" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuItem onClick={toggleTheme}>
+            <DropdownMenuContent align="start" className="w-56 p-1.5" sideOffset={8}>
+              <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Account</div>
+              <DropdownMenuItem onClick={toggleTheme} className="gap-3 py-2.5 rounded-lg">
                 {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem onClick={handleLogout} className="gap-3 py-2.5 rounded-lg text-destructive focus:text-destructive">
                 <LogOut className="h-4 w-4" />
-                Logout
+                <span>Logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

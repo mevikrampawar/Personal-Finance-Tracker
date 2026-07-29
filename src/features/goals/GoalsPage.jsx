@@ -4,7 +4,7 @@ import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { toLocalDate, formatShortDate } from '@/lib/date'
 import { toast } from 'sonner'
-import { Plus, Trash2, Target, PartyPopper } from 'lucide-react'
+import { Plus, Trash2, Target, PartyPopper, PiggyBank, ArrowRight, Clock } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Progress, ProgressLabel, ProgressValue } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel, AlertDialogMedia } from '@/components/ui/alert-dialog'
 
 export default function GoalsPage() {
@@ -40,6 +41,7 @@ export default function GoalsPage() {
         targetAmount: amt,
         ...(targetDate ? { targetDate: new Date(targetDate) } : {}),
         currentAmount: 0,
+        contributions: [],
       })
       setName('')
       setTargetAmount('')
@@ -52,19 +54,21 @@ export default function GoalsPage() {
 
   const handleContribute = async (goal) => {
     const { valid, value: amt } = sanitizeAmount(contributions[goal.id])
-    if (!valid) return toast('Enter a valid contribution amount', { type: 'warning' })
+    if (!valid) return toast.warning('Enter a valid contribution amount')
     const newAmount = (goal.currentAmount || 0) + amt
     const pct = Math.min((newAmount / goal.targetAmount) * 100, 100)
+    const log = { amount: amt, addedAt: new Date() }
+    const existingLogs = Array.isArray(goal.contributions) ? goal.contributions : []
     try {
-      await update(goal.id, { currentAmount: newAmount })
+      await update(goal.id, { currentAmount: newAmount, contributions: [...existingLogs, log] })
       setContributions((prev) => ({ ...prev, [goal.id]: '' }))
       if (pct >= 100) {
         setShowCelebrate(goal.id)
         setTimeout(() => setShowCelebrate(null), 4000)
       }
-      toast('Contribution added', { type: 'success' })
+      toast.success('Contribution added')
     } catch {
-      toast('Failed to add contribution', { type: 'error' })
+      toast.error('Failed to add contribution')
     }
   }
 
@@ -73,9 +77,9 @@ export default function GoalsPage() {
     try {
       await remove(deleteTarget.id)
       setDeleteTarget(null)
-      toast('Goal deleted', { type: 'success' })
+      toast.success('Goal deleted')
     } catch {
-      toast('Failed to delete goal', { type: 'error' })
+      toast.error('Failed to delete goal')
     }
   }
 
@@ -166,14 +170,14 @@ export default function GoalsPage() {
                     {isComplete && <Badge variant="default">Completed</Badge>}
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-4">
                   <Progress value={pct}>
                     <ProgressLabel>{Math.round(pct)}%</ProgressLabel>
                     <ProgressValue>{formatCurrency(goal.currentAmount || 0)} / {formatCurrency(goal.targetAmount)}</ProgressValue>
                   </Progress>
 
                   {showCelebrate === goal.id && (
-                    <div className="flex items-center gap-2 rounded-lg bg-income/10 p-2 text-sm text-income">
+                    <div className="flex items-center gap-2 rounded-lg bg-income/10 p-2.5 text-sm text-income animate-in">
                       <PartyPopper className="h-4 w-4" /> Goal reached!
                     </div>
                   )}
@@ -190,6 +194,31 @@ export default function GoalsPage() {
                         onChange={(e) => setContributions((p) => ({ ...p, [goal.id]: e.target.value }))}
                       />
                       <Button variant="secondary" onClick={() => handleContribute(goal)}>Add</Button>
+                    </div>
+                  )}
+
+                  {(Array.isArray(goal.contributions) && goal.contributions.length > 0) && (
+                    <div className="space-y-2">
+                      <Separator />
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        Contribution History
+                      </div>
+                      <div className="space-y-1 max-h-36 overflow-y-auto pr-1">
+                        {[...goal.contributions].reverse().map((c, i) => (
+                          <div key={i} className="flex items-center justify-between rounded-lg bg-muted/30 px-2.5 py-1.5 text-xs">
+                            <div className="flex items-center gap-2">
+                              <PiggyBank className="h-3 w-3 text-muted-foreground/60" />
+                              <span className="text-muted-foreground">
+                                {c.addedAt?.toDate
+                                  ? formatShortDate(toLocalDate(c.addedAt))
+                                  : 'Today'}
+                              </span>
+                            </div>
+                            <span className="font-medium tabular-nums text-income">+{formatCurrency(c.amount)}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
 

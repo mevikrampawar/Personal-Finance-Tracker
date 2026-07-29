@@ -53,7 +53,7 @@ export function AppProviders({ children }) {
       <ConfirmContext.Provider value={{ confirm }}>
         <TooltipProvider>
           {children}
-          <Toaster richColors position="bottom-center" />
+          <Toaster richColors position="top-right" closeButton duration={3000} className="toaster-custom" />
           <AlertDialog open={confirmOpen} onOpenChange={(open) => { if (!open) handleCancel() }}>
             <AlertDialogContent>
               <AlertDialogHeader>

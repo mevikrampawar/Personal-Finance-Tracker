@@ -195,3 +195,16 @@
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+@media (max-width: 640px) {
+  .toaster-custom[data-sonner-toaster] {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    top: 8px !important;
+  }
+  .toaster-custom [data-sonner-toast] {
+    width: calc(100vw - 32px) !important;
+    max-width: 400px !important;
+  }
+}

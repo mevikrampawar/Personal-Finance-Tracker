@@ -125,29 +125,36 @@ export default function CalendarView() {
         </div>
       </div>
 
-      <Card className="shadow-sm">
-        <CardContent className="p-4 sm:p-6">
-          <div className="grid grid-cols-7 gap-1 sm:gap-2">
+      <Card className="shadow-md overflow-hidden">
+        <CardContent className="p-3 sm:p-6">
+          <div className="grid grid-cols-7 gap-1.5 sm:gap-3">
             {WEEKDAYS.map((d) => (
-              <div key={d} className="py-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">{d}</div>
+              <div key={d} className="py-1.5 sm:py-2 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">{d}</div>
             ))}
             {calendarDays.map((day, i) => {
               const dateKey = `${day.date.getFullYear()}-${day.date.getMonth()}-${day.date.getDate()}`
               const counts = txCountByDate[dateKey]
               const isSelected = isSameDay(day.date, selectedDate)
               const today = isToday(day.date)
+              const isPrevNext = !day.currentMonth
               return (
                 <Button
                   key={i}
-                  variant="ghost"
+                  variant={isSelected ? 'default' : 'ghost'}
                   onClick={() => setSelectedDate(day.date)}
-                  className={`relative flex flex-col items-center rounded-xl py-3 text-sm transition-all ${
-                    !day.currentMonth ? 'text-muted-foreground/30' : 'text-foreground'
-                  } ${isSelected ? 'bg-primary text-primary-foreground font-semibold shadow-md' : today ? 'ring-1 ring-border font-medium' : 'hoverable:hover:bg-muted/50 active:scale-95'}`}
+                  className={`relative flex flex-col items-center justify-center rounded-xl h-12 sm:h-16 w-full text-sm font-medium transition-all duration-150 ${
+                    isPrevNext
+                      ? 'text-muted-foreground/25'
+                      : isSelected
+                        ? 'shadow-md shadow-primary/20 scale-105'
+                        : today
+                          ? 'ring-1 ring-border'
+                          : 'hoverable:hover:bg-muted/50 hoverable:hover:scale-105 active:scale-95'
+                  } ${!isSelected && !today && !isPrevNext ? 'hoverable:hover:shadow-sm' : ''}`}
                 >
-                  <span className="text-sm">{day.day}</span>
+                  <span className={isSelected ? 'text-sm' : today && !isSelected ? 'text-sm font-semibold' : 'text-sm'}>{day.day}</span>
                   {counts && (
-                    <div className="mt-1 flex items-center gap-1">
+                    <div className="mt-0.5 flex items-center gap-1">
                       {counts.income > 0 && (
                         <span className="flex h-1.5 w-1.5 rounded-full bg-income ring-1 ring-income/30" />
                       )}
