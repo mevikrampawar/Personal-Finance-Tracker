@@ -141,11 +141,30 @@ function isValidTransaction(data) {
          (!('transactionDate' in data) || data.transactionDate is timestamp);
 }
 
+// For CREATE, createdAt is serverTimestamp() sentinel (null during rules eval)
+// ServerTimestamp guarantees the stored value will be a server-side timestamp.
+function isValidTransactionCreate(data) {
+  return hasOnlyAllowedFields(['description', 'amount', 'type', 'category', 'transactionDate', 'createdAt', 'updatedAt', 'recurringId', 'recurringPeriod']) &&
+         isValidString(data.description, 1, 200) &&
+         isPositiveNumber(data.amount) &&
+         isValidType() &&
+         isValidOptionalString('category', 50) &&
+         isValidOptionalString('recurringId', 50) &&
+         isValidOptionalString('recurringPeriod', 20) &&
+         (!('transactionDate' in data) || data.transactionDate is timestamp);
+}
+
 function isValidCategory(data) {
   return hasOnlyAllowedFields(['name', 'monthlyBudget', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 50) &&
          isNonNegativeNumber(data.monthlyBudget) &&
          data.createdAt is timestamp;
+}
+
+function isValidCategoryCreate(data) {
+  return hasOnlyAllowedFields(['name', 'monthlyBudget', 'createdAt', 'updatedAt']) &&
+         isValidString(data.name, 1, 50) &&
+         isNonNegativeNumber(data.monthlyBudget);
 }
 
 function isValidRecurringTransaction(data) {
@@ -158,6 +177,15 @@ function isValidRecurringTransaction(data) {
          data.createdAt is timestamp;
 }
 
+function isValidRecurringTransactionCreate(data) {
+  return hasOnlyAllowedFields(['description', 'amount', 'type', 'category', 'dayOfMonth', 'createdAt', 'updatedAt']) &&
+         isValidString(data.description, 1, 200) &&
+         isPositiveNumber(data.amount) &&
+         isValidType() &&
+         isValidOptionalString('category', 50) &&
+         isNumberInRange(data.dayOfMonth, 1, 28);
+}
+
 function isValidGoal(data) {
   return hasOnlyAllowedFields(['name', 'targetAmount', 'targetDate', 'currentAmount', 'contributions', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 100) &&
@@ -167,11 +195,25 @@ function isValidGoal(data) {
          data.createdAt is timestamp;
 }
 
+function isValidGoalCreate(data) {
+  return hasOnlyAllowedFields(['name', 'targetAmount', 'targetDate', 'currentAmount', 'contributions', 'createdAt', 'updatedAt']) &&
+         isValidString(data.name, 1, 100) &&
+         isPositiveNumber(data.targetAmount) &&
+         isNonNegativeNumber(data.currentAmount) &&
+         (!('targetDate' in data) || data.targetDate is timestamp);
+}
+
 function isValidAsset(data) {
   return hasOnlyAllowedFields(['name', 'amount', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 100) &&
          isPositiveNumber(data.amount) &&
          data.createdAt is timestamp;
+}
+
+function isValidAssetCreate(data) {
+  return hasOnlyAllowedFields(['name', 'amount', 'createdAt', 'updatedAt']) &&
+         isValidString(data.name, 1, 100) &&
+         isPositiveNumber(data.amount);
 }
 
 function isValidLiability(data) {
@@ -181,6 +223,12 @@ function isValidLiability(data) {
          data.createdAt is timestamp;
 }
 
+function isValidLiabilityCreate(data) {
+  return hasOnlyAllowedFields(['name', 'amount', 'createdAt', 'updatedAt']) &&
+         isValidString(data.name, 1, 100) &&
+         isPositiveNumber(data.amount);
+}
+
 function isValidSubscription(data) {
   return hasOnlyAllowedFields(['name', 'amount', 'frequency', 'nextDate', 'createdAt', 'updatedAt']) &&
          isValidString(data.name, 1, 100) &&
@@ -188,6 +236,14 @@ function isValidSubscription(data) {
          isValidFrequency() &&
          (!('nextDate' in data) || data.nextDate is timestamp) &&
          data.createdAt is timestamp;
+}
+
+function isValidSubscriptionCreate(data) {
+  return hasOnlyAllowedFields(['name', 'amount', 'frequency', 'nextDate', 'createdAt', 'updatedAt']) &&
+         isValidString(data.name, 1, 100) &&
+         isPositiveNumber(data.amount) &&
+         isValidFrequency() &&
+         (!('nextDate' in data) || data.nextDate is timestamp);
 }
 
 // ===============================================================
@@ -207,7 +263,7 @@ service cloud.firestore {
       match /transactions/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidTransaction(request.resource.data);
+          isValidTransactionCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidTransaction(request.resource.data) &&
@@ -219,7 +275,7 @@ service cloud.firestore {
       match /categories/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidCategory(request.resource.data);
+          isValidCategoryCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidCategory(request.resource.data) &&
@@ -231,7 +287,7 @@ service cloud.firestore {
       match /recurringTransactions/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidRecurringTransaction(request.resource.data);
+          isValidRecurringTransactionCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidRecurringTransaction(request.resource.data) &&
@@ -243,7 +299,7 @@ service cloud.firestore {
       match /goals/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidGoal(request.resource.data);
+          isValidGoalCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidGoal(request.resource.data) &&
@@ -255,7 +311,7 @@ service cloud.firestore {
       match /assets/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidAsset(request.resource.data);
+          isValidAssetCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidAsset(request.resource.data) &&
@@ -267,7 +323,7 @@ service cloud.firestore {
       match /liabilities/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidLiability(request.resource.data);
+          isValidLiabilityCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidLiability(request.resource.data) &&
@@ -279,7 +335,7 @@ service cloud.firestore {
       match /subscriptions/{docId} {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) &&
-          isValidSubscription(request.resource.data);
+          isValidSubscriptionCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidSubscription(request.resource.data) &&
