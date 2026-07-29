@@ -11,6 +11,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { toast } from 'sonner'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Timestamp } from 'firebase/firestore'
 import { ArrowDownLeft, ArrowUpRight, Save, X } from 'lucide-react'
 
 export default function TransactionFormPage() {
@@ -78,7 +79,7 @@ export default function TransactionFormPage() {
     if (!date) return toast.warning('Please select a date')
 
     const [y, m, d] = date.split('-')
-    const transactionDate = new Date(Number(y), Number(m) - 1, Number(d), 12, 0, 0, 0)
+    const transactionDate = Timestamp.fromDate(new Date(Number(y), Number(m) - 1, Number(d), 12, 0, 0, 0))
 
     const payload = {
       description: description.trim(),
