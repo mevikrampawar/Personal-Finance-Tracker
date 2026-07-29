@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { collection, query, orderBy, limit, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
+import { collection, query, orderBy, limit, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 
 export function useFirestoreCollection(uid, collectionName, limitParam = 1000) {
@@ -40,7 +40,7 @@ export function useFirestoreCollection(uid, collectionName, limitParam = 1000) {
       if (!uid) throw new Error('Not authenticated')
       const ref = collection(db, 'users', uid, collectionName)
       const { createdAt: _, ...rest } = payload
-      return addDoc(ref, { ...rest, createdAt: serverTimestamp(), updatedAt: serverTimestamp() })
+      return addDoc(ref, { ...rest, createdAt: new Date(), updatedAt: new Date() })
     },
     [uid, collectionName],
   )
@@ -50,7 +50,7 @@ export function useFirestoreCollection(uid, collectionName, limitParam = 1000) {
       if (!uid) throw new Error('Not authenticated')
       const ref = doc(db, 'users', uid, collectionName, id)
       const { createdAt: _, ...rest } = payload
-      return updateDoc(ref, { ...rest, updatedAt: serverTimestamp() })
+      return updateDoc(ref, { ...rest, updatedAt: new Date() })
     },
     [uid, collectionName],
   )
