@@ -3,7 +3,6 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { formatYearMonth } from '@/lib/date'
-import { cn } from '@/lib/utils'
 import { Plus, Trash2, Play, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -189,9 +188,12 @@ export default function RecurringPage() {
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
-              <div className={cn('space-y-2', type !== 'expense' && 'invisible')}>
-                <label className="text-sm font-medium">Category</label>
-                <Select value={category} onValueChange={setCategory} disabled={type !== 'expense'}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Category
+                  {type !== 'expense' && <span className="ml-2 inline-flex items-center rounded-full border border-muted-foreground/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">expenses only</span>}
+                </label>
+                <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
                   <SelectContent>
                     {categories.map((c) => (

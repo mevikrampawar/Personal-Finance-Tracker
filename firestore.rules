@@ -40,7 +40,9 @@ rules_version = '2';
 //   - targetAmount: number (required, > 0)
 //   - targetDate: timestamp (optional)
 //   - currentAmount: number (required, >= 0)
+//   - contributions: array (optional, [{amount, addedAt}])
 //   - createdAt: timestamp (required, immutable, auto-set)
+//   - updatedAt: timestamp (required, auto-set)
 //
 // Collection: assets
 // Fields:
