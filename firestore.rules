@@ -262,8 +262,7 @@ service cloud.firestore {
       // --- transactions ---
       match /transactions/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-          isValidTransactionCreate(request.resource.data);
+        allow create: if isOwner(userId);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidTransaction(request.resource.data) &&
@@ -274,8 +273,7 @@ service cloud.firestore {
       // --- categories ---
       match /categories/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-          isValidCategoryCreate(request.resource.data);
+        allow create: if isOwner(userId);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidCategory(request.resource.data) &&
@@ -286,8 +284,7 @@ service cloud.firestore {
       // --- recurringTransactions ---
       match /recurringTransactions/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-          isValidRecurringTransactionCreate(request.resource.data);
+        allow create: if isOwner(userId);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidRecurringTransaction(request.resource.data) &&
@@ -298,8 +295,7 @@ service cloud.firestore {
       // --- goals ---
       match /goals/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-          isValidGoalCreate(request.resource.data);
+        allow create: if isOwner(userId);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidGoal(request.resource.data) &&
@@ -310,8 +306,7 @@ service cloud.firestore {
       // --- assets ---
       match /assets/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-          isValidAssetCreate(request.resource.data);
+        allow create: if isOwner(userId);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidAsset(request.resource.data) &&
@@ -322,8 +317,7 @@ service cloud.firestore {
       // --- liabilities ---
       match /liabilities/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-          isValidLiabilityCreate(request.resource.data);
+        allow create: if isOwner(userId);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidLiability(request.resource.data) &&
@@ -334,8 +328,7 @@ service cloud.firestore {
       // --- subscriptions ---
       match /subscriptions/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId) &&
-          isValidSubscriptionCreate(request.resource.data);
+        allow create: if isOwner(userId);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidSubscription(request.resource.data) &&
