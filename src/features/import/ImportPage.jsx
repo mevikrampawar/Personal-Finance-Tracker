@@ -10,7 +10,7 @@ import { rowsToTransactions } from '@/lib/import/rowsToTransactions'
 import { importTransactions } from '@/lib/import/importTransactions'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { UploadCloud, FileText, Check, CheckCheck, AlertTriangle, Loader2, ArrowDownToLine, RefreshCw, X, Tag, Lock } from 'lucide-react'
+import { UploadCloud, FileText, Check, CheckCheck, AlertTriangle, Loader2, ArrowDownToLine, RefreshCw, X, Tag, Lock, CheckSquare } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -73,6 +73,7 @@ export default function ImportPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const { data: transactions } = useFirestoreCollection(user?.uid, 'transactions', 10000)
+  const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
 
   const [stage, setStage] = useState('upload')
   const [parseResult, setParseResult] = useState(null)
@@ -89,6 +90,9 @@ export default function ImportPage() {
   const [items, setItems] = useState([])
   const [excluded, setExcluded] = useState(() => new Set())
   const [includeDupes, setIncludeDupes] = useState(false)
+  const [bulkMode, setBulkMode] = useState(false)
+  const [bulkSelected, setBulkSelected] = useState(() => new Set())
+  const [bulkCategory, setBulkCategory] = useState('')
 
   const [importing, setImporting] = useState(false)
   const [importedCount, setImportedCount] = useState(0)
@@ -141,6 +145,35 @@ export default function ImportPage() {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)))
   }
 
+  const toggleBulkMode = () => {
+    setBulkMode((m) => !m)
+    setBulkSelected(new Set())
+    setBulkCategory('')
+  }
+
+  const toggleBulkSelect = (id) => {
+    setBulkSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const selectAllValid = () => setBulkSelected(new Set(items.filter((i) => i.valid).map((i) => i.id)))
+
+  const clearBulkSelection = () => setBulkSelected(new Set())
+
+  const applyBulkCategory = () => {
+    const cat = bulkCategory
+    if (!cat) return toast.warning('Choose a category to apply')
+    if (bulkSelected.size === 0) return toast.warning('Select at least one row')
+    setItems((prev) => prev.map((i) => (bulkSelected.has(i.id) ? { ...i, category: cat } : i)))
+    toast.success(`Categorized ${bulkSelected.size} row${bulkSelected.size !== 1 ? 's' : ''}`)
+    setBulkSelected(new Set())
+    setBulkCategory('')
+  }
+
   const handleFile = async (file, filePassword) => {
     if (!file) return
     setParsing(true)
@@ -154,6 +187,9 @@ export default function ImportPage() {
       setDataEnd(det.dataEnd)
       setExcluded(new Set())
       setIncludeDupes(false)
+      setBulkMode(false)
+      setBulkSelected(new Set())
+      setBulkCategory('')
       setPasswordPrompt(false)
       setPassword('')
       setStage('map')
@@ -211,6 +247,9 @@ export default function ImportPage() {
     setItems([])
     setExcluded(new Set())
     setIncludeDupes(false)
+    setBulkMode(false)
+    setBulkSelected(new Set())
+    setBulkCategory('')
     setMode('AUTO')
     setDefaultType('auto')
     setDefaultCategory('')
@@ -343,6 +382,9 @@ export default function ImportPage() {
           <p className="mt-1 text-sm text-muted-foreground truncate max-w-full">{fileName}</p>
         </div>
         <div className="flex gap-2">
+          <Button variant={bulkMode ? 'default' : 'outline'} onClick={toggleBulkMode}>
+            <CheckSquare className="h-4 w-4" /> {bulkMode ? 'Done' : 'Select'}
+          </Button>
           <Button variant="outline" onClick={resetAll}>
             <X className="h-4 w-4" /> Change file
           </Button>
@@ -465,6 +507,33 @@ export default function ImportPage() {
         </CardContent>
       </Card>
 
+      {/* Bulk category bar */}
+      {bulkMode && (
+        <Card>
+          <CardContent className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-medium tabular-nums">{bulkSelected.size} selected</span>
+              <Button variant="ghost" size="sm" onClick={selectAllValid}>Select all</Button>
+              <Button variant="ghost" size="sm" onClick={clearBulkSelection} disabled={bulkSelected.size === 0}>Clear</Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Tag className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <Select value={bulkCategory} onValueChange={setBulkCategory}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button onClick={applyBulkCategory} disabled={bulkSelected.size === 0}>Apply</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Preview */}
       <Card>
         <CardContent className="p-0">
@@ -484,6 +553,14 @@ export default function ImportPage() {
                             {i.date ? formatShortDate(i.date) : '—'} · {formatCurrency(i.amount)}
                           </p>
                         </div>
+                        {bulkMode && (
+                          <RowCheck
+                            checked={bulkSelected.has(i.id)}
+                            disabled={!i.valid}
+                            onChange={() => toggleBulkSelect(i.id)}
+                            label="Select row"
+                          />
+                        )}
                         <TypeToggle value={i.type} onChange={(v) => updateItem(i.id, { type: v })} />
                         <RowCheck
                           checked={!excluded.has(i.id) && i.valid}
@@ -517,6 +594,7 @@ export default function ImportPage() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
+                      {bulkMode && <TableHead className="w-12">✓</TableHead>}
                       <TableHead className="w-12"></TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Description</TableHead>
@@ -529,6 +607,16 @@ export default function ImportPage() {
                   <TableBody>
                     {items.map((i) => (
                       <TableRow key={i.id} className={cn(!i.valid && 'opacity-60')}>
+                        {bulkMode && (
+                          <TableCell>
+                            <RowCheck
+                              checked={bulkSelected.has(i.id)}
+                              disabled={!i.valid}
+                              onChange={() => toggleBulkSelect(i.id)}
+                              label="Select row"
+                            />
+                          </TableCell>
+                        )}
                         <TableCell>
                           <RowCheck
                             checked={!excluded.has(i.id) && i.valid}

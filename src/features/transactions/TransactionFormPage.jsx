@@ -158,22 +158,22 @@ export default function TransactionFormPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="category" className="text-sm font-medium">
-                Category
-                {type !== 'expense' && <span className="ml-2 inline-flex items-center rounded-full border border-muted-foreground/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">expenses only</span>}
-              </label>
-              <Select value={category} onValueChange={setCategory} disabled={type !== 'expense'}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {type !== 'expense' && (
-                <p className="text-xs text-muted-foreground">Categories apply only to expenses</p>
+              <label htmlFor="category" className="text-sm font-medium">Category</label>
+              {type === 'expense' ? (
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((c) => (
+                      <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex h-10 items-center rounded-md border border-dashed px-3 text-sm text-muted-foreground">
+                  Categories apply to expenses only
+                </div>
               )}
             </div>
 

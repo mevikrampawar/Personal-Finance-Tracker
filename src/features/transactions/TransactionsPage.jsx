@@ -4,7 +4,7 @@ import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { getTransactionsForMonth, getTransactionDate, formatShortDate, formatYearMonth } from '@/lib/date'
 import { exportToCSV } from '@/lib/csv'
-import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2, TrendingUp, TrendingDown, SlidersHorizontal } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, Download, X, Edit, Trash2, TrendingUp, TrendingDown, SlidersHorizontal, Check, CheckSquare, Tag } from 'lucide-react'
 import { subMonths, addMonths } from 'date-fns'
 import { MonthPicker } from '@/components/ui/month-picker'
 import { useNavigate } from 'react-router-dom'
@@ -21,7 +21,8 @@ import { toast } from 'sonner'
 
 export default function TransactionsPage() {
   const { user } = useAuth()
-  const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions', 10000)
+  const { data: transactions, loading, remove, update } = useFirestoreCollection(user?.uid, 'transactions', 10000)
+  const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
   const [month, setMonth] = useState(new Date())
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -32,6 +33,9 @@ export default function TransactionsPage() {
   const [toDate, setToDate] = useState('')
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState(() => new Set())
+  const [bulkCategory, setBulkCategory] = useState('')
   const navigate = useNavigate()
 
   const monthTransactions = useMemo(() => getTransactionsForMonth(transactions, month), [transactions, month])
@@ -83,6 +87,43 @@ export default function TransactionsPage() {
     setMaxAmount('')
     setFromDate('')
     setToDate('')
+  }
+
+  const toggleSelectMode = () => {
+    setSelectMode((m) => !m)
+    setSelectedIds(new Set())
+    setBulkCategory('')
+  }
+
+  const toggleSelect = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const selectAllVisible = () => setSelectedIds(new Set(sorted.map((t) => t.id)))
+
+  const clearSelection = () => setSelectedIds(new Set())
+
+  const applyBulkCategory = async () => {
+    const cat = bulkCategory
+    if (!cat) return toast.warning('Choose a category to apply')
+    if (selectedIds.size === 0) return toast.warning('Select at least one transaction')
+    let ok = 0
+    for (const id of selectedIds) {
+      try {
+        await update(id, { category: cat })
+        ok++
+      } catch {
+        toast.error('Failed to update a transaction')
+      }
+    }
+    if (ok > 0) toast.success(`Categorized ${ok} transaction${ok !== 1 ? 's' : ''}`)
+    setSelectedIds(new Set())
+    setBulkCategory('')
   }
 
   const hasFilters = search || typeFilter !== 'all' || categoryFilter !== 'all' || minAmount || maxAmount || fromDate || toDate
@@ -156,7 +197,35 @@ export default function TransactionsPage() {
         <Button variant="outline" size="sm" onClick={handleExport} className="hidden sm:flex">
           <Download className="h-3 w-3" /> Export
         </Button>
+        <Button variant={selectMode ? 'default' : 'outline'} size="sm" onClick={toggleSelectMode}>
+          <CheckSquare className="h-3 w-3" /> {selectMode ? 'Done' : 'Select'}
+        </Button>
       </div>
+
+      {/* Bulk category bar */}
+      {selectMode && (
+        <div className="flex flex-col gap-2 rounded-xl border bg-background p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-medium tabular-nums">{selectedIds.size} selected</span>
+            <Button variant="ghost" size="sm" onClick={selectAllVisible}>Select all</Button>
+            <Button variant="ghost" size="sm" onClick={clearSelection} disabled={selectedIds.size === 0}>Clear</Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Tag className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <Select value={bulkCategory} onValueChange={setBulkCategory}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((c) => (
+                  <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={applyBulkCategory} disabled={selectedIds.size === 0}>Apply</Button>
+          </div>
+        </div>
+      )}
 
       {/* Filters - collapsible on mobile, always visible on desktop */}
       <div className={`${showFilters ? 'block' : 'hidden'} sm:block`}>
@@ -243,6 +312,11 @@ export default function TransactionsPage() {
                 <CardContent className="p-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2 min-w-0 flex-1">
+                      {selectMode && (
+                        <Button variant="outline" size="icon" className="min-touch mr-1 shrink-0" onClick={() => toggleSelect(t.id)} aria-label={selectedIds.has(t.id) ? 'Deselect' : 'Select'}>
+                          {selectedIds.has(t.id) ? <Check className="h-4 w-4" /> : null}
+                        </Button>
+                      )}
                       <div className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-full ${t.type === 'income' ? 'bg-income/10' : 'bg-expense/10'}`}>
                         {t.type === 'income' ? <TrendingUp className="h-4 w-4 text-income" /> : <TrendingDown className="h-4 w-4 text-expense" />}
                       </div>
@@ -289,6 +363,7 @@ export default function TransactionsPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
+              {selectMode && <TableHead className="w-12">✓</TableHead>}
               <TableHead>Date</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Type</TableHead>
@@ -300,13 +375,20 @@ export default function TransactionsPage() {
           <TableBody>
             {sorted.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">No transactions found</TableCell>
+                <TableCell colSpan={selectMode ? 7 : 6} className="py-12 text-center text-muted-foreground">No transactions found</TableCell>
               </TableRow>
             ) : (
               sorted.map((t) => {
                 const d = getTransactionDate(t)
                 return (
                   <TableRow key={t.id}>
+                    {selectMode && (
+                      <TableCell>
+                        <Button variant="outline" size="icon" className="min-touch h-9 w-9" onClick={() => toggleSelect(t.id)} aria-label={selectedIds.has(t.id) ? 'Deselect' : 'Select'}>
+                          {selectedIds.has(t.id) ? <Check className="h-4 w-4" /> : null}
+                        </Button>
+                      </TableCell>
+                    )}
                     <TableCell className="whitespace-nowrap text-muted-foreground">{d ? formatShortDate(d) : '-'}</TableCell>
                     <TableCell className="font-medium">{t.description}</TableCell>
                     <TableCell>

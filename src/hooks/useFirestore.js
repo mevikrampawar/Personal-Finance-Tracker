@@ -23,6 +23,8 @@ export function useLocalFirestoreCollection(uid, collectionName, limitParam = 10
     }
 
     setLoading(true)
+    setData([])
+    setError(null)
     const ref = collection(db, 'users', uid, collectionName)
     const q = query(ref, orderBy('createdAt', 'desc'), limit(limitParam))
 

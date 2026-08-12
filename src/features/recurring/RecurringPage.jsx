@@ -49,6 +49,7 @@ export default function RecurringPage() {
       setAmount('')
       setCategory('')
       setDayOfMonth('1')
+      setType('expense')
       toast.success('Recurring transaction added')
     } catch (err) {
       console.error('Failed to add recurring transaction:', err)
@@ -194,18 +195,21 @@ export default function RecurringPage() {
                 </ToggleGroup>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  Category
-                  {type !== 'expense' && <span className="ml-2 inline-flex items-center rounded-full border border-muted-foreground/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">expenses only</span>}
-                </label>
-                <Select value={category} onValueChange={setCategory} disabled={type !== 'expense'}>
-                  <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
-                  <SelectContent>
-                    {categories.map((c) => (
-                      <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <label className="text-sm font-medium">Category</label>
+                {type === 'expense' ? (
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => (
+                        <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="flex h-10 items-center rounded-md border border-dashed px-3 text-sm text-muted-foreground">
+                    Categories apply to expenses only
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Day of Month</label>
@@ -224,7 +228,7 @@ export default function RecurringPage() {
           </form>
         </CardContent>
         <CardFooter className="flex-col gap-2 sm:flex-row">
-          <Button type="button" disabled={false} onClick={saveRecurring} className="w-full sm:w-auto">
+          <Button type="button" onClick={saveRecurring} className="w-full sm:w-auto">
             <Plus className="h-4 w-4" /> Add Recurring Transaction
           </Button>
           {recurring.length > 0 && (
