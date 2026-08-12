@@ -141,8 +141,10 @@ function isValidTransaction(data) {
          (!('transactionDate' in data) || data.transactionDate is timestamp);
 }
 
-// For CREATE, createdAt is serverTimestamp() sentinel (null during rules eval)
-// ServerTimestamp guarantees the stored value will be a server-side timestamp.
+// For CREATE, createdAt/updatedAt are set client-side as JS Date objects,
+// which the SDK serializes to Firestore timestamps before the write is evaluated.
+// The create validators intentionally do not require timestamp types so that the
+// schema stays tolerant of client timestamp handling.
 function isValidTransactionCreate(data) {
   return hasOnlyAllowedFields(['description', 'amount', 'type', 'category', 'transactionDate', 'createdAt', 'updatedAt', 'recurringId', 'recurringPeriod']) &&
          isValidString(data.description, 1, 200) &&
@@ -262,7 +264,7 @@ service cloud.firestore {
       // --- transactions ---
       match /transactions/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTransactionCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidTransaction(request.resource.data) &&
@@ -273,7 +275,7 @@ service cloud.firestore {
       // --- categories ---
       match /categories/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidCategoryCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidCategory(request.resource.data) &&
@@ -284,7 +286,7 @@ service cloud.firestore {
       // --- recurringTransactions ---
       match /recurringTransactions/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidRecurringTransactionCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidRecurringTransaction(request.resource.data) &&
@@ -295,7 +297,7 @@ service cloud.firestore {
       // --- goals ---
       match /goals/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidGoalCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidGoal(request.resource.data) &&
@@ -306,7 +308,7 @@ service cloud.firestore {
       // --- assets ---
       match /assets/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidAssetCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidAsset(request.resource.data) &&
@@ -317,7 +319,7 @@ service cloud.firestore {
       // --- liabilities ---
       match /liabilities/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidLiabilityCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidLiability(request.resource.data) &&
@@ -328,7 +330,7 @@ service cloud.firestore {
       // --- subscriptions ---
       match /subscriptions/{docId} {
         allow read: if isOwner(userId);
-        allow create: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidSubscriptionCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
           isValidSubscription(request.resource.data) &&

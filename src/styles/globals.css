@@ -196,3 +196,28 @@
     max-width: 400px !important;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff !important;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #report-area,
+  #report-area * {
+    visibility: visible;
+  }
+  #report-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    color: #111;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

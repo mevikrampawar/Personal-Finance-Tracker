@@ -21,6 +21,11 @@ desktop.ini
 DATABASE_SCHEMA.md
 *.log
 
+# Environment & secrets — never commit
+.env
+.env.*
+!.env.example
+
 # Docs are local-only — never push markdown to GitHub
 *.md
 

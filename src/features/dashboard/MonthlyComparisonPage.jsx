@@ -4,11 +4,12 @@ import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { formatMonthYear, getTransactionsForMonth } from '@/lib/date'
 import { subMonths } from 'date-fns'
-import { ArrowUp, ArrowDown, ArrowUpDown, Minus } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
+import { ArrowUp, ArrowDown, ArrowUpDown, Minus, TrendingUp } from 'lucide-react'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MonthPicker } from '@/components/ui/month-picker'
+import { TrendChart } from '@/components/charts/TrendChart'
 import { cn } from '@/lib/utils'
 
 function pctChange(prev, curr) {
@@ -167,6 +168,18 @@ export function MonthlyComparisonPage() {
           </Card>
         ))}
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            Monthly Trend
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <TrendChart transactions={transactions} endMonth={rightMonth} months={6} height={280} />
+        </CardContent>
+      </Card>
 
       {allCategories.length > 0 && (
         <div>

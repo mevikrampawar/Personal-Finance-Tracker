@@ -19,6 +19,7 @@ export default defineConfig({
           if (id.includes('node_modules/react-dom')) return 'react-vendor'
           if (id.includes('node_modules/react-router')) return 'react-vendor'
           if (id.includes('node_modules/date-fns')) return 'date'
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-vendor')) return 'charts'
         },
       },
     },

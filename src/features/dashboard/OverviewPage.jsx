@@ -3,8 +3,8 @@ import { useAuth } from '@/features/auth/AuthProvider'
 import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { getTransactionsForMonth, getTransactionDate } from '@/lib/date'
-import { ChevronLeft, ChevronRight, Plus, TrendingDown, TrendingUp, IndianRupee, List, ArrowRight } from 'lucide-react'
-import { subMonths, addMonths } from 'date-fns'
+import { ChevronLeft, ChevronRight, Plus, TrendingDown, TrendingUp, IndianRupee, List, ArrowRight, Activity } from 'lucide-react'
+import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'
 import { MonthPicker } from '@/components/ui/month-picker'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
@@ -13,6 +13,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
+import { CashFlowChart } from '@/components/charts/CashFlowChart'
 import { CategoryBreakdown } from './CategoryBreakdown'
 import { BudgetProgress } from './BudgetProgress'
 import { SpendingInsights } from './SpendingInsights'
@@ -176,6 +177,23 @@ export function OverviewPage() {
               View All <ArrowRight data-icon="inline-end" />
             </Button>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Activity className="h-4 w-4 text-primary" />
+            Cash Flow
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CashFlowChart
+            transactions={monthTransactions}
+            start={startOfMonth(month)}
+            end={endOfMonth(month)}
+            height={240}
+          />
         </CardContent>
       </Card>
 

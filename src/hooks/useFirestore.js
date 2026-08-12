@@ -1,14 +1,21 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { collection, query, orderBy, limit, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
 
-export function useFirestoreCollection(uid, collectionName, limitParam = 1000) {
+// Central data store: DataProvider (src/app/DataProvider.jsx) subscribes to every
+// user collection once and shares the result through this context. Pages consume it
+// via useFirestoreCollection, so all reads come from a single source of truth and
+// no page creates its own duplicate onSnapshot listener.
+export const DataContext = createContext(null)
+
+export function useLocalFirestoreCollection(uid, collectionName, limitParam = 1000, enabled = true) {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const unsubRef = useRef(null)
 
   useEffect(() => {
+    if (!enabled) return
     if (!uid) {
       setData([])
       setLoading(false)
@@ -33,7 +40,7 @@ export function useFirestoreCollection(uid, collectionName, limitParam = 1000) {
     )
 
     return () => unsubRef.current?.()
-  }, [uid, collectionName, limitParam])
+  }, [uid, collectionName, limitParam, enabled])
 
   const add = useCallback(
     async (payload) => {
@@ -65,4 +72,16 @@ export function useFirestoreCollection(uid, collectionName, limitParam = 1000) {
   )
 
   return { data, loading, error, add, update, remove }
+}
+
+export function useFirestoreCollection(uid, collectionName, limitParam = 1000) {
+  const ctx = useContext(DataContext)
+  const ownedByProvider = Boolean(ctx && ctx[collectionName])
+
+  // Always call the local hook (rules of hooks); when the central provider owns
+  // this collection we skip attaching our own listener and use its snapshot.
+  const local = useLocalFirestoreCollection(uid, collectionName, limitParam, !ownedByProvider)
+
+  if (ownedByProvider) return ctx[collectionName]
+  return local
 }

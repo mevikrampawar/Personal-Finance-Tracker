@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from '@/features/auth/AuthProvider'
 import LoginPage from '@/features/auth/LoginPage'
 import DashboardLayout from '@/app/layouts/DashboardLayout'
+import { DataProvider } from '@/app/DataProvider'
 
 const LandingPage = lazy(() => import('@/features/landing/LandingPage'))
 const OverviewPage = lazy(() => import('@/features/dashboard/OverviewPage'))
@@ -16,6 +17,7 @@ const SubscriptionsPage = lazy(() => import('@/features/subscriptions/Subscripti
 const MonthlyComparisonPage = lazy(() => import('@/features/dashboard/MonthlyComparisonPage'))
 const CalendarView = lazy(() => import('@/features/transactions/CalendarView'))
 const ImportPage = lazy(() => import('@/features/import/ImportPage'))
+const ReportsPage = lazy(() => import('@/features/reports/ReportsPage'))
 
 function PageLoader() {
   return (
@@ -71,7 +73,9 @@ export default function App() {
               path="/app"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout />
+                  <DataProvider>
+                    <DashboardLayout />
+                  </DataProvider>
                 </ProtectedRoute>
               }
             >
@@ -86,6 +90,7 @@ export default function App() {
               <Route path="compare" element={<MonthlyComparisonPage />} />
               <Route path="calendar" element={<CalendarView />} />
               <Route path="import" element={<ImportPage />} />
+              <Route path="reports" element={<ReportsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
