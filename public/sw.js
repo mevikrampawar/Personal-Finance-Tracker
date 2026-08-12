@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finance-tracker-v3'
+const CACHE_NAME = 'finance-tracker-v4'
 
 const BASE = self.location.pathname.replace(/\/sw\.js$/, '')
 

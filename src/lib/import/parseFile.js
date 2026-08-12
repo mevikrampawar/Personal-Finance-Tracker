@@ -26,17 +26,19 @@ function bufToLatin1(buf) {
   return s
 }
 
-function isEncryptedXlsx(buf) {
-  return /EncryptedPackage|encryptionInfo/i.test(bufToLatin1(buf))
+function isPasswordError(e) {
+  return /password/i.test(String(e?.message || e || ''))
 }
 
-function isEncryptedXls(buf) {
+// Encrypted .xlsx files are CFB (OLE2) containers whose directory holds an
+// "EncryptedPackage" entry; plain .xlsx files are ZIPs (PK magic). Scanning a
+// non-PK buffer for that entry name is a reliable signal. (Encrypted .xls files
+// are detected by SheetJS itself via its FILEPASS record — see parseExcel.)
+function looksEncryptedXlsx(buf) {
   const bytes = new Uint8Array(buf)
-  for (let i = 0; i < bytes.length - 3; i++) {
-    // BIFF FILEPASS record: id 0x002F then a small record length
-    if (bytes[i] === 0x2f && bytes[i + 1] === 0x00 && bytes[i + 2] < 0x40 && bytes[i + 3] === 0x00) return true
-  }
-  return false
+  if (bytes.length < 4) return false
+  if (bytes[0] === 0x50 && bytes[1] === 0x4b) return false // PK\x03\x04 — plain ZIP
+  return /EncryptedPackage|encryptionInfo/i.test(bufToLatin1(buf))
 }
 
 function cellsToText(row) {
@@ -60,7 +62,28 @@ function pickBestSheet(wb, XLSX) {
 
 async function parseExcel(buf, password) {
   const XLSX = await import('xlsx')
-  const encrypted = isEncryptedXls(buf) || isEncryptedXlsx(buf)
+  const encXlsx = looksEncryptedXlsx(buf)
+
+  // Determine whether the file is genuinely encrypted. Encrypted .xlsx files are
+  // CFB containers (encXlsx). Encrypted .xls files are detected by SheetJS itself:
+  // its parser hits the BIFF FILEPASS record and throws "File is password-protected".
+  let encrypted = encXlsx
+  if (!encrypted && !password) {
+    try {
+      // Probe without a password — plain files read fine, encrypted .xls throws.
+      XLSX.read(buf, { type: 'array', cellDates: false })
+    } catch (e) {
+      if (isPasswordError(e)) encrypted = true
+    }
+  } else if (!encrypted && password) {
+    try {
+      // Probe to learn whether the file is actually encrypted before claiming so
+      // in the warning below. Result is discarded; the real read happens after.
+      XLSX.read(buf, { type: 'array', cellDates: false })
+    } catch (e) {
+      if (isPasswordError(e)) encrypted = true
+    }
+  }
 
   if (encrypted && !password) throw encryptedError()
 
@@ -77,9 +100,11 @@ async function parseExcel(buf, password) {
   try {
     wb = XLSX.read(buf, { type: 'array', cellDates: false, ...(encrypted ? { password } : {}) })
   } catch (e) {
-    const msg = String(e?.message || e || '').trim()
-    if (/password/i.test(msg) && password) throw new Error('Could not open the Excel file. The password may be incorrect.')
-    throw new Error(msg ? `Could not open Excel file: ${msg}` : 'Could not open Excel file.')
+    if (isPasswordError(e)) {
+      if (!password) throw encryptedError()
+      throw new Error('Could not open the Excel file. The password may be incorrect.')
+    }
+    throw new Error(`Could not open Excel file: ${e?.message || e || 'unknown error'}`)
   }
 
   if (!wb.SheetNames.length) throw new Error('Excel file has no sheets.')
