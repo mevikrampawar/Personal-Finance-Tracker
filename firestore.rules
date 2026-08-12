@@ -12,11 +12,15 @@ rules_version = '2';
 //   - amount: number (required, > 0)
 //   - type: string (required, enum: "expense" | "income")
 //   - category: string (optional, 0-50 chars)
-//   - createdAt: timestamp (required, immutable, auto-set)
+//   - createdAt: timestamp (required, immutable, auto-set) — legacy docs may store a number
 //   - updatedAt: timestamp (required, auto-set)
 //   - transactionDate: timestamp (optional, user-selected date)
 //   - recurringId: string (optional, 0-50 chars)
 //   - recurringPeriod: string (optional, 0-20 chars)
+//
+// CREATE enforces the full schema above. UPDATE validates only the standard
+// fields on the merged doc (no strict schema/timestamp checks) so legacy
+// transactions remain editable.
 //
 // Collection: categories
 // Fields:
@@ -129,16 +133,17 @@ function hasOnlyAllowedFields(fields) {
 // Collection Validators
 // ===============================================================
 
-function isValidTransaction(data) {
-  return hasOnlyAllowedFields(['description', 'amount', 'type', 'category', 'transactionDate', 'createdAt', 'updatedAt', 'recurringId', 'recurringPeriod']) &&
-         isValidString(data.description, 1, 200) &&
+// UPDATE validation is intentionally more lenient than CREATE: it validates the
+// standard fields on the merged document but does not enforce a strict schema or
+// timestamp types, so that legacy documents (e.g. createdAt stored as a number by
+// older app versions) remain editable. Security is preserved by isOwner + createdAtUnchanged.
+function isValidTransactionUpdate(data) {
+  return isValidString(data.description, 1, 200) &&
          isPositiveNumber(data.amount) &&
          isValidType() &&
          isValidOptionalString('category', 50) &&
          isValidOptionalString('recurringId', 50) &&
-         isValidOptionalString('recurringPeriod', 20) &&
-         data.createdAt is timestamp &&
-         (!('transactionDate' in data) || data.transactionDate is timestamp);
+         isValidOptionalString('recurringPeriod', 20);
 }
 
 // For CREATE, createdAt/updatedAt are set client-side as JS Date objects,
@@ -267,7 +272,7 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidTransactionCreate(request.resource.data);
         allow update: if isOwner(userId) &&
           isExistingDoc() &&
-          isValidTransaction(request.resource.data) &&
+          isValidTransactionUpdate(request.resource.data) &&
           createdAtUnchanged();
         allow delete: if isOwner(userId) && isExistingDoc();
       }

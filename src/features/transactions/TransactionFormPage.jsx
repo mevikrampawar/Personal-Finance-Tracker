@@ -141,7 +141,9 @@ export default function TransactionFormPage() {
                   type="single"
                   value={type}
                   onValueChange={(val) => {
-                    if (val) setType(val)
+                    if (!val) return
+                    setType(val)
+                    if (val !== 'expense') setCategory('')
                   }}
                   className="w-full"
                 >
@@ -160,7 +162,7 @@ export default function TransactionFormPage() {
                 Category
                 {type !== 'expense' && <span className="ml-2 inline-flex items-center rounded-full border border-muted-foreground/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/60">expenses only</span>}
               </label>
-              <Select value={category} onValueChange={setCategory}>
+              <Select value={category} onValueChange={setCategory} disabled={type !== 'expense'}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>

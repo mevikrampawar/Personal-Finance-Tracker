@@ -81,7 +81,17 @@ export function buildFingerprint(transactionDate, type, amount, description) {
   return [d, type, Math.round(Math.abs(amount || 0) * 100), desc].join('::')
 }
 
-export function rowsToTransactions({ rows, headerIndex, mapping, mode = 'AUTO', defaultType = 'auto', defaultCategory = '', existing }) {
+function normalizeCell(c) {
+  return String(c ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+function isSeparatorRow(row) {
+  const cells = (row || []).map((c) => String(c ?? '').trim()).filter(Boolean)
+  if (cells.length === 0) return false
+  return cells.every((c) => !/[a-z0-9]/i.test(c))
+}
+
+export function rowsToTransactions({ rows, headerIndex, mapping, mode = 'AUTO', defaultType = 'auto', defaultCategory = '', existing, dataEnd }) {
   const seen = new Set((existing || []).map((t) => {
     const raw = t.date || t.transactionDate
     const date = raw?.toDate ? raw.toDate() : raw instanceof Date ? raw : raw ? new Date(raw) : null
@@ -96,10 +106,16 @@ export function rowsToTransactions({ rows, headerIndex, mapping, mode = 'AUTO', 
 
   const items = []
   const dataStart = headerIndex >= 0 ? headerIndex + 1 : 0
+  const stopAt = dataEnd != null ? dataEnd : rows.length
+  const headerKey = headerIndex >= 0
+    ? (rows[headerIndex] || []).map(normalizeCell).join('|')
+    : null
 
-  for (let r = dataStart; r < rows.length; r++) {
+  for (let r = dataStart; r < stopAt; r++) {
     const row = rows[r]
     if (!row || row.every((c) => String(c ?? '').trim() === '')) continue
+    if (isSeparatorRow(row)) continue
+    if (headerKey != null && row.map(normalizeCell).join('|') === headerKey) continue
 
     const errors = []
     const dateStr = cell(row, 'date')

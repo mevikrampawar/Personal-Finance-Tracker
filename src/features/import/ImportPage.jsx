@@ -4,12 +4,13 @@ import { useFirestoreCollection } from '@/hooks/useFirestore'
 import { formatCurrency } from '@/lib/currency'
 import { formatShortDate } from '@/lib/date'
 import { parseFile } from '@/lib/import/parseFile'
-import { autoDetectRole, detectHeaderRow, autoMapping, ROLE_OPTIONS } from '@/lib/import/mapping'
+import { detectTable } from '@/lib/import/detect'
+import { autoDetectRole, ROLE_OPTIONS } from '@/lib/import/mapping'
 import { rowsToTransactions } from '@/lib/import/rowsToTransactions'
 import { importTransactions } from '@/lib/import/importTransactions'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { UploadCloud, FileText, Check, CheckCheck, AlertTriangle, Loader2, ArrowDownToLine, RefreshCw, X, Tag } from 'lucide-react'
+import { UploadCloud, FileText, Check, CheckCheck, AlertTriangle, Loader2, ArrowDownToLine, RefreshCw, X, Tag, Lock } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -81,6 +82,7 @@ export default function ImportPage() {
 
   const [headerIndex, setHeaderIndex] = useState(-1)
   const [mapping, setMapping] = useState([])
+  const [dataEnd, setDataEnd] = useState(null)
   const [mode, setMode] = useState('AUTO')
   const [defaultType, setDefaultType] = useState('auto')
   const [defaultCategory, setDefaultCategory] = useState('')
@@ -90,6 +92,10 @@ export default function ImportPage() {
 
   const [importing, setImporting] = useState(false)
   const [importedCount, setImportedCount] = useState(0)
+
+  const [pendingFile, setPendingFile] = useState(null)
+  const [password, setPassword] = useState('')
+  const [passwordPrompt, setPasswordPrompt] = useState(false)
 
   const fileInputRef = useRef(null)
 
@@ -117,9 +123,10 @@ export default function ImportPage() {
       defaultType,
       defaultCategory,
       existing: transactions,
+      dataEnd,
     })
     setItems(next)
-  }, [parseResult, headerIndex, mapping, mode, defaultType, defaultCategory, transactions])
+  }, [parseResult, headerIndex, mapping, mode, defaultType, defaultCategory, transactions, dataEnd])
 
   const stats = useMemo(() => {
     const valid = items.filter((i) => i.valid).length
@@ -134,29 +141,46 @@ export default function ImportPage() {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)))
   }
 
-  const handleFile = async (file) => {
+  const handleFile = async (file, filePassword) => {
     if (!file) return
     setParsing(true)
     setFileName(file.name)
     try {
-      const result = await parseFile(file)
-      const hi = detectHeaderRow(result.rows)
+      const result = await parseFile(file, filePassword ? { password: filePassword } : {})
+      const det = detectTable(result.rows)
       setParseResult(result)
-      setHeaderIndex(hi)
-      setMapping(autoMapping(result.rows, hi))
+      setHeaderIndex(det.headerIndex)
+      setMapping(det.mapping)
+      setDataEnd(det.dataEnd)
       setExcluded(new Set())
       setIncludeDupes(false)
+      setPasswordPrompt(false)
+      setPassword('')
       setStage('map')
     } catch (err) {
       console.error('Failed to parse file:', err)
-      toast.error(err.message || 'Failed to parse file')
+      if (err.code === 'ENCRYPTED') {
+        setPendingFile(file)
+        setPasswordPrompt(true)
+      } else {
+        toast.error(err.message || 'Failed to parse file')
+      }
     } finally {
       setParsing(false)
     }
   }
 
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault()
+    if (!password.trim()) return toast.warning('Enter the file password')
+    await handleFile(pendingFile, password.trim())
+  }
+
   const resetMapping = () => {
-    setMapping(autoMapping(parseResult.rows, headerIndex))
+    const det = detectTable(parseResult.rows)
+    setHeaderIndex(det.headerIndex)
+    setMapping(det.mapping)
+    setDataEnd(det.dataEnd)
   }
 
   const handleImport = async () => {
@@ -183,12 +207,16 @@ export default function ImportPage() {
     setFileName('')
     setHeaderIndex(-1)
     setMapping([])
+    setDataEnd(null)
     setItems([])
     setExcluded(new Set())
     setIncludeDupes(false)
     setMode('AUTO')
     setDefaultType('auto')
     setDefaultCategory('')
+    setPendingFile(null)
+    setPassword('')
+    setPasswordPrompt(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -223,45 +251,83 @@ export default function ImportPage() {
 
         <Card>
           <CardContent className="p-4 sm:p-6">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={ACCEPT}
-              className="hidden"
-              onChange={(e) => handleFile(e.target.files?.[0])}
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault()
-                setDragOver(true)
-              }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault()
-                setDragOver(false)
-                handleFile(e.dataTransfer.files?.[0])
-              }}
-              className={cn(
-                'flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-4 py-14 text-center transition-colors',
-                dragOver ? 'border-primary bg-primary/5' : 'border-border hoverable:hover:border-primary/50 hoverable:hover:bg-muted/30',
-                parsing && 'pointer-events-none opacity-60',
-              )}
-            >
-              {parsing ? (
-                <>
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="text-sm font-medium">Parsing {fileName || 'file'}…</p>
-                </>
-              ) : (
-                <>
-                  <UploadCloud className="h-10 w-10 text-muted-foreground" />
-                  <p className="text-sm font-medium">Drag & drop your statement here</p>
-                  <p className="text-xs text-muted-foreground">or click to browse · CSV, TSV, XLSX, XLS, PDF</p>
-                </>
-              )}
-            </button>
+            {passwordPrompt ? (
+              <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <Lock className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Password-protected file</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {fileName} is encrypted. Enter its password to continue.
+                    </p>
+                  </div>
+                </div>
+                <Input
+                  type="password"
+                  autoFocus
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="File password"
+                  className="w-full"
+                />
+                <div className="flex gap-2">
+                  <Button type="submit" disabled={parsing}>
+                    {parsing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                    {parsing ? 'Opening…' : 'Open file'}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setPasswordPrompt(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPT}
+                  className="hidden"
+                  onChange={(e) => handleFile(e.target.files?.[0])}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    setDragOver(true)
+                  }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    setDragOver(false)
+                    handleFile(e.dataTransfer.files?.[0])
+                  }}
+                  className={cn(
+                    'flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-4 py-14 text-center transition-colors',
+                    dragOver ? 'border-primary bg-primary/5' : 'border-border hoverable:hover:border-primary/50 hoverable:hover:bg-muted/30',
+                    parsing && 'pointer-events-none opacity-60',
+                  )}
+                >
+                  {parsing ? (
+                    <>
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <p className="text-sm font-medium">Parsing {fileName || 'file'}…</p>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="h-10 w-10 text-muted-foreground" />
+                      <p className="text-sm font-medium">Drag & drop your statement here</p>
+                      <p className="text-xs text-muted-foreground">or click to browse · CSV, TSV, XLSX, XLS, PDF</p>
+                      <p className="text-xs text-muted-foreground">
+                        Works with any Indian bank · password-protected Excel & PDF supported
+                      </p>
+                    </>
+                  )}
+                </button>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
