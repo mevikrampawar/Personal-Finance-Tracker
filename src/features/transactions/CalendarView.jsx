@@ -19,7 +19,7 @@ const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default function CalendarView() {
   const { user } = useAuth()
-  const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions', 500)
+  const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions', 10000)
   const [month, setMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [deleteTarget, setDeleteTarget] = useState(null)

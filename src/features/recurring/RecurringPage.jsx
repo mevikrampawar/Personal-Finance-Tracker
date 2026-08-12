@@ -16,7 +16,7 @@ import { toast } from 'sonner'
 export default function RecurringPage() {
   const { user } = useAuth()
   const { data: recurring, loading, add, remove } = useFirestoreCollection(user?.uid, 'recurringTransactions')
-  const { data: transactions, add: addTransaction } = useFirestoreCollection(user?.uid, 'transactions')
+  const { data: transactions, add: addTransaction } = useFirestoreCollection(user?.uid, 'transactions', 10000)
   const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
 
   const [description, setDescription] = useState('')

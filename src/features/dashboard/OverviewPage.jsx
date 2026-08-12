@@ -19,7 +19,7 @@ import { SpendingInsights } from './SpendingInsights'
 
 export function OverviewPage() {
   const { user } = useAuth()
-  const { data: transactions, loading } = useFirestoreCollection(user?.uid, 'transactions')
+  const { data: transactions, loading } = useFirestoreCollection(user?.uid, 'transactions', 10000)
   const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
   const [month, setMonth] = useState(new Date())
   const navigate = useNavigate()

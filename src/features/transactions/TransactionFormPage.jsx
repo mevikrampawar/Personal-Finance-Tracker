@@ -15,7 +15,7 @@ import { ArrowDownLeft, ArrowUpRight, Save, X } from 'lucide-react'
 
 export default function TransactionFormPage() {
   const { user } = useAuth()
-  const { data: transactions, add, update } = useFirestoreCollection(user?.uid, 'transactions')
+  const { data: transactions, loading, add, update } = useFirestoreCollection(user?.uid, 'transactions', 10000)
   const { data: categories } = useFirestoreCollection(user?.uid, 'categories')
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -27,25 +27,25 @@ export default function TransactionFormPage() {
   const [amount, setAmount] = useState('')
   const [date, setDate] = useState(formatInputDate(new Date()))
   const [submitting, setSubmitting] = useState(false)
-  const [editLoading, setEditLoading] = useState(!!editId)
 
   const isEditing = !!editId
+  const editLoading = loading && isEditing
 
   useEffect(() => {
-    if (editId) {
-      const t = transactions.find((x) => x.id === editId)
-      if (t) {
-        setEditLoading(false)
-        setDescription(t.description || '')
-        setType(t.type || 'expense')
-        setCategory(t.category || '')
-        setAmount(String(t.amount || ''))
-        const dateField = t.transactionDate || t.createdAt
-        const d = dateField?.toDate ? dateField.toDate() : new Date(dateField)
-        setDate(formatInputDate(d))
-      }
+    if (!editId || loading) return
+    const t = transactions.find((x) => x.id === editId)
+    if (!t) {
+      navigate('/app/transactions', { replace: true })
+      return
     }
-  }, [editId, transactions])
+    setDescription(t.description || '')
+    setType(t.type || 'expense')
+    setCategory(t.category || '')
+    setAmount(String(t.amount || ''))
+    const dateField = t.transactionDate || t.createdAt
+    const d = dateField?.toDate ? dateField.toDate() : new Date(dateField)
+    setDate(formatInputDate(d))
+  }, [editId, transactions, loading, navigate])
 
   const sanitizeAmount = (val) => {
     const n = Number(val)

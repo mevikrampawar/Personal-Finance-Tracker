@@ -21,7 +21,7 @@ import { toast } from 'sonner'
 
 export default function TransactionsPage() {
   const { user } = useAuth()
-  const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions', 500)
+  const { data: transactions, loading, remove } = useFirestoreCollection(user?.uid, 'transactions', 10000)
   const [month, setMonth] = useState(new Date())
   const [search, setSearch] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')

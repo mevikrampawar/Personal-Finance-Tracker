@@ -17,6 +17,7 @@ import {
   Menu,
   Calendar,
   MoreHorizontal,
+  UploadCloud,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useConfirmCtx } from '@/app/providers'
@@ -38,6 +39,7 @@ const FULL_NAV_ITEMS = [
   { path: '/app/subscriptions', label: 'Subscriptions', icon: CreditCard },
   { path: '/app/compare', label: 'Compare', icon: BarChart3 },
   { path: '/app/calendar', label: 'Calendar', icon: Calendar },
+  { path: '/app/import', label: 'Import', icon: UploadCloud },
 ]
 
 const BOTTOM_NAV = [

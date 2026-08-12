@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader,
 export default function CategoriesPage() {
   const { user } = useAuth()
   const { data: categories, loading, add, update, remove } = useFirestoreCollection(user?.uid, 'categories')
-  const { data: transactions } = useFirestoreCollection(user?.uid, 'transactions')
+  const { data: transactions } = useFirestoreCollection(user?.uid, 'transactions', 10000)
   const [newName, setNewName] = useState('')
   const [budgetEdits, setBudgetEdits] = useState({})
   const [deleteTarget, setDeleteTarget] = useState(null)

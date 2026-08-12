@@ -21,6 +21,9 @@ desktop.ini
 DATABASE_SCHEMA.md
 *.log
 
+# Docs are local-only — never push markdown to GitHub
+*.md
+
 # Agent artifacts
 .superpowers/
 

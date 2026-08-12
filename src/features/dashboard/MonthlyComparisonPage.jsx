@@ -68,7 +68,7 @@ function MiniBar({ left, right, colorClass = 'bg-primary' }) {
 
 export function MonthlyComparisonPage() {
   const { user } = useAuth()
-  const { data: transactions, loading } = useFirestoreCollection(user?.uid, 'transactions')
+  const { data: transactions, loading } = useFirestoreCollection(user?.uid, 'transactions', 10000)
   const [leftMonth, setLeftMonth] = useState(subMonths(new Date(), 1))
   const [rightMonth, setRightMonth] = useState(new Date())
 
